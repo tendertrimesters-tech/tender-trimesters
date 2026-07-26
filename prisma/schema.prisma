@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Tender Trimesters — Prisma schema
+// SQLite for dev. Swap to Postgres for prod when ready.
 
 generator client {
   provider = "prisma-client-js"
@@ -14,19 +11,141 @@ datasource db {
 }
 
 model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  passwordHash   String
+  // Pregnancy profile
+  dueDate        DateTime?
+  babyName       String?
+  partnerName    String?
+  // Premium
+  isPremium      Boolean  @default(false)
+  premiumTier    String?  // "one_time" | "monthly"
+  premiumSince   DateTime?
+  // Onboarding
+  onboarded      Boolean  @default(false)
+  // Partner link (so a partner can view their journey read-only)
+  partnerLinkToken String? @unique
+  // Timestamps
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  journalEntries  JournalEntry[]
+  moodEntries     MoodEntry[]
+  appointments    Appointment[]
+  bumpPhotos      BumpPhoto[]
+  chatMessages    ChatMessage[]
+  communityPosts  CommunityPost[]
+  communityComments CommunityComment[]
+  waitlistEntry   WaitlistEntry?
+}
+
+model WaitlistEntry {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String?
+  source    String?  // "landing_hero" | "landing_cta" | etc.
+  userId    String?  @unique // link to user if they sign up later
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model JournalEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      Int?     // pregnancy week 1-40
+  title     String?
+  body      String
+  mood      String?  // "glowing" | "calm" | "tired" | "anxious" | "teary" | "grateful"
+  craving   String?
+  babyName   String?
+  photoUrl  String?
+  isPrivate Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Post {
+model MoodEntry {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mood      String   // "glowing" | "calm" | "tired" | "anxious" | "teary" | "grateful" | "nauseous" | "energized"
+  note      String?
+  week      Int?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  date        DateTime
+  location    String?
+  notes       String?
+  type        String?  // "ob_visit" | "ultrasound" | "glucose_test" | "lab" | "other"
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BumpPhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      Int
+  photoUrl  String
+  caption   String?
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model CommunityPost {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  mood      String?
+  week      Int?
+  hugs      Int      @default(0)
+  createdAt DateTime @default(now())
+  comments  CommunityComment[]
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+}
+
+// Static weekly pregnancy content (seeded, not user-editable)
+model WeeklyContent {
+  id              String   @id @default(cuid())
+  week            Int      @unique // 1-40
+  trimester       Int      // 1, 2, or 3
+  babySize        String   // "Lime"
+  babySizeDesc    String   // "About 2 inches long..."
+  babyLengthCm    Float
+  babyWeightG     Float
+  bodyChanges     String   // multi-line, separated by \n
+  emotionalChanges String
+  bestFriendTip   String
+  selfCare        String   // checklist items separated by \n
+  affirmation     String
+  milestone       String?  // optional special milestone
+  createdAt       DateTime @default(now())
 }

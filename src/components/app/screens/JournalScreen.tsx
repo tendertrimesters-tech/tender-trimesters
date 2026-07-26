@@ -1,0 +1,308 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { calcWeek, useProfile } from "@/components/providers";
+import { Plus, BookHeart, Trash2, Camera, X, Sparkles, Smile } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+type Mood = "glowing" | "calm" | "tired" | "anxious" | "teary" | "grateful" | "nauseous" | "energized";
+
+const MOODS: { value: Mood; emoji: string; label: string }[] = [
+  { value: "glowing", emoji: "🌸", label: "Glowing" },
+  { value: "calm", emoji: "🌿", label: "Calm" },
+  { value: "tired", emoji: "🌙", label: "Tired" },
+  { value: "anxious", emoji: "💭", label: "Anxious" },
+  { value: "teary", emoji: "💧", label: "Teary" },
+  { value: "grateful", emoji: "💛", label: "Grateful" },
+  { value: "nauseous", emoji: "🍃", label: "Nauseous" },
+  { value: "energized", emoji: "✨", label: "Energized" },
+];
+
+export default function JournalScreen() {
+  const [entries, setEntries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
+  const { profile } = useProfile();
+  const week = calcWeek(profile?.dueDate);
+
+  const load = () => {
+    fetch("/api/journal")
+      .then((r) => r.json())
+      .then((d) => {
+        setEntries(d.entries || []);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => { load(); }, []);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="font-serif text-2xl text-moss-deep">Journal</div>
+          <div className="text-xs text-muted-foreground">{entries.length} {entries.length === 1 ? "entry" : "entries"} · private to you</div>
+        </div>
+        <Button onClick={() => setAddOpen(true)} className="bg-moss hover:bg-moss-deep rounded-full h-9">
+          <Plus className="w-4 h-4 mr-1" /> New
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}</div>
+      ) : entries.length === 0 ? (
+        <Card className="bg-card border-dashed border-border rounded-3xl p-10 text-center">
+          <BookHeart className="w-12 h-12 text-rose-gold/40 mx-auto mb-3" />
+          <div className="font-serif text-xl text-moss-deep">Your journal is empty</div>
+          <div className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
+            This is your space. Letters to baby, midnight thoughts, cravings, fears, joys. Whatever you need to put down.
+          </div>
+          <Button onClick={() => setAddOpen(true)} className="mt-5 bg-moss hover:bg-moss-deep rounded-full">
+            Write your first entry
+          </Button>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {entries.map((e) => (
+            <JournalCard key={e.id} entry={e} onChange={load} />
+          ))}
+        </div>
+      )}
+
+      <NewEntryDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        defaultWeek={week}
+        onAdded={load}
+      />
+    </div>
+  );
+}
+
+function JournalCard({ entry, onChange }: { entry: any; onChange: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  const mood = MOODS.find((m) => m.value === entry.mood);
+
+  async function remove() {
+    if (!confirm("Delete this entry?")) return;
+    await fetch(`/api/journal?id=${entry.id}`, { method: "DELETE" });
+    toast.success("Entry deleted");
+    onChange();
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="bg-card border-moss/15 rounded-3xl p-5">
+        <div className="flex items-start gap-3">
+          {mood && <div className="text-2xl">{mood.emoji}</div>}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline justify-between gap-2">
+              {entry.title && <div className="font-serif text-lg text-moss-deep">{entry.title}</div>}
+              <div className="text-[10px] text-muted-foreground ml-auto whitespace-nowrap">
+                {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
+              </div>
+            </div>
+            {entry.week && (
+              <div className="text-[10px] uppercase tracking-wider text-rose-gold font-semibold mt-0.5">Week {entry.week}</div>
+            )}
+            <p className={cn("text-sm text-foreground/80 mt-2 leading-relaxed whitespace-pre-wrap", !expanded && "line-clamp-3")}>
+              {entry.body}
+            </p>
+            {entry.body.length > 200 && (
+              <button onClick={() => setExpanded(!expanded)} className="text-xs text-moss hover:underline mt-1">
+                {expanded ? "Show less" : "Show more"}
+              </button>
+            )}
+            {(entry.craving || entry.babyName || entry.photoUrl) && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {entry.craving && (
+                  <div className="text-[10px] bg-butter text-terracotta px-2 py-1 rounded-full">
+                    Craving: {entry.craving}
+                  </div>
+                )}
+                {entry.babyName && (
+                  <div className="text-[10px] bg-blush/40 text-rose-gold px-2 py-1 rounded-full">
+                    Baby: {entry.babyName}
+                  </div>
+                )}
+              </div>
+            )}
+            {entry.photoUrl && (
+              <div className="mt-3 rounded-2xl overflow-hidden">
+                <img src={entry.photoUrl} alt="" className="w-full max-h-64 object-cover" />
+              </div>
+            )}
+            <div className="flex gap-2 mt-3">
+              <Button size="sm" variant="ghost" onClick={remove} className="h-7 text-xs text-destructive hover:text-destructive">
+                <Trash2 className="w-3 h-3 mr-1" /> Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+function NewEntryDialog({
+  open,
+  onOpenChange,
+  defaultWeek,
+  onAdded,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  defaultWeek: number | null;
+  onAdded: () => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [mood, setMood] = useState<Mood | "">("");
+  const [week, setWeek] = useState<number | "">(defaultWeek || "");
+  const [craving, setCraving] = useState("");
+  const [babyName, setBabyName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  function reset() {
+    setTitle(""); setBody(""); setMood(""); setWeek(defaultWeek || ""); setCraving(""); setBabyName(""); setPhotoUrl("");
+  }
+
+  async function upload(file: File) {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setPhotoUrl(data.url);
+      toast.success("Photo added");
+    } catch {
+      toast.error("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function submit() {
+    if (!body.trim()) {
+      toast.error("Write something first");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim() || null,
+          body: body.trim(),
+          mood: mood || null,
+          week: week || null,
+          craving: craving.trim() || null,
+          babyName: babyName.trim() || null,
+          photoUrl: photoUrl || null,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Entry saved");
+      reset();
+      onOpenChange(false);
+      onAdded();
+    } catch {
+      toast.error("Failed to save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setTimeout(reset, 300); }}>
+      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[90vh] overflow-y-auto scroll-soft">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-2xl text-moss-deep">New journal entry</DialogTitle>
+          <DialogDescription>Whatever's on your heart, mama.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 mt-2">
+          <div>
+            <Label>How are you feeling?</Label>
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {MOODS.map((m) => (
+                <button
+                  key={m.value}
+                  onClick={() => setMood(mood === m.value ? "" : m.value)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 py-2 rounded-xl transition-all",
+                    mood === m.value ? "bg-blush/40 ring-2 ring-rose-gold" : "bg-muted/40 hover:bg-muted"
+                  )}
+                >
+                  <span className="text-xl">{m.emoji}</span>
+                  <span className="text-[10px] text-moss-deep">{m.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="je-title">Title (optional)</Label>
+            <Input id="je-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A note to baby, a moment..." className="mt-1.5 rounded-xl" />
+          </div>
+          <div>
+            <Label htmlFor="je-body">Your thoughts</Label>
+            <Textarea id="je-body" value={body} onChange={(e) => setBody(e.target.value)} placeholder="Dear baby today..." className="mt-1.5 rounded-xl min-h-[140px]" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="je-week">Week</Label>
+              <Input id="je-week" type="number" min={1} max={40} value={week} onChange={(e) => setWeek(e.target.value ? Number(e.target.value) : "")} className="mt-1.5 rounded-xl" />
+            </div>
+            <div>
+              <Label htmlFor="je-craving">Craving (optional)</Label>
+              <Input id="je-craving" value={craving} onChange={(e) => setCraving(e.target.value)} placeholder="Pickles + ice cream" className="mt-1.5 rounded-xl" />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="je-baby">Baby name note (optional)</Label>
+            <Input id="je-baby" value={babyName} onChange={(e) => setBabyName(e.target.value)} placeholder="Thinking of naming..." className="mt-1.5 rounded-xl" />
+          </div>
+          <div>
+            <Label>Photo (optional)</Label>
+            <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }} />
+            {photoUrl ? (
+              <div className="mt-2 relative rounded-2xl overflow-hidden">
+                <img src={photoUrl} alt="" className="w-full max-h-48 object-cover" />
+                <button onClick={() => setPhotoUrl("")} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-cream/90 flex items-center justify-center">
+                  <X className="w-4 h-4 text-moss-deep" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileInput.current?.click()}
+                disabled={uploading}
+                className="mt-2 w-full py-6 rounded-2xl border-2 border-dashed border-border hover:border-moss/30 hover:bg-muted/30 transition-colors flex flex-col items-center gap-1"
+              >
+                <Camera className="w-5 h-5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{uploading ? "Uploading..." : "Add a photo"}</span>
+              </button>
+            )}
+          </div>
+          <Button onClick={submit} disabled={saving} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11">
+            {saving ? "Saving..." : "Save entry"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
