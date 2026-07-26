@@ -101,3 +101,27 @@ Stage Summary:
 - Total files in download dir: 12 (6 marketing + 6 app screenshots/preview)
 - App screenshots saved during agent-browser testing: landing-preview.png, app-home.png, app-calendar.png, app-profile-premium.png, app-after-partner.png
 - All scripts persisted in /home/z/my-project/scripts/ for future iteration
+
+---
+Task ID: 21
+Agent: main (orchestrator)
+Task: Wire up real Stripe payments (replace mock premium flow)
+
+Work Log:
+- Installed stripe@22.3.2 via bun
+- Added 3 fields to User model: stripeCustomerId, stripeSubscriptionId, stripeCheckoutSessionId (all @unique, all optional)
+- Ran db:push — schema synced cleanly
+- Created /src/lib/stripe.ts — singleton Stripe client with isStripeConfigured() helper and STRIPE_PRICES lookup
+- Created /src/app/api/stripe/checkout/route.ts — creates Checkout Session (mode: payment for one-time, subscription for monthly), passes userId in metadata + client_reference_id, returns { url } for client redirect
+- Created /src/app/api/stripe/webhook/route.ts — verifies signature, handles checkout.session.completed (flips isPremium, stores IDs) + customer.subscription.deleted (revokes premium for cancellations), idempotent on session ID
+- Updated /src/app/api/premium/route.ts — now refuses to run when Stripe is configured (returns 409); only used in dev
+- Updated /src/components/app/screens/ProfileScreen.tsx UpgradeDialog — detects NEXT_PUBLIC_STRIPE_CONFIGURED env flag, routes through Stripe Checkout if set, falls back to dev mock otherwise; updated disclaimer copy for both modes
+- Added PremiumSuccessHandler to AppShell — listens for ?premium=success|cancelled query param after Stripe redirect, refreshes profile, shows toast, cleans URL
+- Updated .env with 5 Stripe placeholder vars; created .env.example for Vercel
+- Verified: tsc --noEmit shows no errors in any stripe/profile/appshell file; dev server recompiled and serves 200 on /
+
+Stage Summary:
+- Stripe is fully wired but dormant — app stays in demo mode until user fills in 5 env vars in Stripe Dashboard + sets NEXT_PUBLIC_STRIPE_CONFIGURED=1
+- One-time + monthly both supported; webhook handles subscription cancellation automatically
+- All Stripe card data stays on Stripe's servers (Checkout Sessions approach) — never touches our DB
+- Customer email prefilled, promotion codes enabled, success/cancel URLs route back to /

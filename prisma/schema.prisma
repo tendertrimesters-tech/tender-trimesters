@@ -23,6 +23,10 @@ model User {
   isPremium      Boolean  @default(false)
   premiumTier    String?  // "one_time" | "monthly"
   premiumSince   DateTime?
+  // Stripe (set by webhook after successful checkout)
+  stripeCustomerId       String? @unique
+  stripeSubscriptionId   String? @unique
+  stripeCheckoutSessionId String? @unique
   // Onboarding
   onboarded      Boolean  @default(false)
   // Partner link (so a partner can view their journey read-only)

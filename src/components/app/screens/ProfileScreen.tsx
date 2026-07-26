@@ -259,10 +259,34 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
   const [tier, setTier] = useState<"one_time" | "monthly">("one_time");
   const [processing, setProcessing] = useState(false);
 
+  // Set NEXT_PUBLIC_STRIPE_CONFIGURED=1 in your env once you've added real Stripe keys.
+  // When true, the dialog routes through Stripe Checkout. When false (dev only),
+  // it falls back to the mock /api/premium endpoint so you can test the UX.
+  const stripeLive = process.env.NEXT_PUBLIC_STRIPE_CONFIGURED === "1";
+
   async function purchase() {
     setProcessing(true);
     try {
-      // Mock purchase — in production, this would redirect to Stripe Checkout
+      if (stripeLive) {
+        // Real Stripe flow: ask our backend to create a Checkout Session,
+        // then redirect the browser to Stripe's hosted checkout page.
+        const res = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tier }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error || "Failed to start checkout");
+        }
+        const { url } = await res.json();
+        if (!url) throw new Error("No checkout URL returned");
+        // Redirect to Stripe — user pays there, then comes back to /?premium=success
+        window.location.href = url;
+        return;
+      }
+
+      // Dev mock flow — flips isPremium without payment.
       const res = await fetch("/api/premium", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -272,8 +296,8 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
       await onUpgraded();
       toast.success(tier === "one_time" ? "Welcome to Premium 💛" : "You're Premium now 💛");
       onOpenChange(false);
-    } catch {
-      toast.error("Something went wrong. Try again?");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Something went wrong. Try again?");
     } finally {
       setProcessing(false);
     }
@@ -340,7 +364,15 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
           <div className="bg-muted/30 rounded-xl p-3 text-xs text-muted-foreground flex gap-2">
             <Lock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
             <div>
-              <strong className="text-moss-deep">Demo mode:</strong> Clicking "Continue" will activate premium instantly without payment (for testing). In production this will route through Stripe.
+              {stripeLive ? (
+                <>
+                  <strong className="text-moss-deep">Secure checkout:</strong> You'll be redirected to Stripe to complete payment. Your card details never touch our servers. After payment you'll land back here as Premium.
+                </>
+              ) : (
+                <>
+                  <strong className="text-moss-deep">Demo mode:</strong> Stripe is not configured yet — clicking "Continue" will activate premium instantly without payment (for testing). Once you add Stripe keys, this becomes a real checkout.
+                </>
+              )}
             </div>
           </div>
 

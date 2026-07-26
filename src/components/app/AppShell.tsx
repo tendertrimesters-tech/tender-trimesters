@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Home, Calendar, BookHeart, MessageCircleHeart, User, Leaf } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import HomeScreen from "./screens/HomeScreen";
@@ -10,16 +12,46 @@ import CalendarScreen from "./screens/CalendarScreen";
 import JournalScreen from "./screens/JournalScreen";
 import TempieScreen from "./screens/TempieScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-import { useAuth } from "@/components/providers";
+import { useAuth, useProfile } from "@/components/providers";
 
 export type AppView = "home" | "calendar" | "journal" | "tempie" | "profile";
+
+function PremiumSuccessHandler() {
+  const searchParams = useSearchParams();
+  const { refresh } = useProfile();
+  useEffect(() => {
+    const status = searchParams.get("premium");
+    if (status === "success") {
+      // Refresh profile so the new premium status is reflected in the UI.
+      refresh().then(() => {
+        toast.success("Welcome to Premium. Everything's unlocked. 💛");
+      });
+      // Clean the query string so the toast doesn't fire again on refresh.
+      const url = new URL(window.location.href);
+      url.searchParams.delete("premium");
+      window.history.replaceState({}, "", url.toString());
+    } else if (status === "cancelled") {
+      toast.info("Checkout cancelled — no charge was made. You can try again anytime.");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("premium");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams, refresh]);
+  return null;
+}
 
 export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
   const [view, setView] = useState<AppView>("home");
   const { userName } = useAuth();
 
+  // Listen for the ?premium=success redirect back from Stripe Checkout.
+  // Wrapped in Suspense because useSearchParams() requires it during static rendering.
+
   return (
     <div className="min-h-screen bg-gradient-cream flex flex-col">
+      <Suspense fallback={null}>
+        <PremiumSuccessHandler />
+      </Suspense>
       {/* Top bar */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-cream/85 border-b border-border/40">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
