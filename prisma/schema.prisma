@@ -42,6 +42,7 @@ model User {
   chatMessages    ChatMessage[]
   communityPosts  CommunityPost[]
   communityComments CommunityComment[]
+  meditationSessions MeditationSession[]
   waitlistEntry   WaitlistEntry?
 }
 
@@ -152,4 +153,14 @@ model WeeklyContent {
   affirmation     String
   milestone       String?  // optional special milestone
   createdAt       DateTime @default(now())
+}
+
+model MeditationSession {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meditationId String   // matches meditations.ts id field
+  durationSec  Int      // actual seconds listened
+  completed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
 }
