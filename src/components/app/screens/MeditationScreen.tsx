@@ -204,7 +204,8 @@ export default function MeditationScreen() {
           <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
             All meditations
           </div>
-          {Object.entries(MEDITATION_CATEGORIES).map(([catKey, cat]) => {
+          {Object.entries(MEDITATION_CATEGORIES).map(([catKey, catValue]) => {
+            const cat = catValue as { label: string; description: string; accent: string };
             const meds = MEDITATIONS.filter((m) => m.category === catKey);
             const style = categoryStyle(catKey);
             const Icon = style.icon;

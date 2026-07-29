@@ -125,3 +125,25 @@ Stage Summary:
 - One-time + monthly both supported; webhook handles subscription cancellation automatically
 - All Stripe card data stays on Stripe's servers (Checkout Sessions approach) — never touches our DB
 - Customer email prefilled, promotion codes enabled, success/cancel URLs route back to /
+---
+Task ID: meditation-scripts-v2-sensual-voice
+Agent: main (orchestrator)
+Task: Rewrite all 8 meditation scripts with a more human, sensual, flowing voice per user feedback. Fix missing file from session context loss. Fix MeditationScreen compile errors.
+
+Work Log:
+- User feedback: "too choppy, sounds like skipping, needs more sultry/sensual human voice"
+- Completely rewrote all 8 scripts from scratch in /home/z/my-project/src/data/meditations.ts
+- New voice direction: long flowing passages (not choppy beats), breath woven into narrative, longer pauses between passages (not between fragments), sensual embodied language ("warm honey," "warm butter on bread," "like candlelight softening a room"), second-person intimacy like a lover whispering in the dark
+- Key structural changes: fewer beats per script but each beat is a full flowing paragraph (5-8 sentences), breath cues are now spoken sentences with embedded breath instructions rather than separate clinical commands, pauses are longer (8-16s between passages vs 3-6s before), affirmations use sensual language ("the sound your nervous system has been waiting for all day")
+- Fixed MeditationScreen.tsx: added type assertion for Object.entries(MEDITATION_CATEGORIES) `catValue as { label, description, accent }`
+- Recreated /home/z/my-project/scripts/dump-meditations-json.ts (lost from session)
+- Regenerated meditations-data.json (8 meditations)
+- TypeScript compile: zero meditation-related errors. Pre-existing errors in auth/partner routes only.
+- Dev server running on port 3000 (confirmed via curl)
+
+Stage Summary:
+- All 8 scripts rewritten with sensual, flowing voice
+- Scripts live at /home/z/my-project/src/data/meditations.ts (canonical source)
+- MeditationScreen.tsx compile errors fixed
+- App running and ready for visual testing
+- Scripts are designed for ~120-140 wpm with extended pauses — total ~58 min of audio content
