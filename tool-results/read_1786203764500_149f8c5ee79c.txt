@@ -1,0 +1,369 @@
+     1→// Tender Trimesters — 40-week pregnancy content seed
+     2→// Run: bun run scripts/seed.ts
+     3→
+     4→import { db } from "../src/lib/db";
+     5→
+     6→type Week = {
+     7→  week: number;
+     8→  trimester: 1 | 2 | 3;
+     9→  babySize: string;
+    10→  babySizeDesc: string;
+    11→  babyLengthCm: number;
+    12→  babyWeightG: number;
+    13→  bodyChanges: string;
+    14→  emotionalChanges: string;
+    15→  bestFriendTip: string;
+    16→  selfCare: string;
+    17→  affirmation: string;
+    18→  milestone?: string;
+    19→};
+    20→
+    21→const weeks: Week[] = [
+    22→  {
+    23→    week: 1, trimester: 1, babySize: "Poppy Seed", babySizeDesc: "Technically not pregnant yet — your body is prepping for ovulation. The clock starts here.", babyLengthCm: 0.1, babyWeightG: 0.2,
+    24→    bodyChanges: "You won't feel different yet. Your body is gearing up to release an egg. Start taking a prenatal vitamin with folic acid if you haven't already.",
+    25→    emotionalChanges: "Hopeful, anxious, or just waiting. Whatever you're feeling is valid — this part is a quiet kind of waiting game.",
+    26→    bestFriendTip: "Start a daily habit of drinking one full glass of water first thing in the morning. Future you will thank present you.",
+    27→    selfCare: "Take a prenatal vitamin with 400mcg folic acid\nDrink 8 glasses of water\nGet 7-9 hours of sleep",
+    28→    affirmation: "My body knows exactly what to do.",
+    29→  },
+    30→  {
+    31→    week: 2, trimester: 1, babySize: "Poppy Seed", babySizeDesc: "Ovulation happens this week. The egg is traveling, hoping to meet its match.", babyLengthCm: 0.1, babyWeightG: 0.2,
+    32→    bodyChanges: "Cervical mucus changes (clear and stretchy = fertile window). Your body is releasing one lucky egg.",
+    33→    emotionalChanges: "If you're trying, this is the week to lean in. If not yet — same. Patience is the lesson of week 2.",
+    34→    bestFriendTip: "If you're trying to conceive, this is your window. If not — protection is your friend.",
+    35→    selfCare: "Track your cycle in the app\nContinue prenatal vitamins\nLimit caffeine to under 200mg",
+    36→    affirmation: "I trust the timing of my life.",
+    37→  },
+    38→  {
+    39→    week: 3, trimester: 1, babySize: "Pinhead", babySizeDesc: "Conception has likely happened. The fertilized egg is making its way down the fallopian tube to your uterus.", babyLengthCm: 0.15, babyWeightG: 0.5,
+    40→    bodyChanges: "Cell division is happening fast. You won't feel it, but a tiny cluster of cells is implanting in your uterine lining.",
+    41→    emotionalChanges: "Most women don't know they're pregnant yet. The two-week wait is its own kind of emotional marathon.",
+    42→    bestFriendTip: "Pretend you might be pregnant — avoid alcohol, raw fish, and high-mercury fish just in case.",
+    43→    selfCare: "Avoid alcohol and smoking\nSkip raw sushi and deli meats\nContinue prenatal vitamins",
+    44→    affirmation: "Something miraculous is unfolding inside me.",
+    45→  },
+    46→  {
+    47→    week: 4, trimester: 1, babySize: "Sesame Seed", babySizeDesc: "Your baby is now an embryo, about the size of a poppy seed. The placenta is starting to form.", babyLengthCm: 0.2, babyWeightG: 0.5,
+    48→    bodyChanges: "Missed period is the first big sign. Some women feel mild cramping (implantation) or notice light spotting.",
+    49→    emotionalChanges: "That moment you see the positive test — joy, fear, disbelief, all at once. Take a deep breath, mama.",
+    50→    bestFriendTip: "Take a pregnancy test first thing in the morning for the most accurate result. Call your OB to schedule your first appointment.",
+    51→    selfCare: "Call your OB to book your first prenatal visit\nStart a pregnancy journal\nTake prenatal vitamins daily",
+    52→    affirmation: "I am ready for this journey.",
+    53→  },
+    54→  {
+    55→    week: 5, trimester: 1, babySize: "Apple Seed", babySizeDesc: "Your baby's heart is starting to form and may even start beating this week. Tiny arm and leg buds appear.", babyLengthCm: 0.25, babyWeightG: 1,
+    56→    bodyChanges: "Fatigue hits hard — your body is making a human AND a placenta. Breasts may feel tender. The nausea might begin.",
+    57→    emotionalChanges: "Excitement mixes with exhaustion. It's okay if you don't feel 'glowing' yet — first trimester is survival mode.",
+    58→    bestFriendTip: "Keep saltine crackers on your nightstand. Eat a few before you even sit up in bed — it tames morning nausea.",
+    59→    selfCare: "Eat small frequent meals\nNap when your body asks\nGinger tea for nausea",
+    60→    affirmation: "Rest is productive. My body is doing important work.",
+    61→  },
+    62→  {
+    63→    week: 6, trimester: 1, babySize: "Lentil", babySizeDesc: "Baby's face is taking shape — tiny dots where eyes will be, a little mouth, even the beginnings of ears.", babyLengthCm: 0.5, babyWeightG: 1.5,
+    64→    bodyChanges: "Hormones are surging. Nausea, bloating, frequent peeing, and food aversions are all normal right now.",
+    65→    emotionalChanges: "Mood swings are real. You might cry at a commercial. That's your hormones — not you being 'too much.'",
+    66→    bestFriendTip: "Don't suffer in silence with nausea. Talk to your OB about B6 or prescription options if you can't keep food down.",
+    67→    selfCare: "Hydrate with electrolytes if vomiting\nEat whatever sounds good — calories matter more than nutrition right now\nTell your closest people",
+    68→    affirmation: "Every wave of nausea is a sign my baby is growing.",
+    69→  },
+    70→  {
+    71→    week: 7, trimester: 1, babySize: "Blueberry", babySizeDesc: "Arms and legs are lengthening. Tiny hands and feet are forming. Brain is developing rapidly.", babyLengthCm: 1, babyWeightG: 2,
+    72→    bodyChanges: "Uterus has doubled in size. Your clothes might feel tight. Acne, bloating, and constipation are common.",
+    73→    emotionalChanges: "First-trimester anxiety is real. It's normal to worry about miscarriage. Take it one day at a time.",
+    74→    bestFriendTip: "Buy a pregnancy pillow now — even if you don't think you need one yet. Future you will weep with gratitude.",
+    75→    selfCare: "Add fiber-rich foods to ease constipation\nGentle walks (10-15 min)\nStretch before bed",
+    76→    affirmation: "I am exactly the mother my baby needs.",
+    77→  },
+    78→  {
+    79→    week: 8, trimester: 1, babySize: "Raspberry", babySizeDesc: "Baby's fingers and toes are starting to form. Tiny webbed. The heart is beating about 150 times per minute.", babyLengthCm: 1.5, babyWeightG: 3,
+    80→    bodyChanges: "You may have your first ultrasound this week — hearing that heartbeat for the first time is unforgettable.",
+    81→    emotionalChanges: "Seeing the heartbeat changes everything. The abstract becomes real. Let yourself feel it.",
+    82→    bestFriendTip: "Take your partner to the first ultrasound. That shared moment will become a core memory for both of you.",
+    83→    selfCare: "Schedule first ultrasound if not done\nStart a 'pregnancy memory' photo folder\nMoisturize your belly (skin stretching begins)",
+    84→    affirmation: "I am growing a life. That is enough.",
+    85→  },
+    86→  {
+    87→    week: 9, trimester: 1, babySize: "Grape", babySizeDesc: "Baby is starting to look like a baby — less tadpole, more human. Tail is gone. Muscles are forming.", babyLengthCm: 2.3, babyWeightG: 4,
+    88→    bodyChanges: "Your waistline may be thickening. Breasts are noticeably bigger. Areolas may darken.",
+    89→    emotionalChanges: "You might still feel like you're faking it — symptoms come and go. That's normal. Worry is the price of love.",
+    90→    bestFriendTip: "If your symptoms suddenly disappear, don't panic — but do call your OB. Peace of mind is worth the call.",
+    91→    selfCare: "Buy your first maternity bra (size up)\nSwitch to gentler skincare (avoid retinols)\nContinue light movement",
+    92→    affirmation: "I release the need to control what I cannot.",
+    93→  },
+    94→  {
+    95→    week: 10, trimester: 1, babySize: "Kumquat", babySizeDesc: "Baby's vital organs are formed and starting to function. Nails are beginning to grow. Bones are hardening.", babyLengthCm: 3, babyWeightG: 5,
+    96→    bodyChanges: "You may hear the heartbeat with a Doppler at your OB visit. The 'bean' is now officially a fetus.",
+    97→    emotionalChanges: "Crossing the 10-week mark feels like a milestone. Some of the early worry starts to ease.",
+    98→    bestFriendTip: "Start thinking about how and when to announce. There's no 'right' time — do what feels true to you.",
+    99→    selfCare: "Plan your announcement (or don't — your call)\nBook NIPT (genetic screening) if desired\nContinue prenatal yoga",
+   100→    affirmation: "I trust my body to carry this pregnancy.",
+   101→  },
+   102→  {
+   103→    week: 11, trimester: 1, babySize: "Lime", babySizeDesc: "Baby is moving — kicking, stretching, even hiccuping — though you can't feel it yet.", babyLengthCm: 4, babyWeightG: 7,
+   104→    bodyChanges: "First trimester symptoms may start easing. Energy might return. You're almost at the second trimester!",
+   105→    emotionalChanges: "Relief is on the horizon. Hang in there — the glow-up is coming.",
+   106→    bestFriendTip: "Use this energy window to prep: clean the house, freeze meals, research childcare. Future tired you will be grateful.",
+   107→    selfCare: "Meal prep and freeze portions\nResearch childbirth classes\nContinue gentle exercise",
+   108→    affirmation: "The hardest part is almost over. I am strong.",
+   109→  },
+   110→  {
+   111→    week: 12, trimester: 1, babySize: "Plum", babySizeDesc: "Baby has reflexes now. If you poke your belly, baby might respond by squirming. All systems are forming.", babyLengthCm: 5.4, babyWeightG: 14,
+   112→    bodyChanges: "NT scan (nuchal translucency) ultrasound this week — checks for chromosomal conditions and confirms due date.",
+   113→    emotionalChanges: "End of the first trimester. Many women feel safe enough to announce. Whatever you choose is right.",
+   114→    bestFriendTip: "Get a 12-week belly photo — even if you don't 'look pregnant' yet. The before-and-after will blow your mind later.",
+   115→    selfCare: "Schedule NT scan\nTake a 12-week photo\nPlan your announcement if you're sharing",
+   116→    affirmation: "I have made it through the first trimester.",
+   117→    milestone: "End of First Trimester approaching",
+   118→  },
+   119→  {
+   120→    week: 13, trimester: 1, babySize: "Lemon", babySizeDesc: "Baby has fingerprints now. Unique to them, forever. Vocal cords are forming.", babyLengthCm: 7.4, babyWeightG: 23,
+   121→    bodyChanges: "Energy is returning. Risk of miscarriage drops significantly. Your bump may make a tiny debut.",
+   122→    emotionalChanges: "Relief. Joy. Maybe a tiny bit of sadness that the secret-keeping chapter is ending.",
+   123→    bestFriendTip: "If you haven't told work yet, this is a good time. You'll need accommodations and time off for appointments.",
+   124→    selfCare: "Tell your employer (if you haven't)\nStart a baby name list\nBook a second-trimester anatomy scan (around week 20)",
+   125→    affirmation: "Welcome to the second trimester. I am ready.",
+   126→    milestone: "Second Trimester Begins",
+   127→  },
+   128→  {
+   129→    week: 14, trimester: 2, babySize: "Peach", babySizeDesc: "Baby can make facial expressions now — squinting, frowning, even sucking a thumb.", babyLengthCm: 8.7, babyWeightG: 43,
+   130→    bodyChanges: "Appetite is back. The 'glow' might appear. Some women feel baby flutters (called quickening) for the first time.",
+   131→    emotionalChanges: "This is the sweet spot — energy returning, belly not too big yet, mood more stable.",
+   132→    bestFriendTip: "Use this window to travel, date your partner, see friends. Third trimester you'll be tired again.",
+   133→    selfCare: "Plan a babymoon\nEat iron-rich foods (baby's blood volume is increasing)\nMoisturize belly daily",
+   134→    affirmation: "I am blooming into motherhood.",
+   135→  },
+   136→  {
+   137→    week: 15, trimester: 2, babySize: "Apple", babySizeDesc: "Baby can hear muffled sounds from outside the womb — your heartbeat, voice, even music.", babyLengthCm: 10.1, babyWeightG: 70,
+   138→    bodyChanges: "You might feel baby move for the first time — like little butterflies or gas bubbles. Heartburn may begin.",
+   139→    emotionalChanges: "Feeling those first kicks is electric. Suddenly it's real in a new way.",
+   140→    bestFriendTip: "Start talking to your baby. Read a book, sing a song. They're listening.",
+   141→    selfCare: "Play music or read aloud to baby\nTums for heartburn (OB-approved)\nSleep on your left side",
+   142→    affirmation: "My voice is the first sound my baby will know.",
+   143→  },
+   144→  {
+   145→    week: 16, trimester: 2, babySize: "Avocado", babySizeDesc: "Baby's eyes can make small movements, though they're still closed. Hair is starting to grow.", babyLengthCm: 11.6, babyWeightG: 100,
+   146→    bodyChanges: "Belly is officially showing. You might need maternity clothes. Round ligament pain (sharp groin pulls) can start.",
+   147→    emotionalChanges: "You look pregnant now. Strangers might start asking. The attention can be sweet or overwhelming — both are okay.",
+   148→    bestFriendTip: "Invest in 2-3 quality maternity basics (jeans, leggings, a dress). You'll live in them for months.",
+   149→    selfCare: "Buy maternity clothes\nUse a pregnancy pillow\nStretch daily to ease ligament pain",
+   150→    affirmation: "My changing body is beautiful.",
+   151→  },
+   152→  {
+   153→    week: 17, trimester: 2, babySize: "Pear", babySizeDesc: "Baby's skeleton is hardening from cartilage to bone. Sweat glands are forming.", babyLengthCm: 13, babyWeightG: 140,
+   154→    bodyChanges: "Weight gain picks up. You might feel off-balance as your center of gravity shifts.",
+   155→    emotionalChanges: "Bonding deepens. You might find yourself rubbing your belly, daydreaming about who they'll be.",
+   156→    bestFriendTip: "Switch to flat, supportive shoes. Heels will betray you now.",
+   157→    selfCare: "Wear supportive shoes\nPractice good posture\nAdd a daily 20-min walk",
+   158→    affirmation: "I am connected to my baby in ways I cannot see.",
+   159→  },
+   160→  {
+   161→    week: 18, trimester: 2, babySize: "Bell Pepper", babySizeDesc: "Baby is yawning, hiccuping, and stretching. If you're carrying a girl, her uterus is forming now.", babyLengthCm: 14.2, babyWeightG: 190,
+   162→    bodyChanges: "Belly is popping. You may feel baby move more clearly — distinct kicks now, not just flutters.",
+   163→    emotionalChanges: "Some days you feel like Superwoman, others like you're running on fumes. Both are normal second-trimester experiences.",
+   164→    bestFriendTip: "Start a 'letters to baby' journal. Even short notes — 'Today you kicked during my meeting' — will be precious later.",
+   165→    selfCare: "Write a letter to baby\nSchedule anatomy scan (week 20)\nEat omega-3s for baby's brain",
+   166→    affirmation: "I am documenting this season with love.",
+   167→  },
+   168→  {
+   169→    week: 19, trimester: 2, babySize: "Mango", babySizeDesc: "Baby is covered in vernix — a creamy protective coating. Skin is developing, no longer translucent.", babyLengthCm: 15.3, babyWeightG: 240,
+   170→    bodyChanges: "Skin changes: linea nigra (dark line down belly), pregnancy mask (dark patches on face). All temporary.",
+   171→    emotionalChanges: "Body image can wobble. Be gentle with yourself — your body is doing extraordinary work.",
+   172→    bestFriendTip: "Take a weekly bump photo in the same spot, same lighting. Watch your baby grow.",
+   173→    selfCare: "Weekly bump photo\nSunscreen to prevent pregnancy mask\nGentle skin routine",
+   174→    affirmation: "Every mark on my body is a love letter to my baby.",
+   175→  },
+   176→  {
+   177→    week: 20, trimester: 2, babySize: "Banana", babySizeDesc: "Halfway there! Baby can hear clearly now. The anatomy scan reveals all organs, and often, the sex.", babyLengthCm: 16.4, babyWeightG: 300,
+   178→    bodyChanges: "Anatomy scan this week — the big detailed ultrasound. Bump is undeniable. Belly button may pop out.",
+   179→    emotionalChanges: "HALFWAY. A real milestone. Seeing baby on screen, finding out the sex (if you want to) — this is a peak week.",
+   180→    bestFriendTip: "Bring your partner and ask for printed ultrasound photos. Frame one — it's a forever keepsake.",
+   181→    selfCare: "Attend anatomy scan\nStart registry research\nCelebrate halfway point with a date night",
+   182→    affirmation: "I am halfway to holding my baby.",
+   183→    milestone: "Halfway Point",
+   184→  },
+   185→  {
+   186→    week: 21, trimester: 2, babySize: "Carrot", babySizeDesc: "Baby's taste buds are developing. The flavors of what you eat come through in amniotic fluid.", babyLengthCm: 26.7, babyWeightG: 360,
+   187→    bodyChanges: "Stretch marks may appear. Feet might grow (yes, really). Swelling in ankles by end of day.",
+   188→    emotionalChanges: "You're nesting. Maybe not literally yet, but mentally — researching, planning, dreaming.",
+   189→    bestFriendTip: "Eat diverse flavors now — research shows babies prefer foods they 'tasted' in utero. Spices, veggies, all of it.",
+   190→    selfCare: "Eat a rainbow of foods\nElevate feet at end of day\nStart childbirth class research",
+   191→    affirmation: "I am nourishing my baby, body and soul.",
+   192→  },
+   193→  {
+   194→    week: 22, trimester: 2, babySize: "Spaghetti Squash", babySizeDesc: "Baby has a sense of touch now. They can feel when you rub your belly.", babyLengthCm: 27.8, babyWeightG: 430,
+   195→    bodyChanges: "Braxton Hicks (practice contractions) might begin — painless tightening of your belly.",
+   196→    emotionalChanges: "Bonding deepens through touch. You and baby are in conversation now.",
+   197→    bestFriendTip: "When baby kicks, press gently back. You're having your first 'conversations.'",
+   198→    selfCare: "Daily belly rubs\nHydrate to ease Braxton Hicks\nTrack kick patterns",
+   199→    affirmation: "My touch is my baby's first language of love.",
+   200→  },
+   201→  {
+   202→    week: 23, trimester: 2, babySize: "Grapefruit", babySizeDesc: "Baby's lungs are developing. They can hear your voice clearly and may startle at loud sounds.", babyLengthCm: 28.9, babyWeightG: 501,
+   203→    bodyChanges: "You're gaining about a pound a week now. Sleep may get uncomfortable. Strange dreams are common.",
+   204→    emotionalChanges: "The reality of impending motherhood hits. It's normal to feel both excited and terrified.",
+   205→    bestFriendTip: "If anxious thoughts spiral at 3am, write them down. Getting them out of your head and onto paper helps.",
+   206→    selfCare: "Journal before bed\nRead to baby\nPractice breathing exercises",
+   207→    affirmation: "My worries are valid, and they are not in charge.",
+   208→  },
+   209→  {
+   210→    week: 24, trimester: 2, babySize: "Corn Cob", babySizeDesc: "Baby is viable — with intensive medical care, could survive if born now. A huge medical milestone.", babyLengthCm: 30, babyWeightG: 600,
+   211→    bodyChanges: "Glucose screening is coming up soon. Your OB may have you track kick counts.",
+   212→    emotionalChanges: "Viability is a powerful threshold. Many mamas breathe a little easier this week.",
+   213→    bestFriendTip: "Start counting kicks daily — same time each day, ideally after a meal when baby is active.",
+   214→    selfCare: "Daily kick counts\nSchedule glucose test (24-28 weeks)\nTour your birthing facility",
+   215→    affirmation: "My baby is getting stronger every day.",
+   216→    milestone: "Viability",
+   217→  },
+   218→  {
+   219→    week: 25, trimester: 2, babySize: "Cauliflower", babySizeDesc: "Baby's nose and nostrils are working. They can practice breathing motions.", babyLengthCm: 34.6, babyWeightG: 660,
+   220→    bodyChanges: "Heartburn, constipation, and hemorrhoids — the glamorous side of pregnancy. Hair may be thicker and shinier.",
+   221→    emotionalChanges: "Third trimester looms. You might feel a sudden urge to get everything 'done' — nesting instinct kicking in.",
+   222→    bestFriendTip: "Start packing a 'just in case' hospital bag. You won't regret having it ready early.",
+   223→    selfCare: "Pack hospital bag (just in case)\nFiber for constipation\nSleep with pregnancy pillow",
+   224→    affirmation: "I am preparing with intention.",
+   225→  },
+   226→  {
+   227→    week: 26, trimester: 2, babySize: "Lettuce Head", babySizeDesc: "Baby's eyes are opening for the first time. They can blink. Brain activity is surging.", babyLengthCm: 35.6, babyWeightG: 760,
+   228→    bodyChanges: "Blood pressure may rise — your OB is watching for preeclampsia. Swelling increases.",
+   229→    emotionalChanges: "Anticipation builds. You can see the finish line of pregnancy, even if delivery still feels abstract.",
+   230→    bestFriendTip: "Use a body pillow between your knees — it's a game-changer for hip pain.",
+   231→    selfCare: "Track blood pressure\nSleep on left side\nReduce sodium if swelling",
+   232→    affirmation: "I am tuned in to my body's signals.",
+   233→  },
+   234→  {
+   235→    week: 27, trimester: 2, babySize: "Cabbage", babySizeDesc: "Baby recognizes your voice and your partner's voice. They may respond to familiar songs.", babyLengthCm: 36.6, babyWeightG: 875,
+   236→    bodyChanges: "End of second trimester. Your bump is solid. Movement is constant and sometimes uncomfortable.",
+   237→    emotionalChanges: "Mixed feelings — excitement to meet baby, sadness about the end of pregnancy. Both are real.",
+   238→    bestFriendTip: "Take a 'before baby' photo with your partner. This chapter is closing; honor it.",
+   239→    selfCare: "Pre-register at hospital\nFinalize childbirth class\nTake partner photos",
+   240→    affirmation: "Welcome to the third trimester. The final stretch.",
+   241→    milestone: "Third Trimester Begins",
+   242→  },
+   243→  {
+   244→    week: 28, trimester: 3, babySize: "Eggplant", babySizeDesc: "Baby can dream now — REM sleep has begun. Brain is forming billions of neurons.", babyLengthCm: 37.6, babyWeightG: 1005,
+   245→    bodyChanges: "Glucose test this week if not done. Rhogam shot if you're Rh-negative. Baby moves a lot.",
+   246→    emotionalChanges: "The countdown feels real. You might start visualizing the birth — your hopes, your fears.",
+   247→    bestFriendTip: "Write your birth preferences (not a strict 'plan' — babies don't read those). Share with your OB and partner.",
+   248→    selfCare: "Glucose screening (if not done)\nWrite birth preferences\nStart perineal massage (OB-approved)",
+   249→    affirmation: "I trust my body to birth my baby.",
+   250→  },
+   251→  {
+   252→    week: 29, trimester: 3, babySize: "Butternut Squash", babySizeDesc: "Baby's muscles and lungs are maturing. Head is growing bigger to make room for the brain.", babyLengthCm: 38.6, babyWeightG: 1150,
+   253→    bodyChanges: "Heartburn and shortness of breath as baby pushes up against your diaphragm. Frequent urination returns.",
+   254→    emotionalChanges: "You're tired in a new way — heavy, slow, ready. Impatience can creep in.",
+   255→    bestFriendTip: "Eat 5-6 small meals instead of 3 big ones. Eases heartburn and keeps energy steady.",
+   256→    selfCare: "Small frequent meals\nSleep elevated\nGentle prenatal yoga",
+   257→    affirmation: "I am strong enough for this final stretch.",
+   258→  },
+   259→  {
+   260→    week: 30, trimester: 3, babySize: "Cucumber", babySizeDesc: "Baby's eyes can open and close. They can distinguish light and dark.", babyLengthCm: 39.9, babyWeightG: 1320,
+   261→    bodyChanges: "Braxton Hicks more frequent. Breasts may leak colostrum (early milk).",
+   262→    emotionalChanges: "Nesting is in full swing. You might rearrange the nursery at 2am. Lean in — it's primal.",
+   263→    bestFriendTip: "Set up the crib/bassinet NOW. Don't wait until 38 weeks. The 'last-minute' scramble is brutal.",
+   264→    selfCare: "Assemble nursery furniture\nWash baby clothes\nBuy nursing bras",
+   265→    affirmation: "I am creating a sanctuary for my baby.",
+   266→  },
+   267→  {
+   268→    week: 31, trimester: 3, babySize: "Coconut", babySizeDesc: "Baby's brain is growing fast. They can process information and remember sounds after birth.", babyLengthCm: 41.1, babyWeightG: 1500,
+   269→    bodyChanges: "Back pain intensifies. Sleep is increasingly difficult. Varicose veins may appear.",
+   270→    emotionalChanges: "You might feel huge and over it. That's normal. You're almost there.",
+   271→    bestFriendTip: "Book a prenatal massage. Your back will thank you. Many insurance plans cover it.",
+   272→    selfCare: "Prenatal massage\nUse a maternity support belt\nWarm baths for back pain",
+   273→    affirmation: "My discomfort is temporary. My love is forever.",
+   274→  },
+   275→  {
+   276→    week: 32, trimester: 3, babySize: "Jicama", babySizeDesc: "Baby is practicing breathing, sucking, and swallowing. Digestive system is ready for the outside world.", babyLengthCm: 42.4, babyWeightG: 1700,
+   277→    bodyChanges: "Shortness of breath as baby takes up more space. Heartburn peaks. You might waddle now.",
+   278→    emotionalChanges: "Time feels both fast and slow. Each week is a countdown. Hold steady, mama.",
+   279→    bestFriendTip: "Take a hospital tour if you haven't. Knowing where to go lowers labor-day anxiety.",
+   280→    selfCare: "Hospital tour\nPractice labor breathing\nInstall car seat (get it checked!)",
+   281→    affirmation: "I am prepared for what's ahead.",
+   282→  },
+   283→  {
+   284→    week: 33, trimester: 3, babySize: "Pineapple", babySizeDesc: "Baby's immune system is developing. Skull bones are still soft (they'll overlap during birth).", babyLengthCm: 43.7, babyWeightG: 1920,
+   285→    bodyChanges: "Pelvic pressure increases as baby drops. You might leak a little urine when laughing or sneezing.",
+   286→    emotionalChanges: "Imagining the moment of meeting baby. Wondering who they'll look like. A magical kind of anticipation.",
+   287→    bestFriendTip: "Do kegel exercises daily — they help with that little leak and speed postpartum recovery.",
+   288→    selfCare: "Daily kegels\nPack hospital bag (for real this time)\nMeal prep and freeze",
+   289→    affirmation: "I am almost ready to meet my baby.",
+   290→  },
+   291→  {
+   292→    week: 34, trimester: 3, babySize: "Cantaloupe", babySizeDesc: "Baby's lungs are nearly mature. Central nervous system is finishing up. You're in the home stretch.", babyLengthCm: 45, babyWeightG: 2150,
+   293→    bodyChanges: "OB visits switch to every 2 weeks. Group B Strep test coming soon.",
+   294→    emotionalChanges: "Final preparations feel urgent. You might suddenly need everything 'done.'",
+   295→    bestFriendTip: "Pre-register at the hospital and put your OB's after-hours number in your phone.",
+   296→    selfCare: "Pre-register at hospital\nSave OB after-hours number\nWash and fold baby clothes",
+   297→    affirmation: "Everything is falling into place.",
+   298→  },
+   299→  {
+   300→    week: 35, trimester: 3, babySize: "Honeydew Melon", babySizeDesc: "Baby's kidneys are fully developed. Liver is processing some waste. Almost ready!", babyLengthCm: 46.2, babyWeightG: 2380,
+   301→    bodyChanges: "Group B Strep test this week. Baby is dropping lower — easier breathing, harder walking.",
+   302→    emotionalChanges: "Last full month of pregnancy. Surrender to the slowness.",
+   303→    bestFriendTip: "Treat yourself — haircut, pedicure, facial. Self-care before baby takes center stage.",
+   304→    selfCare: "Group B Strep test\nSelf-care day\nFinalize nursery",
+   305→    affirmation: "I am savoring these final days of carrying my baby.",
+   306→  },
+   307→  {
+   308→    week: 36, trimester: 3, babySize: "Papaya", babySizeDesc: "Baby is considered 'early term' next week. Most organs are ready for the outside world.", babyLengthCm: 47.4, babyWeightG: 2620,
+   309→    bodyChanges: "OB visits weekly now. Baby may engage in pelvis. You're exhausted and excited.",
+   310→    emotionalChanges: "You might cry easily. Anticipation is at its peak. This is your body's rehearsal week.",
+   311→    bestFriendTip: "Sleep whenever you can. Seriously. Don't be a hero.",
+   312→    selfCare: "Weekly OB visits\nSleep as much as possible\nReview birth preferences with partner",
+   313→    affirmation: "I am ready when my baby is ready.",
+   314→    milestone: "Early Term Approaching",
+   315→  },
+   316→  {
+   317→    week: 37, trimester: 3, babySize: "Swiss Chard", babySizeDesc: "Baby is 'early term' now. Lungs are mature. They're practicing breathing for the outside world.", babyLengthCm: 48.6, babyWeightG: 2860,
+   318→    bodyChanges: "Watch for signs of labor: regular contractions, water breaking, bloody show. Pack the car seat.",
+   319→    emotionalChanges: "The wait is excruciating. Every twinge feels like 'is this it?' Try to stay present.",
+   320→    bestFriendTip: "Set up a group text or use an app to notify family when labor starts — saves your partner from 50 texts.",
+   321→    selfCare: "Install car seat in car\nReview labor signs\nTime contractions if they start",
+   322→    affirmation: "My baby will come when they are ready.",
+   323→  },
+   324→  {
+   325→    week: 38, trimester: 3, babySize: "Leek", babySizeDesc: "Baby has firm grasps and toenails. Brain is still developing fast — it will for years.", babyLengthCm: 49.8, babyWeightG: 3083,
+   326→    bodyChanges: "Pelvic discomfort is intense. You might lose your mucus plug. Braxton Hicks more frequent.",
+   327→    emotionalChanges: "So close. The longest short wait of your life.",
+   328→    bestFriendTip: "Do something distracting — movie marathon, puzzle, last date night. Time moves slower when you stare at it.",
+   329→    selfCare: "Last date night\nRest\nStay hydrated",
+   330→    affirmation: "I surrender to my baby's timing.",
+   331→  },
+   332→  {
+   333→    week: 39, trimester: 3, babySize: "Mini Watermelon", babySizeDesc: "Baby is full term. Lungs are mature, immune system ready. They're just growing now.", babyLengthCm: 50.7, babyWeightG: 3288,
+   334→    bodyChanges: "Baby drops lower into pelvis. You're uncomfortable but so ready. Any day now.",
+   335→    emotionalChanges: "Anticipation is at its peak. Trust your body. Trust your baby.",
+   336→    bestFriendTip: "If contractions start, time them. Call your OB when they're 5 min apart, lasting 1 min, for 1 hour (5-1-1 rule).",
+   337→    selfCare: "5-1-1 rule for contractions\nStay nourished and rested\nTrust your instincts",
+   338→    affirmation: "I trust my body completely.",
+   339→  },
+   340→  {
+   341→    week: 40, trimester: 3, babySize: "Pumpkin", babySizeDesc: "Your due date! Baby is fully developed and ready to meet you. Average baby is 7.5 lbs and 20 inches.", babyLengthCm: 51.2, babyWeightG: 3462,
+   342→    bodyChanges: "You made it to your due date! Only 5% of babies arrive on this exact day. Labor could start any moment.",
+   343→    emotionalChanges: "A mix of impatience, excitement, and fear. You're about to meet the love of your life.",
+   344→    bestFriendTip: "If you go overdue, your OB will discuss induction options at 41 weeks. Try not to stress — baby knows.",
+   345→    selfCare: "Stay calm\nWalk, bounce on a birth ball\nTrust the process",
+   346→    affirmation: "Today could be the day. I am ready.",
+   347→    milestone: "Due Date!",
+   348→  },
+   349→];
+   350→
+   351→async function seed() {
+   352→  console.log("Seeding weekly content...");
+   353→  for (const w of weeks) {
+   354→    await db.weeklyContent.upsert({
+   355→      where: { week: w.week },
+   356→      create: w,
+   357→      update: w,
+   358→    });
+   359→    process.stdout.write(`.`);
+   360→  }
+   361→  console.log(`\nSeeded ${weeks.length} weeks of pregnancy content.`);
+   362→  await db.$disconnect();
+   363→}
+   364→
+   365→seed().catch((e) => {
+   366→  console.error("Seed failed:", e);
+   367→  process.exit(1);
+   368→});
+   369→

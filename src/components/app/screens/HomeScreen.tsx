@@ -194,6 +194,27 @@ export default function HomeScreen({ onNavigate }: { onNavigate: (v: AppView) =>
         />
       </div>
 
+      {/* Signature keepsakes grid */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="font-serif text-lg text-moss-deep">Your keepsakes</div>
+          <Button variant="ghost" size="sm" onClick={() => onNavigate("more")} className="text-xs text-moss">
+            All <ArrowRight className="ml-1 w-3 h-3" />
+          </Button>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <KeepsakeCard emoji="💌" title="Baby Letters" accent="bg-blush/20" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="🔥" title="Fear to Flame" accent="bg-terracotta/15" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="🤍" title="Belly Bonding" accent="bg-sage/20" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="📖" title="Mother's Mother" accent="bg-butter" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="🌙" title="DreamKeeper" accent="bg-lavender/20" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="🌱" title="Name Garden" accent="bg-sage/25" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="⏳" title="Time Capsule" accent="bg-lavender/25" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="🎵" title="Birth Playlist" accent="bg-blush/25" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="🌊" title="Hormones" accent="bg-sage/15" onClick={() => onNavigate("more")} />
+        </div>
+      </motion.div>
+
       {/* Upcoming appointments */}
       {upcomingAppts.length > 0 && (
         <Card className="bg-card border-moss/15 rounded-3xl p-6">
@@ -273,6 +294,17 @@ export default function HomeScreen({ onNavigate }: { onNavigate: (v: AppView) =>
         )}
       </Card>
     </div>
+  );
+}
+
+function KeepsakeCard({ emoji, title, accent, onClick }: { emoji: string; title: string; accent: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="text-left">
+      <div className={cn("rounded-2xl p-3 h-full transition-all hover:shadow-soft border border-transparent hover:border-moss/10", accent)}>
+        <div className="text-xl mb-1">{emoji}</div>
+        <div className="text-[11px] font-medium text-moss-deep leading-tight">{title}</div>
+      </div>
+    </button>
   );
 }
 

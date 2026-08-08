@@ -1,0 +1,301 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProfile, calcWeek } from "@/components/providers";
+import { cn } from "@/lib/utils";
+import { DREAM_MOODS } from "@/data/signature-features";
+import { Moon, Plus, Sparkles, Trash2, Tag, Lightbulb } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+
+type DreamMood = (typeof DREAM_MOODS)[number];
+
+interface DreamEntry {
+  id: string;
+  title: string | null;
+  body: string;
+  week: number | null;
+  mood: string | null;
+  symbols: string | null;
+  themes: string | null;
+  createdAt: string;
+}
+
+export default function DreamKeeperScreen() {
+  const [entries, setEntries] = useState<DreamEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [selectedMood, setSelectedMood] = useState<DreamMood | "">("");
+  const { profile } = useProfile();
+  const currentWeek = calcWeek(profile?.dueDate);
+
+  const loadEntries = () => {
+    setLoading(true);
+    fetch("/api/dream-entries")
+      .then((r) => r.json())
+      .then((d) => {
+        setEntries(d.entries || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadEntries();
+  }, []);
+
+  const handleLogDream = async () => {
+    if (!body.trim()) {
+      toast.error("Describe your dream first");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/dream-entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim() || null,
+          body: body.trim(),
+          week: currentWeek,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Dream logged — analyzing symbols ✨");
+      setTitle("");
+      setBody("");
+      setSelectedMood("");
+      loadEntries();
+    } catch {
+      toast.error("Failed to log dream");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleMood = (mood: DreamMood) => {
+    setSelectedMood(selectedMood === mood ? "" : mood);
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div>
+        <h1 className="font-serif text-2xl text-moss-deep">DreamKeeper</h1>
+        <p className="text-xs text-muted-foreground mt-1">
+          Your pregnancy dreams are trying to tell you something
+        </p>
+      </div>
+
+      {/* Add Dream Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Card className="rounded-3xl p-5">
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Give this dream a title..."
+            className="mb-3 rounded-xl"
+          />
+          <Textarea
+            rows={4}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="What did you dream? The weirder the better..."
+            className="rounded-xl resize-none"
+          />
+
+          {/* Mood selector — horizontal scrollable */}
+          <div className="flex gap-2 overflow-x-auto py-3 scrollbar-none">
+            {DREAM_MOODS.map((mood) => (
+              <button
+                key={mood}
+                onClick={() => toggleMood(mood)}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-xs whitespace-nowrap transition-all capitalize",
+                  selectedMood === mood
+                    ? "bg-lavender/30 text-moss-deep ring-1 ring-lavender/50"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {mood}
+              </button>
+            ))}
+          </div>
+
+          <Button
+            onClick={handleLogDream}
+            disabled={saving || !body.trim()}
+            className="w-full bg-moss text-cream hover:bg-moss-deep rounded-full"
+          >
+            {saving ? (
+              <>
+                <Sparkles className="w-4 h-4 mr-2 animate-spin" />
+                Analyzing symbols...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                Log dream
+              </>
+            )}
+          </Button>
+        </Card>
+      </motion.div>
+
+      {/* Loading */}
+      {loading && (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-40 rounded-2xl" />
+          ))}
+        </div>
+      )}
+
+      {/* Dream entries */}
+      {!loading && entries.length > 0 && (
+        <div className="space-y-3">
+          {entries.map((entry) => (
+            <DreamCard key={entry.id} entry={entry} onChange={loadEntries} />
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && entries.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-10"
+        >
+          <Moon className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="font-serif text-lg text-muted-foreground">
+            Pregnancy dreams are vivid and wild
+          </p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+            Start capturing yours.
+          </p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+function DreamCard({
+  entry,
+  onChange,
+}: {
+  entry: DreamEntry;
+  onChange: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  let symbols: string[] = [];
+  let themes: string[] = [];
+  try {
+    if (entry.symbols) symbols = JSON.parse(entry.symbols);
+  } catch { /* ignore */ }
+  try {
+    if (entry.themes) themes = JSON.parse(entry.themes);
+  } catch { /* ignore */ }
+
+  const handleDelete = async () => {
+    if (!confirm("Delete this dream?")) return;
+    await fetch(`/api/dream-entries?id=${entry.id}`, { method: "DELETE" });
+    toast.success("Dream deleted");
+    onChange();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <Card className="bg-card border-moss/15 rounded-2xl p-5 relative">
+        {/* Delete button top right */}
+        <button
+          onClick={handleDelete}
+          className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-muted/60 transition-colors"
+        >
+          <Trash2 className="w-3.5 h-3.5 text-muted-foreground/60" />
+        </button>
+
+        {/* Title */}
+        <h3 className="font-serif text-base text-moss-deep pr-8">
+          {entry.title || "Untitled dream"}
+        </h3>
+
+        {/* Body */}
+        <p
+          className={cn(
+            "text-sm text-foreground/80 leading-relaxed mt-2 whitespace-pre-wrap",
+            !expanded && "line-clamp-3"
+          )}
+          onClick={() => setExpanded(!expanded)}
+          role="button"
+          tabIndex={0}
+        >
+          {entry.body}
+        </p>
+        {entry.body.length > 200 && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs text-moss hover:underline mt-1"
+          >
+            {expanded ? "Show less" : "Read more"}
+          </button>
+        )}
+
+        {/* Symbols row */}
+        {symbols.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-3">
+            <Tag className="w-3 h-3 text-moss-deep/60" />
+            {symbols.map((s, i) => (
+              <span
+                key={i}
+                className="bg-butter rounded-full px-2 py-0.5 text-[10px] font-medium text-moss-deep"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Themes row */}
+        {themes.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <Lightbulb className="w-3 h-3 text-rose-gold/80" />
+            {themes.map((t, i) => (
+              <span key={i} className="text-xs text-rose-gold">
+                {t}{i < themes.length - 1 && ","}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Date + week */}
+        <div className="flex items-center gap-2 mt-3 text-[10px] text-muted-foreground">
+          <span>{formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}</span>
+          {entry.week && (
+            <>
+              <span>·</span>
+              <span className="uppercase tracking-wider text-rose-gold font-semibold">
+                Week {entry.week}
+              </span>
+            </>
+          )}
+        </div>
+      </Card>
+    </motion.div>
+  );
+}

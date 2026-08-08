@@ -1,0 +1,315 @@
+     1→     1→/**
+     2→     2→ * Signature Features — Static Data
+     3→     3→ * --------------------------------
+     4→     4→ * Belly Bonding Rituals, My Mother's Mother prompts,
+     5→     5→ * Fear to Flame, Dream symbols, Hormone Horoscope, Name Garden starter names,
+     6→     6→ * Birth Playlist song suggestions, Memory Capsule types
+     7→     7→ */
+     8→     8→
+     9→     9→// ─── Belly Bonding Rituals ───────────────────────────────────────
+    10→    10→// 40 daily micro-rituals (one per week), each with phrase + gesture + breath
+    11→    11→
+    12→    12→export interface BellyRitual {
+    13→    13→  week: number;
+    14→    14→  phrase: string;   // what to say to your bump
+    15→    15→  gesture: string;  // where to place your hands
+    16→    16→  breath: string;   // breath cue
+    17→    17→}
+    18→    18→
+    19→    19→export const BELLY_RITUALS: BellyRitual[] = [
+    20→    20→  { week: 1, phrase: "Hey, little one. I'm here. I'm already so glad you chose me.", gesture: "Both hands flat on your lower belly, fingers spread wide like you're holding something precious", breath: "Breathe in slow through your nose for 4 counts, let it out through parted lips for 6" },
+    21→    21→  { week: 2, phrase: "You're so small right now, but I already feel full because of you.", gesture: "Right hand on your belly, left hand over your heart", breath: "In for 4, hold softly for 2, out for 6" },
+    22→    22→  { week: 3, phrase: "I'm going to love you so fiercely. You have no idea what's coming.", gesture: "Cup your belly with both hands like you're cradling warm water", breath: "In through the nose, out like you're blowing on a dandelion" },
+    23→    23→  { week: 4, phrase: "Whatever happens, whatever I'm feeling — you are the yes in all of it.", gesture: "Palms pressing gently into your lower belly, feeling for warmth", breath: "Deep belly breath — let your belly rise into your hands" },
+    24→    24→  { week: 5, phrase: "Your mama is tired today. But she's also the strongest she's ever been.", gesture: "One hand on belly, trace slow circles with your fingertips", breath: "In for 3, out for 5, soft and easy" },
+    25→    25→  { week: 6, phrase: "I wonder what your laugh sounds like. I think about it all the time.", gesture: "Both hands on belly, rock gently side to side", breath: "Breathe like you're humming — feel the vibration in your chest" },
+    26→    26→  { week: 7, phrase: "You're making a whole new heart in there. That's the most incredible thing anyone's ever done.", gesture: "Left hand on your heart, right hand low on your belly — connect them", breath: "Breathe in love, breathe out worry" },
+    27→    27→  { week: 8, phrase: "I'm learning patience because of you. Every day, a little more.", gesture: "Hands clasped over your belly, resting like a bridge", breath: "In for 4, hold for 4, out for 6 — let it be slow" },
+    28→    28→  { week: 9, phrase: "Some days are hard, baby. But you make every single one worth it.", gesture: "Wrap both arms around your midsection like you're hugging yourself and baby together", breath: "Breathe in comfort, breathe out tension" },
+    29→    29→  { week: 10, phrase: "I'm already your safe place. I promise to keep being that.", gesture: "Both palms flat, pressing gently, holding space", breath: "Long slow breath in, longer slow breath out" },
+    30→    30→  { week: 11, phrase: "You're growing in the dark, and I'm growing right alongside you.", gesture: "One hand tracing the curve of your belly, the other resting on your thigh", breath: "Breathe like the tide — slow in, slow out" },
+    31→    31→  { week: 12, phrase: "Almost to the second trimester, love. We made it through the quiet part.", gesture: "Hands cupped under your belly, lifting gently like an offering", breath: "In for 4, out for 8 — the longest exhale you've taken today" },
+    32→    32→  { week: 13, phrase: "I felt a flutter — or maybe I imagined it. Either way, my heart knew.", gesture: "Fingertips spread wide across your belly, waiting, listening", breath: "Still breath — barely there, just a whisper of air" },
+    33→    33→  { week: 14, phrase: "You're the size of a lemon now. All tart and bright and perfect.", gesture: "Trace the outline of your belly with both hands, getting to know its shape", breath: "In for 4, out for 6, feel your body expanding to make room" },
+    34→    34→  { week: 15, phrase: "Today I choose to trust my body. It knows exactly what it's doing.", gesture: "Hands on your hips, thumbs resting on your lower belly", breath: "Deep breath into your pelvis — let it pool at the base of you" },
+    35→    35→  { week: 16, phrase: "I can feel you moving now. Little seismic waves of love.", gesture: "Palms flat where you last felt movement, waiting", breath: "Breathe and smile — let your body know it's safe" },
+    36→    36→  { week: 17, phrase: "You're hearing my voice now, muffled and warm. This is the soundtrack of your first world.", gesture: "Lean forward slightly, hands on belly, chin tilted down — bring yourself closer", breath: "Hum on the exhale — let baby feel the vibration" },
+    37→    37→  { week: 18, phrase: "My body is not breaking. It is becoming. There is a difference, and it is holy.", gesture: "Both hands on your belly, pressing in gently, then releasing — a rhythm", breath: "Breathe in strength, breathe out fear" },
+    38→    38→  { week: 19, phrase: "You're halfway home, baby. The best is still ahead of us.", gesture: "One hand on your belly button, the other reaching back to touch your spine", breath: "In for 4, hold for 4, out for 8" },
+    39→    39→  { week: 20, phrase: "I felt you kick today and I laughed out loud like a fool in the grocery store.", gesture: "Wherever you felt the kick, press back gently — a conversation in touch", breath: "Short little breaths of joy, then one long slow one" },
+    40→    40→  { week: 21, phrase: "You're getting so big I can see you move now. Little ripples under my skin.", gesture: "Watch your belly, hands resting nearby, just observing", breath: "Breathe normally — just watch the miracle" },
+    41→    41→  { week: 22, phrase: "I'm nesting already. Your room is going to be so beautiful, little one.", gesture: "Hands on your belly, then spreading your arms wide — making space", breath: "In for 4, out for 6, with open arms on the exhale" },
+    42→    42→  { week: 23, phrase: "You're listening to my heart right now. That's the first song you'll ever know.", gesture: "Right hand on your chest where your heartbeat is strongest", breath: "Breathe normally and feel your pulse — baby feels it too" },
+    43→    43→  { week: 24, phrase: "Viability week. If you came now, you could survive. But I need you to stay. Stay.", gesture: "Both arms wrapped tight around your belly, holding on", breath: "Shallow protective breaths, then one deep release" },
+    44→    44→  { week: 25, phrase: "Your daddy is going to be so wrapped around your finger. You won't even have to try.", gesture: "One hand on belly, the other reaching out — a bridge between you and partner", breath: "Breathe in gratitude, breathe out love" },
+    45→    45→  { week: 26, phrase: "My body is doing something ancient and sacred. Women have done this for a hundred thousand years.", gesture: "Both hands on belly, eyes closed, feeling the lineage", breath: "Slow ancestral breath — in through the nose, out through the mouth, deep" },
+    46→    46→  { week: 27, phrase: "Third trimester. Home stretch. You and me, baby — we've got this.", gesture: "Both hands spread wide across your belly — claim it, own it", breath: "Strong breath in, powerful breath out" },
+    47→    47→  { week: 28, phrase: "I'm tired, I'm big, I'm beautiful, and I'm almost there.", gesture: "Hands on your lower back and belly at the same time — hold yourself together", breath: "In for 4, out for 8 — make the exhale twice as long" },
+    48→    48→  { week: 29, phrase: "I talk to you more than I talk to most people. You're my favorite conversation.", gesture: "Lean close to your belly, chin almost touching it", breath: "Whisper-breath — so soft you can barely hear yourself" },
+    49→    49→  { week: 30, phrase: "Every kick reminds me: you're real. You're coming. This is actually happening.", gesture: "Both hands pressed flat wherever baby is most active", breath: "Breathe in surprise, breathe out wonder" },
+    50→    50→  { week: 31, phrase: "I'm scared of the birth, but I'm more excited to meet you. That ratio feels right.", gesture: "One hand on heart, one on belly — let courage flow between them", breath: "Brave breath — in for 4, hold for 2, out for 6" },
+    51→    51→  { week: 32, phrase: "You're settling into position. Getting ready. We both are.", gesture: "Hands cradling the underside of your belly, supporting its weight", breath: "Heavy grounding breath — feel your feet on the floor" },
+    52→    52→  { week: 33, phrase: "I've been carrying you for over seven months. My arms are going to be so strong.", gesture: "Flex your arms, then rest them gently back on your belly", breath: "In for 4, out for 6 — feel your strength" },
+    53→    53→  { week: 34, phrase: "Your lungs are almost ready. Practice breathing, little one. I'll teach you the rest.", gesture: "Hands on your own ribs, feeling your own breath", breath: "Deep rib-breath — expand sideways, not just forward" },
+    54→    54→  { week: 35, phrase: "You're running out of room in there. I know the feeling, baby.", gesture: "Gentle pats on your belly — a tactile lullaby", breath: "Light quick breaths, then a long slow release" },
+    55→    55→  { week: 36, phrase: "Any day now. Or in four weeks. Either way, I'm ready.", gesture: "Hands flat, pressing gently — counting your baby's movements", breath: "Calm steady breath — you are ready" },
+    56→    56→  { week: 37, phrase: "You're early or you're on time — either way, you're right on schedule for being mine.", gesture: "Both hands tracing slow figure-eights on your belly", breath: "Flowing breath — no pauses, just a river of air" },
+    57→    57→  { week: 38, phrase: "My body knows what to do. I just have to let it.", gesture: "Hands on your belly, then letting them fall open to your sides — surrender", breath: "Release breath — let it all go on the exhale" },
+    58→    58→  { week: 39, phrase: "I can't wait to see your face. I've been imagining it for nine months.", gesture: "Cup your face with one hand, your belly with the other", breath: "Anticipation breath — quick in, slow out" },
+    59→    59→  { week: 40, phrase: "We're here, baby. Right at the door. I'll go first, and I'll hold it open for you.", gesture: "Both hands open, palms up on your belly — an invitation", breath: "The longest, slowest, most intentional breath you've ever taken" },
+    60→    60→];
+    61→    61→
+    62→    62→// ─── My Mother's Mother ──────────────────────────────────────────
+    63→    63→// 12 guided interview prompts about maternal lineage
+    64→    64→
+    65→    65→export interface MaternalPrompt {
+    66→    66→  index: number;
+    67→    67→  title: string;
+    68→    68→  prompt: string;
+    69→    69→  followUp?: string;
+    70→    70→}
+    71→    71→
+    72→    72→export const MATERNAL_PROMPTS: MaternalPrompt[] = [
+    73→    73→  { index: 0, title: "Her Beginning", prompt: "What was your mother's name, and what do you know about the day she was born? Was it at home, in a hospital? Who was there?", followUp: "How does knowing (or not knowing) this make you feel about your own birth story?" },
+    74→    74→  { index: 1, title: "Young Mother", prompt: "How old was your mother when she had her first child? What was her life like at that age — what did she care about, what did she fear?", followUp: "Do you see any of yourself in the woman she was then?" },
+    75→    75→  { index: 2, title: "Pregnancy Truths", prompt: "Did your mother ever tell you what pregnancy was like for her? The nausea, the cravings, the fear, the joy — what did she share?", followUp: "What do you wish she had told you that she didn't?" },
+    76→    76→  { index: 3, title: "Her Birth Story", prompt: "What do you know about the day your mother gave birth to you? How long was her labor? Was it what she expected?", followUp: "If you could ask her one question about that day, what would it be?" },
+    77→    77→  { index: 4, title: "Her Mother", prompt: "What was your grandmother like? What stories did your mother tell you about her own childhood and her mother?", followUp: "What traits or traditions do you think you inherited from her?" },
+    78→    78→  { index: 5, title: "Lessons in Love", prompt: "What did your mother teach you — not through words, but through how she loved you? Think about the small things.", followUp: "Which of those quiet lessons do you want to pass on to your baby?" },
+    79→    79→  { index: 6, title: "What She Carried", prompt: "What hardships or sorrows do you think your mother carried that she never spoke about? How did they shape her?", followUp: "Are there things you're carrying now that you hope your child will never have to know?" },
+    80→    80→  { index: 7, title: "Her Strengths", prompt: "What was your mother genuinely great at? Not the big things — the small, specific things only someone close would notice.", followUp: "Do you have any of those strengths? Or did you develop different ones?" },
+    81→    81→  { index: 8, title: "Traditions and Rituals", prompt: "Were there any pregnancy or birth traditions in your family? Things your mother did, or her mother did, to welcome a baby?", followUp: "Would you like to carry any of those forward, or create your own?" },
+    82→    82→  { index: 9, title: "What She'd Say", prompt: "If your mother could sit beside you right now, with her hand on your belly, what do you think she'd say to you?", followUp: "What would you say back to her?" },
+    83→    83→  { index: 10, title: "The Name", prompt: "Does your name have a story? Why did your mother choose it? Does it connect to anyone in your family's history?", followUp: "How are you thinking about names for your baby? Is family history part of that?" },
+    84→    84→  { index: 11, title: "Your Letter", prompt: "Write a letter directly to your baby about the women they come from. Not a list of facts — a feeling. What is the emotional inheritance?", followUp: "This is your final prompt. When you're ready, this letter becomes part of your family's story." },
+    85→    85→];
+    86→    86→
+    87→    87→// ─── Fear to Flame ───────────────────────────────────────────────
+    88→    88→// AI reframes fears — stages: ember → spark → flame
+    89→    89→
+    90→    90→export const FEAR_CATEGORIES = [
+    91→    91→  "Birth & Labor",
+    92→    92→  "Health & Complications",
+    93→    93→  "Motherhood & Identity",
+    94→    94→  "Relationship Changes",
+    95→    95→  "Financial Worries",
+    96→    96→  "Body & Appearance",
+    97→    97→  "Baby's Health",
+    98→    98→  "Loss & Grief",
+    99→    99→] as const;
+   100→   100→
+   101→   101→export const FEAR_STAGE_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
+   102→   102→  ember:  { label: "Ember",  emoji: "🔥", color: "text-orange-500" },
+   103→   103→  spark:  { label: "Spark",  emoji: "✨", color: "text-yellow-500" },
+   104→   104→  flame:  { label: "Flame",  emoji: "🔥", color: "text-rose-gold" },
+   105→   105→};
+   106→   106→
+   107→   107→// ─── DreamKeeper ──────────────────────────────────────────────────
+   108→   108→
+   109→   109→export const DREAM_MOODS = ["vivid", "strange", "beautiful", "scary", "funny", "recurring", "emotional", "fleeting"] as const;
+   110→   110→
+   111→   111→export const COMMON_PREGNANCY_SYMBOLS = [
+   112→   112→  "Water / Ocean / Swimming",
+   113→   113→  "Flying or Falling",
+   114→   114→  "Animals (especially babies)",
+   115→   115→  "Being Lost or Trapped",
+   116→   116→  "Birth or Babies",
+   117→   117→  "Houses or Rooms",
+   118→   118→  "Teeth or Hair",
+   119→   119→  "Running Late",
+   120→   120→  "Naked in Public",
+   121→   121→  "Food or Eating",
+   122→   122→  "Death or Transformation",
+   123→   123→  "Doors or Pathways",
+   124→   124→  "Gardens or Flowers",
+   125→   125→  "Storms or Weather",
+   126→   126→  "Family Members",
+   127→   127→  "School or Exams",
+   128→   128→] as const;
+   129→   129→
+   130→   130→// ─── Hormone Horoscope ────────────────────────────────────────────
+   131→   131→// Weekly hormone insights, science-backed but written poetically
+   132→   132→
+   133→   133→export interface HormoneInsight {
+   134→   134→  weekRange: [number, number];
+   135→   135→  title: string;
+   136→   136→  dominantHormones: string[];
+   137→   137→  body: string;
+   138→   138→  heart: string;
+   139→   139→  tip: string;
+   140→   140→}
+   141→   141→
+   142→   142→export const HORMONE_INSIGHTS: HormoneInsight[] = [
+   143→   143→  { weekRange: [1, 4], title: "The Quiet Revolution", dominantHormones: ["hCG", "Progesterone"], body: "Human chorionic gonadotropin — hCG — is the tiny chemical messenger that told the world you were pregnant. It's rising exponentially right now, doubling every 48 hours, and it's the reason your body knows before your mind does. Progesterone is flooding in behind it, softening your muscles, loosening your joints, making your womb a welcoming place. You may feel nothing yet, or you may feel everything — nausea, exhaustion, a strange electric tingling in your chest. Both are normal. Both are your body working so hard on something so small.", heart: "Emotionally, this is the liminal space — the doorway between who you were and who you're becoming. You might feel irritable one moment and weepy the next, not because anything is wrong, but because your entire emotional landscape is being redrawn. Be impossibly gentle with yourself right now.", tip: "Eat small, frequent meals with protein and complex carbs. Keep saltine crackers by your bed. Let yourself nap without guilt — your body is building a human." },
+   144→   144→  { weekRange: [5, 8], title: "The Rising Tide", dominantHormones: ["hCG", "Estrogen", "Progesterone"], body: "This is often the hardest stretch hormonally. hCG peaks around weeks 8-10, and with it, nausea can reach its zenith. Estrogen is climbing too — it's 1000 times higher than pre-pregnancy levels by now, and it affects everything from your skin to your sinuses to your sense of smell. Your blood volume is starting to increase (it'll be up 50% by week 32), and your heart is already working harder than it did a month ago. You're basically running a marathon while lying on the couch, and that's not an exaggeration.", heart: "The emotional weather is intense right now. Mood swings that feel like whiplash, anxiety that shows up uninvited, a strange mix of excitement and terror that sits in your chest. This is the estrogen-progesterone tango, and it is exhausting. But underneath it all, your brain is also producing more oxytocin — the love hormone — laying the neural groundwork for the bond you'll feel when you hold your baby.", tip: "Vitamin B6 can help with nausea. Ginger tea, acupressure wristbands, and cold foods (which have less aroma) are your friends. Cry if you need to — it literally processes hormones." },
+   145→   145→  { weekRange: [9, 12], title: "The Turning Point", dominantHormones: ["hCG (peaking)", "Relaxin", "Estrogen"], body: "hCG is reaching its peak and will begin to plateau — for many mamas, this means the fog of first-trimester nausea starts to lift. Relaxin is loosening every joint and ligament in your body, preparing your pelvis for birth months from now. You might notice your hips aching, your feet spreading, a new looseness in your movements. Estrogen continues to rise, thickening your uterine lining, increasing blood flow to your baby, and giving you that famous pregnancy glow (or pregnancy acne — hormones don't discriminate).", heart: "As hCG levels off, the emotional storms may quiet slightly, replaced by a more settled anticipation. But relaxin doesn't just loosen your joints — some researchers believe it loosens emotional boundaries too, making you more empathetic, more open, more raw. You might find yourself deeply moved by things that never used to affect you. That's not weakness — that's your heart expanding.", tip: "This is a great time to start a gentle movement practice — prenatal yoga or swimming. Your joints need support, not strain. And start sharing your news if you're ready — the second trimester glow-up is coming." },
+   146→   146→  { weekRange: [13, 16], title: "The Golden Window", dominantHormones: ["Estrogen", "Progesterone", "Relaxin"], body: "Welcome to the honeymoon phase of pregnancy. hCG has dropped to a manageable level, nausea fades for most, and energy returns. Estrogen is now at magnificent levels — your hair is thicker, your skin is luminous, your nails grow faster. Progesterone keeps your uterus calm and your baby protected. Blood volume is up 20-30%, giving you that extra blush in your cheeks. Your uterus has risen above your pelvic bone and your baby is growing rapidly — about three inches long now, the size of an avocado.", heart: "This is often the sweetest stretch emotionally. The fear of miscarriage drops significantly, the nausea lifts, and a warm, protective instinct kicks in. Oxytocin continues to build, and you may find yourself feeling more connected to your partner, more nurturing toward everyone around you, more in touch with a deep, ancient tenderness you didn't know you had.", tip: "Enjoy this energy — it's the best time for travel, nesting projects, and deep conversations with your partner. Start your baby registry. Take bump photos. This is the trimester everyone talks about." },
+   147→   147→  { weekRange: [17, 20], title: "The Quickening", dominantHormones: ["Estrogen", "Progesterone", "hPL (beginning)"], body: "Human placental lactogen (hPL) starts making its presence known — this hormone is your baby's way of telling your body to redirect nutrients their way. You might feel hungrier than usual as your blood sugar dips more quickly. Estrogen and progesterone are in a beautiful equilibrium right now, supporting steady growth. Your uterus is at your belly button level, and you're probably showing. Your heart is pumping 30-50% more blood than before pregnancy.", heart: "Feeling your baby move for the first time — quickening — is one of the most profound emotional milestones of pregnancy. It shifts something abstract into something real. Many mamas describe a surge of fierce, protective love at this moment that catches them off guard. You might also feel more confident, more grounded, more sure of yourself as a mother than you did a month ago.", tip: "Eat protein with every meal to stabilize blood sugar. Stay hydrated — your blood volume needs it. If you haven't felt movement yet, don't panic — first-time mamas often feel it later (week 20-22)." },
+   148→   148→  { weekRange: [21, 24], title: "The Heartbeat Era", dominantHormones: ["Estrogen (surging)", "Progesterone", "hPL"], body: "Estrogen is surging toward its pregnancy peak (it'll max out around week 24-28). This means maximum blood flow to your uterus, your baby, your skin, everything. You might notice more vaginal discharge, more vivid dreams, more congestion (pregnancy rhinitis is real). Your baby's heartbeat is strong enough to hear with a fetoscope, and their ears are developed enough to recognize your voice. hPL continues to raise your insulin resistance slightly — gestational diabetes screening happens around now.", heart: "Estrogen's peak brings heightened emotions but also heightened intuition. Many mamas report feeling almost psychic about their baby — knowing when they're awake, when they're sleeping, what they need. Trust this. Your body and your baby are in constant chemical conversation, and you're more tuned in than you realize. Vivid dreams are also common — your subconscious is processing the massive identity shift happening in your waking life.", tip: "Sleep on your left side to maximize blood flow to baby. Do your glucose test without fear — most results are normal. Stay cool — estrogen can cause hot flashes and make you feel flushed." },
+   149→   149→  { weekRange: [25, 28], title: "The Great Expansion", dominantHormones: ["Estrogen (peak)", "Progesterone", "Relaxin", "hPL"], body: "Your blood volume has increased by up to 50% now. Your heart is working 40-50% harder than pre-pregnancy. Estrogen has peaked, and your body is a masterpiece of adaptation — every organ system has modified itself to support this pregnancy. Relaxin is making your pelvis more flexible, which can cause hip pain and that characteristic pregnancy waddle. hPL is in full swing, making your cells slightly insulin-resistant so more glucose stays available for your baby. Your baby can now open their eyes, breathe (amniotic fluid, not air), and cry silently.", heart: "The third trimester approaches, and with it, a complex emotional cocktail. Excitement, impatience, nesting instincts, and a new wave of anxiety about birth. Progesterone's steady presence can make you feel sluggish and emotionally blunted — like you're wrapped in warm cotton. Some mamas love this feeling; others find it frustrating. Both are valid. The emotional work of pregnancy is as real as the physical work.", tip: "Watch for swelling in your hands and face (different from normal foot/ankle swelling). Start doing perineal massage if you're planning a vaginal birth. Invest in a pregnancy pillow — sleep is about to get harder." },
+   150→   150→  { weekRange: [29, 32], title: "The Deep Dive", dominantHormones: ["Progesterone (high)", "Relaxin", "hPL", "Oxytocin (rising)"], body: "Progesterone dominates the late third trimester, keeping your uterus quiet until it's time. But it also slows your digestion (hello, heartburn), softens your muscles (hello, clumsiness), and can make you feel heavy and slow. Relaxin is peaking — your pelvis is at its most flexible, which means hip pain, pubic symphysis discomfort, and a feeling that everything is loose. hPL is at its highest, maximizing nutrient transfer to your baby who's gaining about half a pound per week. And oxytocin — the hormone of love, bonding, and contractions — is slowly beginning to rise, preparing your body for birth.", heart: "The emotional deep dive begins. You might find yourself nesting intensely — cleaning, organizing, preparing with an urgency that surprises you. You might also find yourself withdrawing socially, turning inward, needing more quiet and solitude. This is your brain preparing for the intense focus that birth and early motherhood require. It's not antisocial — it's protective. Let yourself go quiet.", tip: "Elevate your feet. Eat small meals to manage heartburn. Practice your breathing techniques for labor. Start writing your birth plan if you haven't — clarity now reduces anxiety later." },
+   151→   151→  { weekRange: [33, 36], title: "The Gathering", dominantHormones: ["Progesterone", "Relaxin", "Oxytocin (building)", "Prolactin (beginning)"], body: "Your baby is settling into position — head down for most. Your cervix is beginning to soften and thin (efface) under the influence of relaxin. Prolactin, the milk-making hormone, starts rising now, and you might notice colostrum leaking from your breasts. Oxytocin is building, creating Braxton Hicks contractions — your uterus practicing for the real thing. Your blood volume is at its absolute maximum, and your heart is working at peak capacity. Every system in your body is converged on one goal.", heart: "Emotionally, this is the 'gathering' phase — collecting courage, collecting supplies, collecting yourself. Many mamas feel a strange mix of impatience and terror. The reality of birth is close now, and the unknown is both thrilling and terrifying in equal measure. You might find yourself wanting to be near your mother, your partner, your closest people — an instinct to gather your village before the storm.", tip: "Pack your hospital bag. Pre-register at your birth facility. Do your kick counts daily — baby should move 10 times in 2 hours. Rest as much as you can — you're about to run an ultramarathon." },
+   152→   152→  { weekRange: [37, 40], title: "The Threshold", dominantHormones: ["Oxytocin (surging)", "Progesterone (dropping)", "Relaxin (peak)", "Prolactin", "Cortisol (rising)", "Endorphins"], body: "This is it. The hormonal symphony that will orchestrate your birth is tuning up. Progesterone, which has kept your uterus calm for nine months, begins to drop. Oxytocin surges, triggering contractions. Relaxin peaks to open your cervix and loosen your pelvis. Cortisol — the stress hormone — rises in your baby too, helping their lungs mature and preparing them for the stress of birth. Prolactin is ready for breastfeeding. And your body will flood with endorphins — nature's pain relief — as labor intensifies. Every hormone has a role. Your body is not broken. It is brilliantly, perfectly designed for this.", heart: "The emotional weather at the threshold is unlike anything else in human experience. Excitement, fear, impatience, nostalgia for your pre-baby life, overwhelming love for a person you haven't met yet — sometimes all within the same five minutes. This is normal. This is your entire endocrine system preparing you for the most transformative moment of your life. Let yourself feel all of it. The tears, the laughter, the panic, the peace. Every emotion is a valid one right now.", tip: "Trust your body. Trust your team. Eat easily digestible foods. Move during early labor — walk, sway, rock. Save your energy for the hard work. And remember: this is the last time your baby will be inside you. Feel it all." },
+   153→   153→];
+   154→   154→
+   155→   155→export function getHormoneInsight(week: number): HormoneInsight | undefined {
+   156→   156→  return HORMONE_INSIGHTS.find(h => week >= h.weekRange[0] && week <= h.weekRange[1]);
+   157→   157→}
+   158→   158→
+   159→   159→// ─── Name Garden ──────────────────────────────────────────────────
+   160→   160→// Starter name suggestions by theme
+   161→   161→
+   162→   162→export interface NameSuggestion {
+   163→   163→  name: string;
+   164→   164→  origin?: string;
+   165→   165→  meaning?: string;
+   166→   166→  theme: string;
+   167→   167→}
+   168→   168→
+   169→   169→export const NAME_THEMES = ["Nature", "Vintage", "Modern", "Cultural", "Celestial", "Literary"] as const;
+   170→   170→export type NameTheme = typeof NAME_THEMES[number];
+   171→   171→
+   172→   172→export const NAME_SUGGESTIONS: NameSuggestion[] = [
+   173→   173→  // Nature
+   174→   174→  { name: "Willow", origin: "English", meaning: "Graceful and resilient tree", theme: "Nature" },
+   175→   175→  { name: "Hazel", origin: "English", meaning: "The hazelnut tree; wisdom and protection", theme: "Nature" },
+   176→   176→  { name: "Ivy", origin: "English", meaning: "Evergreen climbing plant; fidelity", theme: "Nature" },
+   177→   177→  { name: "Juno", origin: "Latin", meaning: "Queen of the heavens", theme: "Nature" },
+   178→   178→  { name: "Rowan", origin: "Gaelic", meaning: "Little red one; tree of protection", theme: "Nature" },
+   179→   179→  { name: "Sage", origin: "Latin", meaning: "Wise and healing", theme: "Nature" },
+   180→   180→  { name: "Flora", origin: "Latin", meaning: "Goddess of flowers", theme: "Nature" },
+   181→   181→  { name: "Silas", origin: "Latin", meaning: "Of the forest", theme: "Nature" },
+   182→   182→  { name: "Aspen", origin: "English", meaning: "Quaking tree; strength in community", theme: "Nature" },
+   183→   183→  { name: "Cedar", origin: "Hebrew", meaning: "Strong, enduring tree", theme: "Nature" },
+   184→   184→  // Vintage
+   185→   185→  { name: "Eleanor", origin: "Greek", meaning: "Shining light", theme: "Vintage" },
+   186→   186→  { name: "Theodore", origin: "Greek", meaning: "Gift of God", theme: "Vintage" },
+   187→   187→  { name: "Clara", origin: "Latin", meaning: "Bright and clear", theme: "Vintage" },
+   188→   188→  { name: "Arthur", origin: "Celtic", meaning: "Bear king; strong as a bear", theme: "Vintage" },
+   189→   189→  { name: "Josephine", origin: "Hebrew", meaning: "Jehovah increases", theme: "Vintage" },
+   190→   190→  { name: "Henry", origin: "Germanic", meaning: "Estate ruler; home leader", theme: "Vintage" },
+   191→   191→  { name: "Mabel", origin: "Latin", meaning: "Lovable", theme: "Vintage" },
+   192→   192→  { name: "Oscar", origin: "Irish", meaning: "Deer lover; gentle warrior", theme: "Vintage" },
+   193→   193→  // Modern
+   194→   194→  { name: "Mila", origin: "Slavic", meaning: "Gracious and dear", theme: "Modern" },
+   195→   195→  { name: "Leo", origin: "Latin", meaning: "Lion; brave", theme: "Modern" },
+   196→   196→  { name: "Nova", origin: "Latin", meaning: "New star; new beginning", theme: "Modern" },
+   197→   197→  { name: "Finn", origin: "Irish", meaning: "Fair; white; clear", theme: "Modern" },
+   198→   198→  { name: "Aria", origin: "Italian", meaning: "Melody; air; song", theme: "Modern" },
+   199→   199→  { name: "Jude", origin: "Hebrew", meaning: "Praised", theme: "Modern" },
+   200→   200→  { name: "Zara", origin: "Arabic", meaning: "Blooming flower; radiance", theme: "Modern" },
+   201→   201→  { name: "Miles", origin: "Latin", meaning: "Soldier; merciful", theme: "Modern" },
+   202→   202→  // Celestial
+   203→   203→  { name: "Luna", origin: "Latin", meaning: "Moon", theme: "Celestial" },
+   204→   204→  { name: "Orion", origin: "Greek", meaning: "Rising in the sky; hunter constellation", theme: "Celestial" },
+   205→   205→  { name: "Aurora", origin: "Latin", meaning: "Dawn; goddess of the morning", theme: "Celestial" },
+   206→   206→  { name: "Atlas", origin: "Greek", meaning: "To carry; the star-bearer", theme: "Celestial" },
+   207→   207→  { name: "Stella", origin: "Latin", meaning: "Star", theme: "Celestial" },
+   208→   208→  { name: "Cosmo", origin: "Greek", meaning: "Order; beauty; the universe", theme: "Celestial" },
+   209→   209→  { name: "Lyra", origin: "Greek", meaning: "Lyre; constellation of the harp", theme: "Celestial" },
+   210→   210→  { name: "Sol", origin: "Latin", meaning: "Sun", theme: "Celestial" },
+   211→   211→  // Literary
+   212→   212→  { name: "Juliet", origin: "Latin", meaning: "Youthful; lover of literature", theme: "Literary" },
+   213→   213→  { name: "Oliver", origin: "French", meaning: "Olive tree; peace", theme: "Literary" },
+   214→   214→  { name: "Poet", origin: "English", meaning: "One who creates with words", theme: "Literary" },
+   215→   215→  { name: "Auden", origin: "Old English", meaning: "Old friend", theme: "Literary" },
+   216→   216→  { name: "Sylvie", origin: "French", meaning: "Of the forest", theme: "Literary" },
+   217→   217→  { name: "Felix", origin: "Latin", meaning: "Happy and fortunate", theme: "Literary" },
+   218→   218→  { name: "Esme", origin: "French", meaning: "Esteemed; beloved", theme: "Literary" },
+   219→   219→  { name: "Remy", origin: "French", meaning: "Oarsman; from Rheims", theme: "Literary" },
+   220→   220→  // Cultural
+   221→   221→  { name: "Amara", origin: "Igbo", meaning: "Grace; mercy", theme: "Cultural" },
+   222→   222→  { name: "Kai", origin: "Hawaiian", meaning: "Sea; ocean", theme: "Cultural" },
+   223→   223→  { name: "Zuri", origin: "Swahili", meaning: "Beautiful", theme: "Cultural" },
+   224→   224→  { name: "Kenji", origin: "Japanese", meaning: "Strong and vigorous; second son", theme: "Cultural" },
+   225→   225→  { name: "Priya", origin: "Sanskrit", meaning: "Beloved; dear one", theme: "Cultural" },
+   226→   226→  { name: "Idris", origin: "Welsh/Arabic", meaning: "Studious lord; interpreter", theme: "Cultural" },
+   227→   227→  { name: "Nia", origin: "Swahili", meaning: "Purpose; intention", theme: "Cultural" },
+   228→   228→  { name: "Ravi", origin: "Sanskrit", meaning: "Sun", theme: "Cultural" },
+   229→   229→];
+   230→   230→
+   231→   231→// ─── Birth Playlist ───────────────────────────────────────────────
+   232→   232→
+   233→   233→export interface PlaylistPhase {
+   234→   234→  id: string;
+   235→   235→  label: string;
+   236→   236→  description: string;
+   237→   237→  icon: string;
+   238→   238→  accent: string;
+   239→   239→}
+   240→   240→
+   241→   241→export const PLAYLIST_PHASES: PlaylistPhase[] = [
+   242→   242→  { id: "early", label: "Early Labor", description: "Long, slow contractions. You need calm, steady energy. Songs that feel like a warm hand on your back.", icon: "🌅", accent: "bg-sage/30" },
+   243→   243→  { id: "active", label: "Active Labor", description: "Contractions intensify. You need rhythm, power, and something to move to. Songs with a pulse.", icon: "🔥", accent: "bg-terracotta/20" },
+   244→   244→  { id: "pushing", label: "Pushing", description: "The final push. You need raw strength and determination. Songs that make you feel invincible.", icon: "💪", accent: "bg-blush/40" },
+   245→   245→  { id: "first_cry", label: "First Cry", description: "The moment everything changes. The first sound your baby hears. Make it count.", icon: "👶", accent: "bg-rose-gold/20" },
+   246→   246→  { id: "golden_hour", label: "Golden Hour", description: "Skin to skin. The first hour together. Songs that feel like being held by the person you love most.", icon: "✨", accent: "bg-butter" },
+   247→   247→];
+   248→   248→
+   249→   249→export const SONG_SUGGESTIONS: Record<string, { title: string; artist: string; reason: string }[]> = {
+   250→   250→  early: [
+   251→   251→    { title: "Holocene", artist: "Bon Iver", reason: "Expansive and meditative — like staring at the sky during a contraction" },
+   252→   252→    { title: "Breathe Me", artist: "Sia", reason: "Gentle building intensity that matches early labor's rhythm" },
+   253→   253→    { title: "Better Together", artist: "Jack Johnson", reason: "Warm, simple, reminds you why you're doing this" },
+   254→   254→    { title: "The Night We Met", artist: "Lord Huron", reason: "Aching beauty — perfect for the quiet, nervous early hours" },
+   255→   255→    { title: "Landslide", artist: "Fleetwood Mac", reason: "Stevie's voice is a lullaby for grown women facing big changes" },
+   256→   256→    { title: "Come Away With Me", artist: "Norah Jones", reason: "Smooth, unhurried, like a warm bath for your nervous system" },
+   257→   257→  ],
+   258→   258→  active: [
+   259→   259→    { title: "Run the World (Girls)", artist: "Beyonce", reason: "Pure power. You ARE running the world right now." },
+   260→   260→    { title: "Redemption Song", artist: "Bob Marley", reason: "Steady, determined, about liberation — you're liberating your baby" },
+   261→   261→    { title: "Dog Days Are Over", artist: "Florence + The Machine", reason: "Euphoric chaos that matches the intensity of active labor" },
+   262→   262→    { title: "Wake Me Up", artist: "Avicii", reason: "High energy, soaring melody — keep moving, keep breathing" },
+   263→   263→    { title: "Survivor", artist: "Destiny's Child", reason: "Because that's exactly what you are in this moment" },
+   264→   264→    { title: "Africa", artist: "Toto", reason: "Anchoring, familiar, impossible not to move to" },
+   265→   265→  ],
+   266→   266→  pushing: [
+   267→   267→    { title: "Roar", artist: "Katy Perry", reason: "Because you're about to roar your baby into the world" },
+   268→   268→    { title: "Lose Yourself", artist: "Eminem", reason: "One moment, one opportunity. This is IT." },
+   269→   269→    { title: "You Make My Dreams (Come True)", artist: "Daryl Hall & John Oates", reason: "Pure joy energy for the final push" },
+   270→   270→    { title: "A Sky Full of Stars", artist: "Coldplay", reason: "Uplifting, soaring — perfect for the crescendo of birth" },
+   271→   271→    { title: "Happy", artist: "Pharrell Williams", reason: "Because this moment, despite everything, is happy" },
+   272→   272→  ],
+   273→   273→  first_cry: [
+   274→   274→    { title: "Isn't She Lovely", artist: "Stevie Wonder", reason: "The ultimate welcome song. Written for his own newborn daughter." },
+   275→   275→    { title: "Here Comes the Sun", artist: "The Beatles", reason: "After the storm, the sun comes out. Always." },
+   276→   276→    { title: "Beautiful Boy", artist: "John Lennon", reason: "Written for his son. Every word is a parent's prayer." },
+   277→   277→    { title: "Sweetest Devotion", artist: "Adele", reason: "Adele wrote this about her son. The devotion is palpable." },
+   278→   278→    { title: "A Thousand Years", artist: "Christina Perri", reason: "Because you've loved them for a thousand years already, and now they're here." },
+   279→   279→  ],
+   280→   280→  golden_hour: [
+   281→   281→    { title: "Make You Feel My Love", artist: "Adele", reason: "Because you'd do anything for this tiny person on your chest" },
+   282→   282→    { title: "What a Wonderful World", artist: "Louis Armstrong", reason: "For the first time, it truly is." },
+   283→   283→    { title: "You've Got a Friend in Me", artist: "Randy Newman", reason: "You are their first friend. And they are yours." },
+   284→   284→    { title: "Hallelujah", artist: "Jeff Buckley", reason: "Sacred, tender, overwhelming — like golden hour itself" },
+   285→   285→    { title: "Blackbird", artist: "The Beatles", reason: "About a broken wing learning to fly. Your baby just took their first breath." },
+   286→   286→  ],
+   287→   287→};
+   288→   288→
+   289→   289→// ─── Memory Capsule ───────────────────────────────────────────────
+   290→   290→
+   291→   291→export const CAPSULE_TYPES = [
+   292→   292→  { id: "letter", label: "Love Letter", emoji: "💌", description: "Write a letter to your future child", accent: "bg-blush/30" },
+   293→   293→  { id: "wish", label: "Wish", emoji: "⭐", description: "A wish for their life", accent: "bg-butter" },
+   294→   294→  { id: "promise", label: "Promise", emoji: "🤝", description: "A promise you'll keep", accent: "bg-sage/30" },
+   295→   295→  { id: "photo_memory", label: "Photo Memory", emoji: "📸", description: "A photo with a story", accent: "bg-lavender/30" },
+   296→   296→] as const;
+   297→   297→
+   298→   298→export const CAPSULE_UNLOCK_OPTIONS = [
+   299→   299→  { label: "On their 13th birthday", yearsFromNow: 13 },
+   300→   300→  { label: "On their 18th birthday", yearsFromNow: 18 },
+   301→   301→  { label: "On their 21st birthday", yearsFromNow: 21 },
+   302→   302→  { label: "Their wedding day", yearsFromNow: 25 },
+   303→   303→  { label: "When they have their first baby", yearsFromNow: 30 },
+   304→   304→] as const;
+   305→   305→
+   306→   306→// ─── Letters from Baby ─────────────────────────────────────────────
+   307→   307→// The AI generates these dynamically using the weekly-content data.
+   308→   308→// This export is a type + helper for the screen.
+   309→   309→
+   310→   310→export interface BabyLetterData {
+   311→   311→  week: number;
+   312→   312→  letter: string;
+   313→   313→  createdAt: string;
+   314→   314→}
+   315→   315→

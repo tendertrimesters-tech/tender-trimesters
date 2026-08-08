@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Calendar, BookHeart, MessageCircleHeart, User, Leaf, Flower2 } from "lucide-react";
+import { Home, Calendar, BookHeart, MessageCircleHeart, User, Leaf, Flower2, Grid3X3, Users, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,12 @@ import JournalScreen from "./screens/JournalScreen";
 import TempieScreen from "./screens/TempieScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import MeditationScreen from "./screens/MeditationScreen";
+import MoreScreen from "./screens/MoreScreen";
+import CommunityScreen from "./screens/CommunityScreen";
+import BumpPhotosScreen from "./screens/BumpPhotosScreen";
 import { useAuth, useProfile } from "@/components/providers";
 
-export type AppView = "home" | "calendar" | "journal" | "tempie" | "meditation" | "profile";
+export type AppView = "home" | "calendar" | "journal" | "tempie" | "meditation" | "more" | "profile" | "community" | "bump-photos";
 
 function PremiumSuccessHandler() {
   const searchParams = useSearchParams();
@@ -83,6 +86,9 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
             {view === "journal" && <JournalScreen />}
             {view === "tempie" && <TempieScreen />}
             {view === "meditation" && <MeditationScreen />}
+            {view === "community" && <CommunityScreen />}
+            {view === "bump-photos" && <BumpPhotosScreen />}
+            {view === "more" && <MoreScreen onNavigate={setView} />}
             {view === "profile" && <ProfileScreen onSignOut={onSignOut} />}
           </motion.div>
         </AnimatePresence>
@@ -95,7 +101,7 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
           <NavButton active={view === "calendar"} onClick={() => setView("calendar")} icon={Calendar} label="Calendar" />
           <NavButton active={view === "journal"} onClick={() => setView("journal")} icon={BookHeart} label="Journal" />
           <NavButton active={view === "tempie"} onClick={() => setView("tempie")} icon={MessageCircleHeart} label="Tempie" highlight />
-          <NavButton active={view === "meditation"} onClick={() => setView("meditation")} icon={Flower2} label="Meditate" />
+          <NavButton active={view === "more"} onClick={() => setView("more")} icon={Grid3X3} label="More" />
           <NavButton active={view === "profile"} onClick={() => setView("profile")} icon={User} label="Profile" />
         </div>
       </nav>
@@ -106,7 +112,7 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
         <DesktopNavButton active={view === "calendar"} onClick={() => setView("calendar")} icon={Calendar} label="Calendar" />
         <DesktopNavButton active={view === "journal"} onClick={() => setView("journal")} icon={BookHeart} label="Journal" />
         <DesktopNavButton active={view === "tempie"} onClick={() => setView("tempie")} icon={MessageCircleHeart} label="Tempie" highlight />
-        <DesktopNavButton active={view === "meditation"} onClick={() => setView("meditation")} icon={Flower2} label="Meditate" />
+        <DesktopNavButton active={view === "more"} onClick={() => setView("more")} icon={Grid3X3} label="More" />
         <DesktopNavButton active={view === "profile"} onClick={() => setView("profile")} icon={User} label="Profile" />
       </nav>
     </div>

@@ -147,3 +147,29 @@ Stage Summary:
 - MeditationScreen.tsx compile errors fixed
 - App running and ready for visual testing
 - Scripts are designed for ~120-140 wpm with extended pauses — total ~58 min of audio content
+
+---
+Task ID: integrate-base44-signature-features
+Agent: main (orchestrator)
+Task: Integrate all 9 signature features, community screen, bump photos, and More hub from base 44 session into current project
+
+Work Log:
+- Read user's full base 44 chat log (1365 lines) to identify all features developed there
+- Audited current project state — identified 9 signature features + community + bump photos + More hub as missing
+- Updated Prisma schema: added 8 new models (RitualLog, MaternalStory, FearEntry, BabyLetter, DreamEntry, NameSeed, CapsuleItem, PlaylistTrack) + User relations. Ran db:push successfully.
+- Created /src/data/signature-features.ts with all static data: 40 belly rituals, 12 maternal prompts, fear categories/stages, dream moods/symbols, 10 hormone horoscope insights (9 week ranges), 44 name suggestions (6 themes), 5 playlist phases + 25 song suggestions, capsule types + unlock options
+- Built 9 API routes: /api/rituals, /api/maternal-stories, /api/fear-entries (with AI reframe), /api/baby-letters (with AI generation), /api/dream-entries (with AI symbol extraction), /api/name-seeds, /api/capsule-items, /api/playlist-tracks, /api/hormone-horoscope
+- Built 11 screen components: CommunityScreen, BumpPhotosScreen, BellyBondingScreen, MotherStoryScreen, FearToFlameScreen, LettersFromBabyScreen, DreamKeeperScreen, HormoneHoroscopeScreen, NameGardenScreen, MemoryCapsuleScreen, BirthPlaylistScreen
+- Built MoreScreen hub with 4 collections (Keepsakes, Inner World, Tracking, Connection) + lazy-loaded signature feature renderer
+- Updated AppShell: added 'more', 'community', 'bump-photos' to AppView type, replaced 'Meditate' nav button with 'More' hub button, imported and rendered all new screens
+- Added SignatureFeatures section to landing page (9-card grid with scroll animations, placed between Visual Showcase and Testimonials)
+- Added keepsakes highlight grid to HomeScreen dashboard (3x3 grid of emoji cards linking to More hub)
+- Verified: TypeScript compiles with zero new errors, dev server returns 200, hormone horoscope API returns correct data
+
+Stage Summary:
+- All 9 signature features from base 44 are now integrated and functional
+- 18 total screens in the app (6 core + 9 signature + More hub + Bump Photos + Community)
+- 20 total API routes (11 original + 9 new)
+- 17 Prisma models (9 original + 8 new)
+- Bottom nav: Home, Calendar, Journal, Tempie, More, Profile (meditation accessible via More hub)
+- All AI-powered features (baby letters, fear reframing, dream analysis) use z-ai-web-dev-sdk matching existing Tempie pattern

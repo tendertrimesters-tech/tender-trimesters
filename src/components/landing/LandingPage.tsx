@@ -53,6 +53,7 @@ export default function LandingPage({ onOpenApp }: LandingPageProps) {
       <Hero onJoinWaitlist={() => setWaitlistOpen(true)} onOpenApp={onOpenApp} />
       <FreeVsPremium onUpgrade={() => setAuthOpen(true)} />
       <VisualShowcase />
+      <SignatureFeatures />
       <Testimonials />
       <PremiumBundle onUpgrade={() => setAuthOpen(true)} />
       <WaitlistCTA onJoin={() => setWaitlistOpen(true)} />
@@ -433,6 +434,63 @@ function VisualShowcase() {
                 </div>
                 <h3 className={`font-serif text-xl mb-2 ${item.color}`}>{item.label}</h3>
                 <p className="text-sm text-foreground/70 leading-relaxed">{item.desc}</p>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────── SIGNATURE FEATURES ─────────────────────────── */
+
+function SignatureFeatures() {
+  const features = [
+    { emoji: "💌", title: "Letters from Baby", desc: "Each week your baby writes you a tender letter in their own voice — a keepsake to hold forever.", accent: "bg-blush/30" },
+    { emoji: "🔥", title: "Fear to Flame", desc: "Name a fear. Watch AI gently reframe it into courage. Track your growing bravery.", accent: "bg-terracotta/20" },
+    { emoji: "📖", title: "My Mother's Mother", desc: "12 guided interview prompts that capture a generational keepsake you'll treasure.", accent: "bg-butter" },
+    { emoji: "🌙", title: "DreamKeeper", desc: "Log your vivid pregnancy dreams. AI surfaces the recurring symbols and themes.", accent: "bg-lavender/20" },
+    { emoji: "🌊", title: "Hormone Horoscope", desc: "A poetic, science-backed forecast of what your hormones are doing — and why you feel the way you do.", accent: "bg-sage/20" },
+    { emoji: "🌱", title: "The Name Garden", desc: "Plant name ideas as seeds. Watch them grow. Track how your feelings shift week to week.", accent: "bg-sage/30" },
+    { emoji: "⏳", title: "Memory Capsule", desc: "Seal letters, wishes, and promises now that unlock for your child on a future date you choose.", accent: "bg-lavender/30" },
+    { emoji: "🎵", title: "Birth Playlist Composer", desc: "Build the soundtrack for labor by phase — early, active, pushing, first cry, golden hour.", accent: "bg-blush/20" },
+    { emoji: "🤍", title: "Belly Bonding Rituals", desc: "A daily 60-second ritual — a phrase, a hand position, a breath — building your bond before birth.", accent: "bg-blush/30" },
+  ];
+
+  return (
+    <section id="signature" className="py-20 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <div className="text-[10px] uppercase tracking-[0.2em] text-rose-gold font-semibold mb-2">Unlike any other pregnancy app</div>
+          <h2 className="font-serif text-3xl sm:text-4xl text-moss-deep">Nine features you won't find anywhere else</h2>
+          <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto">
+            Every other pregnancy app gives you a calendar and a checklist. We give you a deeply personal, keepsake-driven experience that honors the emotional journey of becoming a mother.
+          </p>
+        </motion.div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {features.map((f, i) => (
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.04 * i }}
+            >
+              <Card className="rounded-2xl p-5 h-full border-moss/10 hover:shadow-soft transition-shadow">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">{f.emoji}</span>
+                  <div>
+                    <div className="font-serif text-base text-moss-deep">{f.title}</div>
+                    <p className="text-xs text-foreground/70 leading-relaxed mt-1">{f.desc}</p>
+                  </div>
+                </div>
               </Card>
             </motion.div>
           ))}

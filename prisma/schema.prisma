@@ -44,6 +44,15 @@ model User {
   communityComments CommunityComment[]
   meditationSessions MeditationSession[]
   waitlistEntry   WaitlistEntry?
+  // NEW: Sacred features
+  ritualLogs      RitualLog[]
+  maternalStories  MaternalStory[]
+  fearEntries     FearEntry[]
+  babyLetters     BabyLetter[]
+  dreamEntries    DreamEntry[]
+  nameSeeds       NameSeed[]
+  capsuleItems    CapsuleItem[]
+  playlistTracks  PlaylistTrack[]
 }
 
 model WaitlistEntry {
@@ -163,4 +172,95 @@ model MeditationSession {
   durationSec  Int      // actual seconds listened
   completed    Boolean  @default(false)
   createdAt    DateTime @default(now())
+}
+
+model RitualLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      Int
+  phrase    String   // the ritual phrase used
+  gesture   String   // the gesture described
+  breath    String   // the breath cue
+  completed Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model MaternalStory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptIndex Int    // which of the 12 prompts (0-11)
+  response  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FearEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fear        String   // the original fear
+  reframed    String?  // AI-reframed courage
+  action      String?  // grounding action
+  stage       String   @default("ember") // "ember" | "spark" | "flame"
+  week        Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BabyLetter {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      Int      // pregnancy week
+  letter    String   // the AI-generated letter in baby's voice
+  createdAt DateTime @default(now())
+}
+
+model DreamEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  body      String   // the dream description
+  symbols   String?  // AI-extracted recurring symbols (JSON array)
+  themes    String?  // AI-extracted themes (JSON array)
+  week      Int?
+  createdAt DateTime @default(now())
+}
+
+model NameSeed {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  feeling   String?  // how the name feels to mama this week
+  week      Int?     // when planted
+  chosen    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CapsuleItem {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // "letter" | "wish" | "promise" | "photo"
+  title       String
+  body        String?
+  unlockDate  DateTime? // when to reveal (defaults to due date)
+  unlocked    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model PlaylistTrack {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phase     String   // "early" | "active" | "pushing" | "first_cry" | "golden_hour"
+  title     String
+  artist    String?
+  note      String?
+  createdAt DateTime @default(now())
 }
