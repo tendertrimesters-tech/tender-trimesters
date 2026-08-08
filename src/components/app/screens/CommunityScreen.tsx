@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { calcWeek, useProfile } from "@/components/providers";
 import { formatDistanceToNow } from "date-fns";
+import EmptyState from "@/components/app/EmptyState";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
@@ -237,14 +238,10 @@ export default function CommunityScreen() {
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-moss border-t-transparent" />
           </div>
         ) : posts.length === 0 ? (
-          <motion.div
-            {...fadeUp}
-            className="text-center py-16"
-          >
-            <p className="text-muted-foreground text-sm">
-              The village is quiet right now. Be the first to share.
-            </p>
-          </motion.div>
+          <EmptyState
+            title="The village is quiet right now"
+            description="Be the first to share."
+          />
         ) : (
           posts.map((post, idx) => {
             const extraHugs = localHugs[post.id] ?? 0;

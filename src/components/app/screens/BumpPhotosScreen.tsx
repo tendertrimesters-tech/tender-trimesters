@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useProfile, calcWeek } from "@/components/providers";
 import { Camera, Lock, X, Plus } from "lucide-react";
+import EmptyState from "@/components/app/EmptyState";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -140,18 +141,11 @@ export default function BumpPhotosScreen() {
           ))}
         </div>
       ) : photos.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="flex flex-col items-center justify-center py-16"
-        >
-          <Camera className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-          <div className="font-serif text-lg text-muted-foreground">No bump photos yet</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Start capturing your beautiful journey.
-          </div>
-        </motion.div>
+        <EmptyState
+          icon={<Camera className="w-7 h-7 text-muted-foreground/40" />}
+          title="No bump photos yet"
+          description="Start capturing your beautiful journey."
+        />
       ) : (
         <div className="grid grid-cols-2 gap-3">
           {photos.map((photo, i) => (

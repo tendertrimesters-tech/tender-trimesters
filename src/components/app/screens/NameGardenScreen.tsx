@@ -1,86 +1,132 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useProfile, calcWeek } from '@/components/providers';
-import { NAME_SUGGESTIONS, NAME_THEMES, type NameTheme, type NameSuggestion } from '@/data/signature-features';
-import { Sprout, TreePine, Plus, Search, Heart, Star, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProfile, calcWeek } from "@/components/providers";
+import { NAME_SUGGESTIONS, NAME_THEMES, type NameTheme, type NameSuggestion } from "@/data/signature-features";
+import { Sprout, TreePine, Plus, Search, Heart, Star, Trash2 } from "lucide-react";
+import EmptyState from "@/components/app/EmptyState";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+interface NameSeed {
+  id: string;
+  name: string;
+  feeling: string | null;
+  week: number | null;
+  chosen: boolean;
+}
 
 export default function NameGardenScreen() {
-  const [seeds, setSeeds] = useState<any[]>([]);
+  const [seeds, setSeeds] = useState<NameSeed[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newName, setNewName] = useState('');
-  const [feeling, setFeeling] = useState('');
-  const [activeTheme, setActiveTheme] = useState<NameTheme | ''>('');
+  const [error, setError] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [feeling, setFeeling] = useState("");
+  const [activeTheme, setActiveTheme] = useState<NameTheme | "">("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editFeeling, setEditFeeling] = useState('');
+  const [editFeeling, setEditFeeling] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const { profile } = useProfile();
   const currentWeek = calcWeek(profile?.dueDate);
 
-  const load = () => {
-    fetch('/api/name-seeds')
-      .then((r) => r.json())
+  const load = useCallback(() => {
+    fetch("/api/name-seeds")
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         setSeeds(d.seeds || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError(true);
       });
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const plantSeed = async (name: string, feelingText: string) => {
     if (!name.trim()) {
-      toast.error('Enter a name first');
+      toast.error("Enter a name first");
       return;
     }
     try {
-      await fetch('/api/name-seeds', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/name-seeds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), feeling: feelingText.trim() || null, week: currentWeek }),
       });
-      toast.success('🌱 Seed planted!');
-      setNewName('');
-      setFeeling('');
+      if (!res.ok) throw new Error();
+      toast.success("Seed planted!");
+      setNewName("");
+      setFeeling("");
       load();
     } catch {
-      toast.error('Failed to plant seed');
+      toast.error("Failed to plant seed");
     }
   };
 
   const chooseSeed = async (id: string) => {
-    await fetch('/api/name-seeds', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, chosen: true }),
-    });
-    toast.success('Name chosen! ✨');
-    load();
+    try {
+      const res = await fetch("/api/name-seeds", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, chosen: true }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Name chosen!");
+      load();
+    } catch {
+      toast.error("Failed to choose name");
+    }
   };
 
   const updateFeeling = async (id: string) => {
-    await fetch('/api/name-seeds', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, feeling: editFeeling.trim() || null }),
-    });
-    toast.success('Feeling updated');
-    setEditingId(null);
-    setEditFeeling('');
-    load();
+    try {
+      const res = await fetch("/api/name-seeds", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, feeling: editFeeling.trim() || null }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Feeling updated");
+      setEditingId(null);
+      setEditFeeling("");
+      load();
+    } catch {
+      toast.error("Failed to update feeling");
+    }
   };
 
-  const deleteSeed = async (id: string) => {
-    if (!confirm('Remove this name from your garden?')) return;
-    await fetch(`/api/name-seeds?id=${id}`, { method: 'DELETE' });
-    toast.success('Seed removed');
-    load();
+  const deleteSeed = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch(`/api/name-seeds?id=${deleteId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      toast.success("Seed removed");
+      load();
+    } catch {
+      toast.error("Failed to remove seed");
+    }
+    setDeleteId(null);
   };
 
   const filteredSuggestions = activeTheme
@@ -110,7 +156,7 @@ export default function NameGardenScreen() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className="rounded-full"
-              onKeyDown={(e) => e.key === 'Enter' && plantSeed(newName, feeling)}
+              onKeyDown={(e) => e.key === "Enter" && plantSeed(newName, feeling)}
             />
             <Textarea
               rows={1}
@@ -139,12 +185,12 @@ export default function NameGardenScreen() {
           {NAME_THEMES.map((theme: NameTheme) => (
             <button
               key={theme}
-              onClick={() => setActiveTheme(activeTheme === theme ? '' : theme)}
+              onClick={() => setActiveTheme(activeTheme === theme ? "" : theme)}
               className={cn(
-                'rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors',
+                "rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
                 activeTheme === theme
-                  ? 'bg-moss text-cream'
-                  : 'bg-sage/20 text-moss-deep hover:bg-sage/40',
+                  ? "bg-moss text-cream"
+                  : "bg-sage/20 text-moss-deep hover:bg-sage/40",
               )}
             >
               {theme}
@@ -156,7 +202,7 @@ export default function NameGardenScreen() {
             {filteredSuggestions.map((s: NameSuggestion) => (
               <button
                 key={s.name}
-                onClick={() => plantSeed(s.name, '')}
+                onClick={() => plantSeed(s.name, "")}
                 className="bg-sage/20 text-moss-deep text-xs px-3 py-1.5 rounded-full hover:bg-sage/40 transition-colors"
               >
                 <Heart className="w-3 h-3 inline mr-1 text-rose-gold" />
@@ -174,12 +220,21 @@ export default function NameGardenScreen() {
           <span className="text-sm font-medium text-moss-deep">My garden</span>
         </div>
 
-        {loading ? null : seeds.length === 0 ? (
-          <Card className="bg-card border-dashed border-border rounded-3xl p-10 text-center">
-            <Sprout className="w-10 h-10 text-rose-gold/40 mx-auto mb-3" />
-            <div className="font-serif text-lg text-moss-deep">Your garden is empty</div>
-            <div className="text-sm text-muted-foreground mt-1">Plant your first name seed.</div>
-          </Card>
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
+          </div>
+        ) : error ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">Couldn't load your garden</p>
+            <Button onClick={load} variant="outline" size="sm" className="mt-2 rounded-full">Retry</Button>
+          </div>
+        ) : seeds.length === 0 ? (
+          <EmptyState
+            icon={<Sprout className="w-7 h-7 text-rose-gold/40" />}
+            title="Your garden is empty"
+            description="Plant your first name seed."
+          />
         ) : (
           <div className="space-y-3">
             {chosenSeed && (
@@ -210,7 +265,7 @@ export default function NameGardenScreen() {
                           placeholder="Update feeling..."
                           className="flex-1 text-xs bg-muted/40 rounded-lg px-2 py-1 border-0 outline-none"
                           autoFocus
-                          onKeyDown={(e) => e.key === 'Enter' && updateFeeling(seed.id)}
+                          onKeyDown={(e) => e.key === "Enter" && updateFeeling(seed.id)}
                         />
                         <button
                           onClick={() => updateFeeling(seed.id)}
@@ -227,7 +282,7 @@ export default function NameGardenScreen() {
                     )}
                   </div>
                   <button
-                    onClick={() => deleteSeed(seed.id)}
+                    onClick={() => setDeleteId(seed.id)}
                     className="text-muted-foreground hover:text-destructive transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -243,7 +298,7 @@ export default function NameGardenScreen() {
                   <button
                     onClick={() => {
                       setEditingId(seed.id);
-                      setEditFeeling(seed.feeling || '');
+                      setEditFeeling(seed.feeling || "");
                     }}
                     className="text-xs bg-muted/40 text-muted-foreground rounded-full px-3 py-1 hover:bg-muted/60 transition-colors"
                   >
@@ -255,6 +310,21 @@ export default function NameGardenScreen() {
           </div>
         )}
       </motion.div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <AlertDialogContent className="bg-card rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-xl text-moss-deep">Remove this name?</AlertDialogTitle>
+            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteSeed} className="rounded-full bg-destructive hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

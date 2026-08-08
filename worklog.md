@@ -173,3 +173,29 @@ Stage Summary:
 - 17 Prisma models (9 original + 8 new)
 - Bottom nav: Home, Calendar, Journal, Tempie, More, Profile (meditation accessible via More hub)
 - All AI-powered features (baby letters, fear reframing, dream analysis) use z-ai-web-dev-sdk matching existing Tempie pattern
+
+---
+Task ID: polish-pass-1
+Agent: main (orchestrator)
+Task: Polish audit and fixes across the whole app
+
+Work Log:
+- Ran comprehensive audit identifying 8 issues across landing page, MoreScreen, HomeScreen, ProfileScreen, and TypeScript errors
+- Added 'Keepsakes' nav link to landing page pointing to new #signature section
+- Created reusable EmptyState component at /src/components/app/EmptyState.tsx (emoji, icon, title, description, action props)
+- Fixed MoreScreen FeatureRenderer: clears screen on featureId change (no stale flash), adds .catch() error handling, handles unknown featureId with error state
+- Updated ProfileScreen upgrade dialog: replaced 4 vague badges with 11 real premium feature names (Letters from Baby, Fear to Flame, etc.), updated monthly tier description
+- Added 2 new quick actions to HomeScreen: 'The Village' (community) and 'Meditate' (meditation), expanded grid to 4 columns on large screens
+- Deep-linked all 9 keepsake cards on HomeScreen to open specific features in MoreScreen (via navigateToMore function + initialFeature prop)
+- Applied EmptyState component to 7 screens: LettersFromBaby, DreamKeeper, NameGarden, MemoryCapsule, BirthPlaylist, BumpPhotos, Community
+- Fixed pre-existing TS error in auth route (user.name nullability via type cast in jwt callback)
+- Fixed pre-existing TS error in partner route (weeklyContent null type via explicit `any` typing)
+- Updated NextAuth type declarations (JWT id/email/name all optional to match actual usage)
+
+Stage Summary:
+- Zero TypeScript errors in src/ (confirmed with tsc --noEmit)
+- Dev server returns 200
+- All empty states now use consistent branded EmptyState component
+- Landing page nav: Features → Keepsakes → Pricing → Stories → Bundle
+- Home screen: 4 quick actions (Appointments, Tempie, Village, Meditate) + 9 deep-linked keepsake cards
+- More hub: proper lazy loading with error handling + deep linking from home

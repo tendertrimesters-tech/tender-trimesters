@@ -91,6 +91,7 @@ function Nav({ onOpenAuth, onOpenApp }: { onOpenAuth: () => void; onOpenApp: () 
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm">
           <a href="#features" className="text-foreground/70 hover:text-moss transition-colors">Features</a>
+          <a href="#signature" className="text-foreground/70 hover:text-moss transition-colors">Keepsakes</a>
           <a href="#comparison" className="text-foreground/70 hover:text-moss transition-colors">Pricing</a>
           <a href="#testimonials" className="text-foreground/70 hover:text-moss transition-colors">Stories</a>
           <a href="#bundle" className="text-foreground/70 hover:text-moss transition-colors">Bundle</a>

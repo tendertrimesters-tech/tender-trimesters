@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,47 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { calcWeek, trimesterOf, useProfile } from "@/components/providers";
-import { Baby, Leaf, Heart, Sparkles, Calendar as CalIcon, Plus, Check, Clock, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { calcWeek, useProfile } from "@/components/providers";
+import { Baby, Leaf, Heart, Sparkles, Calendar as CalIcon, Plus, Check, Clock, MapPin } from "lucide-react";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import type { LucideIcon } from "lucide-react";
+
+interface WeekContent {
+  week: number;
+  trimester: number;
+  babySize: string;
+  babyLengthCm: number;
+  babyWeightG: number;
+  milestone?: string;
+  babySizeDesc: string;
+  bodyChanges: string;
+  emotionalChanges: string;
+  bestFriendTip: string;
+  selfCare: string;
+  affirmation: string;
+}
+
+interface Appointment {
+  id: string;
+  title: string;
+  date: string;
+  type: string;
+  location?: string;
+  notes?: string;
+  completed: boolean;
+}
 
 export default function CalendarScreen() {
   const [view, setView] = useState<"weeks" | "appointments">("weeks");
@@ -44,24 +80,56 @@ export default function CalendarScreen() {
 function WeeksView() {
   const { profile } = useProfile();
   const currentWeek = calcWeek(profile?.dueDate);
-  const [weeks, setWeeks] = useState<any[]>([]);
+  const [weeks, setWeeks] = useState<WeekContent[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<number | null>(currentWeek);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     fetch("/api/weekly-content")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         setWeeks(d.weeks || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError(true);
       });
   }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   if (loading) {
     return <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 rounded-3xl" />)}</div>;
   }
 
+  if (error) {
+    return (
+      <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+        <CalIcon className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+        <div className="font-serif text-lg text-moss-deep">Couldn't load calendar</div>
+        <div className="text-xs text-muted-foreground mt-1">Check your connection and try again.</div>
+        <Button onClick={load} variant="outline" className="mt-4 rounded-full">Retry</Button>
+      </Card>
+    );
+  }
+
+  if (weeks.length === 0) {
+    return (
+      <Card className="bg-card border-dashed border-border rounded-3xl p-8 text-center">
+        <CalIcon className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+        <div className="font-serif text-lg text-moss-deep">No weekly content yet</div>
+        <div className="text-xs text-muted-foreground mt-1">Set your due date in your profile to see weekly updates.</div>
+      </Card>
+    );
+  }
+
   const selected = weeks.find((w) => w.week === selectedWeek);
+  const activeTrimester = selected ? selected.trimester : 1;
 
   return (
     <div className="space-y-4">
@@ -76,7 +144,12 @@ function WeeksView() {
                 const first = tWeeks[0];
                 if (first) setSelectedWeek(first.week);
               }}
-              className="flex-1 text-xs py-2 rounded-full bg-muted/50 hover:bg-muted transition-colors text-muted-foreground"
+              className={cn(
+                "flex-1 text-xs py-2 rounded-full transition-colors",
+                activeTrimester === t
+                  ? "bg-moss text-cream shadow-soft font-semibold"
+                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
+              )}
             >
               T{t}
               <span className="block text-[10px] opacity-70">Wks {t === 1 ? "1-13" : t === 2 ? "14-27" : "28-40"}</span>
@@ -85,27 +158,29 @@ function WeeksView() {
         })}
       </div>
 
-      {/* Week selector */}
-      <div className="flex gap-2 overflow-x-auto scroll-soft pb-2 -mx-4 px-4">
-        {weeks.map((w) => {
-          const isCurrent = w.week === currentWeek;
-          const isSelected = w.week === selectedWeek;
-          const isPast = currentWeek && w.week < currentWeek;
-          return (
-            <button
-              key={w.week}
-              onClick={() => setSelectedWeek(w.week)}
-              className={cn(
-                "flex-shrink-0 w-14 h-16 rounded-2xl flex flex-col items-center justify-center transition-all",
-                isSelected ? "bg-moss text-cream shadow-soft" : isCurrent ? "bg-blush text-moss-deep ring-2 ring-rose-gold" : isPast ? "bg-muted/40 text-muted-foreground" : "bg-card border border-border/40 text-foreground/70 hover:border-moss/30"
-              )}
-            >
-              <span className="text-[9px] uppercase tracking-wider opacity-70">Wk</span>
-              <span className="text-base font-serif font-semibold leading-none">{w.week}</span>
-              {isCurrent && <span className="text-[8px] mt-0.5 text-rose-gold font-bold">NOW</span>}
-            </button>
-          );
-        })}
+      {/* Week selector with scroll fade */}
+      <div className="relative">
+        <div className="flex gap-2 overflow-x-auto scroll-soft pb-2 -mx-4 px-4">
+          {weeks.map((w) => {
+            const isCurrent = w.week === currentWeek;
+            const isSelected = w.week === selectedWeek;
+            const isPast = currentWeek && w.week < currentWeek;
+            return (
+              <button
+                key={w.week}
+                onClick={() => setSelectedWeek(w.week)}
+                className={cn(
+                  "flex-shrink-0 w-14 h-16 rounded-2xl flex flex-col items-center justify-center transition-all",
+                  isSelected ? "bg-moss text-cream shadow-soft" : isCurrent ? "bg-blush text-moss-deep ring-2 ring-rose-gold" : isPast ? "bg-muted/40 text-muted-foreground" : "bg-card border border-border/40 text-foreground/70 hover:border-moss/30"
+                )}
+              >
+                <span className="text-[9px] uppercase tracking-wider opacity-70">Wk</span>
+                <span className="text-base font-serif font-semibold leading-none">{w.week}</span>
+                {isCurrent && <span className="text-[8px] mt-0.5 text-rose-gold font-bold">NOW</span>}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {selected && <WeekDetail week={selected} isCurrent={selected.week === currentWeek} />}
@@ -113,7 +188,7 @@ function WeeksView() {
   );
 }
 
-function WeekDetail({ week, isCurrent }: { week: any; isCurrent: boolean }) {
+function WeekDetail({ week, isCurrent }: { week: WeekContent; isCurrent: boolean }) {
   return (
     <motion.div
       key={week.week}
@@ -168,28 +243,33 @@ function WeekDetail({ week, isCurrent }: { week: any; isCurrent: boolean }) {
       </Card>
 
       {/* Self-care checklist */}
-      <Card className="bg-card border-moss/15 rounded-3xl p-5">
-        <div className="text-[10px] uppercase tracking-widest text-moss font-semibold mb-3">Self-care this week</div>
-        <div className="space-y-2">
-          {week.selfCare.split("\n").filter((s: string) => s.trim()).map((item: string, i: number) => (
-            <SelfCareItem key={i} item={item.trim()} />
-          ))}
-        </div>
-      </Card>
+      {week.selfCare && (
+        <Card className="bg-card border-moss/15 rounded-3xl p-5">
+          <div className="text-[10px] uppercase tracking-widest text-moss font-semibold mb-3">Self-care this week</div>
+          <div className="space-y-2">
+            {week.selfCare.split("\n").filter((s) => s.trim()).map((item, i) => (
+              <SelfCareItem key={i} item={item.trim()} />
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Affirmation */}
-      <Card className="bg-gradient-blush border-rose-gold/20 rounded-3xl p-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-rose-gold" />
-          <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold">Affirmation</div>
-        </div>
-        <p className="font-script text-2xl text-moss-deep leading-snug">{week.affirmation}</p>
-      </Card>
+      {week.affirmation && (
+        <Card className="bg-gradient-blush border-rose-gold/20 rounded-3xl p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-rose-gold" />
+            <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold">Affirmation</div>
+          </div>
+          <p className="font-script text-2xl text-moss-deep leading-snug">{week.affirmation}</p>
+        </Card>
+      )}
     </motion.div>
   );
 }
 
-function DetailCard({ icon: Icon, title, body, accent, iconColor }: { icon: any; title: string; body: string; accent: string; iconColor: string }) {
+function DetailCard({ icon: Icon, title, body, accent, iconColor }: { icon: LucideIcon; title: string; body: string; accent: string; iconColor: string }) {
+  if (!body) return null;
   return (
     <Card className={cn("border-transparent rounded-3xl p-5", accent)}>
       <div className="flex items-center gap-2 mb-2">
@@ -226,23 +306,45 @@ function SelfCareItem({ item }: { item: string }) {
 /* ─────────────────────────── APPOINTMENTS ─────────────────────────── */
 
 function AppointmentsView() {
-  const [appts, setAppts] = useState<any[]>([]);
+  const [appts, setAppts] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
 
-  const load = () => {
+  const load = useCallback(() => {
     fetch("/api/appointments")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         setAppts(d.appointments || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError(true);
       });
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const upcoming = appts.filter((a) => new Date(a.date) >= new Date() && !a.completed);
   const past = appts.filter((a) => new Date(a.date) < new Date() || a.completed).reverse();
+
+  if (loading) {
+    return <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}</div>;
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+        <CalIcon className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+        <div className="font-serif text-lg text-moss-deep">Couldn't load appointments</div>
+        <Button onClick={load} variant="outline" className="mt-4 rounded-full">Retry</Button>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -256,30 +358,24 @@ function AppointmentsView() {
         </Button>
       </div>
 
-      {loading ? (
-        <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}</div>
-      ) : (
-        <>
-          {upcoming.length > 0 && (
-            <div className="space-y-3">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Upcoming</div>
-              {upcoming.map((a) => <ApptCard key={a.id} appt={a} onChange={load} />)}
-            </div>
-          )}
-          {past.length > 0 && (
-            <div className="space-y-3">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold pt-2">Past</div>
-              {past.map((a) => <ApptCard key={a.id} appt={a} onChange={load} />)}
-            </div>
-          )}
-          {appts.length === 0 && (
-            <Card className="bg-card border-dashed border-border rounded-3xl p-8 text-center">
-              <CalIcon className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-              <div className="font-serif text-lg text-moss-deep">No appointments yet</div>
-              <div className="text-xs text-muted-foreground mt-1">Add your first OB visit, ultrasound, or glucose test.</div>
-            </Card>
-          )}
-        </>
+      {upcoming.length > 0 && (
+        <div className="space-y-3">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Upcoming</div>
+          {upcoming.map((a) => <ApptCard key={a.id} appt={a} onChange={load} />)}
+        </div>
+      )}
+      {past.length > 0 && (
+        <div className="space-y-3">
+          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold pt-2">Past</div>
+          {past.map((a) => <ApptCard key={a.id} appt={a} onChange={load} />)}
+        </div>
+      )}
+      {appts.length === 0 && (
+        <Card className="bg-card border-dashed border-border rounded-3xl p-8 text-center">
+          <CalIcon className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+          <div className="font-serif text-lg text-moss-deep">No appointments yet</div>
+          <div className="text-xs text-muted-foreground mt-1">Add your first OB visit, ultrasound, or glucose test.</div>
+        </Card>
       )}
 
       <AddAppointmentDialog open={addOpen} onOpenChange={setAddOpen} onAdded={load} />
@@ -287,7 +383,9 @@ function AppointmentsView() {
   );
 }
 
-function ApptCard({ appt, onChange }: { appt: any; onChange: () => void }) {
+function ApptCard({ appt, onChange }: { appt: Appointment; onChange: () => void }) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
   const typeColors: Record<string, string> = {
     ob_visit: "bg-sage/40",
     ultrasound: "bg-blush/40",
@@ -297,53 +395,80 @@ function ApptCard({ appt, onChange }: { appt: any; onChange: () => void }) {
   };
 
   async function toggleComplete() {
-    await fetch("/api/appointments", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: appt.id, completed: !appt.completed }),
-    });
-    onChange();
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: appt.id, completed: !appt.completed }),
+      });
+      if (!res.ok) throw new Error();
+      onChange();
+    } catch {
+      toast.error("Failed to update");
+    }
   }
 
   async function remove() {
-    if (!confirm("Delete this appointment?")) return;
-    await fetch(`/api/appointments?id=${appt.id}`, { method: "DELETE" });
-    toast.success("Removed");
-    onChange();
+    try {
+      const res = await fetch(`/api/appointments?id=${appt.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      toast.success("Removed");
+      onChange();
+    } catch {
+      toast.error("Failed to remove");
+    }
+    setDeleteOpen(false);
   }
 
   return (
-    <Card className={cn("rounded-2xl p-4 border-transparent", typeColors[appt.type] || "bg-muted/40", appt.completed && "opacity-60")}>
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-xl bg-cream/70 flex flex-col items-center justify-center flex-shrink-0">
-          <span className="text-[9px] uppercase font-bold text-moss-deep">{format(new Date(appt.date), "MMM")}</span>
-          <span className="text-base font-bold text-moss-deep leading-none">{format(new Date(appt.date), "d")}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <div className={cn("text-sm font-semibold text-moss-deep", appt.completed && "line-through")}>{appt.title}</div>
-            <Badge variant="secondary" className="text-[9px] uppercase tracking-wider h-4 px-1.5">{appt.type.replace("_", " ")}</Badge>
+    <>
+      <Card className={cn("rounded-2xl p-4 border-transparent", typeColors[appt.type] || "bg-muted/40", appt.completed && "opacity-60")}>
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-xl bg-cream/70 flex flex-col items-center justify-center flex-shrink-0">
+            <span className="text-[9px] uppercase font-bold text-moss-deep">{format(new Date(appt.date), "MMM")}</span>
+            <span className="text-base font-bold text-moss-deep leading-none">{format(new Date(appt.date), "d")}</span>
           </div>
-          <div className="text-xs text-foreground/60 mt-0.5 flex items-center gap-1">
-            <Clock className="w-3 h-3" /> {format(new Date(appt.date), "EEEE, h:mm a")}
-          </div>
-          {appt.location && (
-            <div className="text-xs text-foreground/60 mt-0.5 flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> {appt.location}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <div className={cn("text-sm font-semibold text-moss-deep", appt.completed && "line-through")}>{appt.title}</div>
+              <Badge variant="secondary" className="text-[9px] uppercase tracking-wider h-4 px-1.5">{appt.type.replaceAll("_", " ")}</Badge>
             </div>
-          )}
-          {appt.notes && <div className="text-xs text-foreground/70 mt-2 italic">{appt.notes}</div>}
-          <div className="flex gap-2 mt-3">
-            <Button size="sm" variant="ghost" onClick={toggleComplete} className="h-7 text-xs">
-              {appt.completed ? "Undo" : "Mark done"}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={remove} className="h-7 text-xs text-destructive hover:text-destructive">
-              Remove
-            </Button>
+            <div className="text-xs text-foreground/60 mt-0.5 flex items-center gap-1">
+              <Clock className="w-3 h-3" /> {format(new Date(appt.date), "EEEE, h:mm a")}
+            </div>
+            {appt.location && (
+              <div className="text-xs text-foreground/60 mt-0.5 flex items-center gap-1">
+                <MapPin className="w-3 h-3" /> {appt.location}
+              </div>
+            )}
+            {appt.notes && <div className="text-xs text-foreground/70 mt-2 italic">{appt.notes}</div>}
+            <div className="flex gap-2 mt-3">
+              <Button size="sm" variant="ghost" onClick={toggleComplete} className="h-7 text-xs">
+                {appt.completed ? "Undo" : "Mark done"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setDeleteOpen(true)} className="h-7 text-xs text-destructive hover:text-destructive">
+                Remove
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent className="bg-card rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-xl text-moss-deep">Delete this appointment?</AlertDialogTitle>
+            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={remove} className="rounded-full bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch this week's content (read-only)
-  let weeklyContent = null;
+  let weeklyContent: any = null;
   if (week) {
     weeklyContent = await db.weeklyContent.findUnique({ where: { week } });
   }

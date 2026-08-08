@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Sparkles, Trash2, Leaf } from "lucide-react";
+import { Send, Trash2, Leaf } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,27 +37,46 @@ export default function TempieScreen() {
   const week = calcWeek(profile?.dueDate);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isNearBottom = useRef(true);
 
-  const load = () => {
+  const load = useCallback(() => {
     fetch("/api/chat")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         setMessages(d.messages || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError(true);
       });
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
+  // Only auto-scroll if user is already near the bottom
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (!el) return;
+    if (isNearBottom.current) {
+      el.scrollTop = el.scrollHeight;
     }
   }, [messages, sending]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const threshold = 100;
+    isNearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+  };
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -65,7 +84,6 @@ export default function TempieScreen() {
     setInput("");
     setSending(true);
 
-    // Optimistic: add user message
     const userMsg: Msg = {
       id: `temp-${Date.now()}`,
       role: "user",
@@ -85,13 +103,12 @@ export default function TempieScreen() {
       const aiMsg: Msg = {
         id: `temp-ai-${Date.now()}`,
         role: "assistant",
-        content: data.reply,
+        content: data.reply || "I'm not sure what to say. Try asking again?",
         createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, aiMsg]);
     } catch {
       toast.error("Tempie's having trouble. Try again?");
-      // Remove optimistic user message
       setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
       setInput(trimmed);
     } finally {
@@ -100,16 +117,22 @@ export default function TempieScreen() {
   }
 
   async function clearChat() {
-    await fetch("/api/chat", { method: "DELETE" });
-    setMessages([]);
-    setClearOpen(false);
-    toast.success("Conversation cleared");
+    try {
+      const res = await fetch("/api/chat", { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      setMessages([]);
+      setClearOpen(false);
+      toast.success("Conversation cleared");
+    } catch {
+      toast.error("Failed to clear conversation");
+      setClearOpen(false);
+    }
   }
 
   return (
     <div className="space-y-4 flex flex-col h-[calc(100vh-220px)] md:h-[calc(100vh-180px)]">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-gradient-premium flex items-center justify-center shadow-premium">
             <Leaf className="w-5 h-5 text-cream" />
@@ -130,12 +153,17 @@ export default function TempieScreen() {
       </div>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-soft pr-1 -mr-1 space-y-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scroll-soft pr-1 -mr-1 space-y-4">
         {loading ? (
           <div className="space-y-3">
             <Skeleton className="h-16 rounded-2xl max-w-[80%]" />
             <Skeleton className="h-20 rounded-2xl max-w-[80%] ml-auto" />
             <Skeleton className="h-16 rounded-2xl max-w-[80%]" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">Couldn't load conversation</p>
+            <Button onClick={load} variant="outline" size="sm" className="mt-3 rounded-full">Retry</Button>
           </div>
         ) : messages.length === 0 ? (
           <WelcomeState onSuggest={send} week={week} userName={profile?.name} />
@@ -255,7 +283,7 @@ function WelcomeState({ onSuggest, week, userName }: { onSuggest: (text: string)
         </div>
         <div className="bg-card border border-border/40 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%]">
           <p className="text-sm text-foreground leading-relaxed">
-            Hi {firstName}. I'm Tempie. 💛
+            Hi {firstName}. I'm Tempie.
           </p>
           <p className="text-sm text-foreground/80 mt-2 leading-relaxed">
             I'm here for whatever you need — a question, a vent, a 3am panic, a win you want to share.

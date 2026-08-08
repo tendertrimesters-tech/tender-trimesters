@@ -4,10 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useProfile, calcWeek } from "@/components/providers";
 import { BELLY_RITUALS, type BellyRitual } from "@/data/signature-features";
-import { Heart, Play, CheckCircle, Flame, Volume2, VolumeX, Hand, Wind } from "lucide-react";
+import { Heart, Play, CheckCircle, Volume2, VolumeX, Hand, Wind } from "lucide-react";
+import { toast } from "sonner";
 
 export default function BellyBondingScreen() {
   const { profile } = useProfile();
@@ -18,16 +20,22 @@ export default function BellyBondingScreen() {
   const [completed, setCompleted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
+  const [streakLoading, setStreakLoading] = useState(true);
   const [showPast, setShowPast] = useState(false);
 
   const loadStreak = useCallback(() => {
+    setStreakLoading(true);
     fetch("/api/rituals")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         const weeks = new Set((d.rituals || []).map((r: any) => r.week));
         setStreakCount(weeks.size);
       })
-      .catch(() => {});
+      .catch(() => toast.error("Couldn't load streak"))
+      .finally(() => setStreakLoading(false));
   }, []);
 
   useEffect(() => {
@@ -36,7 +44,7 @@ export default function BellyBondingScreen() {
 
   const handleComplete = async () => {
     try {
-      await fetch("/api/rituals", {
+      const res = await fetch("/api/rituals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -46,20 +54,26 @@ export default function BellyBondingScreen() {
           breath: ritual.breath,
         }),
       });
+      if (!res.ok) throw new Error();
       setCompleted(true);
       loadStreak();
     } catch {
-      // silent
+      toast.error("Failed to complete ritual");
     }
   };
 
   const toggleSpeech = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      toast.error("Speech not supported in this browser");
+      return;
+    }
     if (speaking) {
       window.speechSynthesis.cancel();
       setSpeaking(false);
     } else {
       const utterance = new SpeechSynthesisUtterance(ritual.phrase);
       utterance.rate = 0.85;
+      utterance.onerror = () => setSpeaking(false);
       utterance.onend = () => setSpeaking(false);
       window.speechSynthesis.speak(utterance);
       setSpeaking(true);
@@ -72,10 +86,7 @@ export default function BellyBondingScreen() {
 
   return (
     <div className="space-y-5">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-serif text-2xl text-moss-deep">Belly Bonding</h1>
         <p className="text-sm text-muted-foreground mt-1">
           60 seconds with your baby, every day
@@ -158,6 +169,7 @@ export default function BellyBondingScreen() {
         </Card>
       </motion.div>
 
+      {/* Streak progress */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -165,17 +177,21 @@ export default function BellyBondingScreen() {
         className="space-y-2"
       >
         <p className="text-xs text-muted-foreground">Your bonding journey</p>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 bg-sage/20 rounded-full h-2">
-            <div
-              className="bg-moss rounded-full h-2 transition-all duration-500"
-              style={{ width: `${(streakCount / 40) * 100}%` }}
-            />
+        {streakLoading ? (
+          <Skeleton className="h-2 rounded-full" />
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-sage/20 rounded-full h-2">
+              <div
+                className="bg-moss rounded-full h-2 transition-all duration-500"
+                style={{ width: `${Math.min((streakCount / 40) * 100, 100)}%` }}
+              />
+            </div>
+            <span className="text-xs font-medium text-moss-deep">
+              {streakCount}/40 weeks
+            </span>
           </div>
-          <span className="text-xs font-medium text-moss-deep">
-            {streakCount}/40 weeks
-          </span>
-        </div>
+        )}
       </motion.div>
 
       {pastRituals.length > 0 && (
@@ -202,8 +218,7 @@ export default function BellyBondingScreen() {
                     Week {r.week}
                   </p>
                   <p className="text-sm text-foreground/80 mt-1">
-                    {r.phrase.slice(0, 50)}
-                    {r.phrase.length > 50 ? "..." : ""}
+                    {r.phrase.length > 80 ? r.phrase.slice(0, 80) + "..." : r.phrase}
                   </p>
                 </Card>
               ))}

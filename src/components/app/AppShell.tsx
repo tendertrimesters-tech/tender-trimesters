@@ -46,7 +46,13 @@ function PremiumSuccessHandler() {
 
 export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
   const [view, setView] = useState<AppView>("home");
+  const [moreFeature, setMoreFeature] = useState<string | undefined>(undefined);
   const { userName } = useAuth();
+
+  function navigateToMore(featureId?: string) {
+    setMoreFeature(featureId);
+    setView("more");
+  }
 
   // Listen for the ?premium=success redirect back from Stripe Checkout.
   // Wrapped in Suspense because useSearchParams() requires it during static rendering.
@@ -81,14 +87,14 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
-            {view === "home" && <HomeScreen onNavigate={setView} />}
+            {view === "home" && <HomeScreen onNavigate={(v) => v === "more" ? navigateToMore() : setView(v)} onNavigateToMore={navigateToMore} />}
             {view === "calendar" && <CalendarScreen />}
             {view === "journal" && <JournalScreen />}
             {view === "tempie" && <TempieScreen />}
             {view === "meditation" && <MeditationScreen />}
             {view === "community" && <CommunityScreen />}
             {view === "bump-photos" && <BumpPhotosScreen />}
-            {view === "more" && <MoreScreen onNavigate={setView} />}
+            {view === "more" && <MoreScreen onNavigate={setView} initialFeature={moreFeature} />}
             {view === "profile" && <ProfileScreen onSignOut={onSignOut} />}
           </motion.div>
         </AnimatePresence>

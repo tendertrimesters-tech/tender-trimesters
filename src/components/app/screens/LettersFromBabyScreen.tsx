@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, calcWeek } from "@/components/providers";
-import { cn } from "@/lib/utils";
-import { Baby as BabyIcon, Sparkles, Plus, BookOpen, ArrowRight } from "lucide-react";
+import { Baby as BabyIcon, Sparkles, BookOpen } from "lucide-react";
+import EmptyState from "@/components/app/EmptyState";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface Letter {
   id: string;
@@ -20,25 +21,32 @@ interface Letter {
 export default function LettersFromBabyScreen() {
   const [letters, setLetters] = useState<Letter[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [generating, setGenerating] = useState(false);
   const { profile } = useProfile();
   const currentWeek = calcWeek(profile?.dueDate);
   const babyName = profile?.babyName;
 
-  const loadLetters = () => {
+  const loadLetters = useCallback(() => {
     setLoading(true);
     fetch("/api/baby-letters")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         setLetters(d.letters || []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  };
+      .catch(() => {
+        setLoading(false);
+        setError(true);
+      });
+  }, []);
 
   useEffect(() => {
     loadLetters();
-  }, []);
+  }, [loadLetters]);
 
   const hasCurrentWeekLetter = currentWeek
     ? letters.some((l) => l.week === currentWeek)
@@ -48,14 +56,16 @@ export default function LettersFromBabyScreen() {
     if (!currentWeek) return;
     setGenerating(true);
     try {
-      await fetch("/api/baby-letters", {
+      const res = await fetch("/api/baby-letters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ week: currentWeek }),
+        body: JSON.stringify({ week: currentWeek, babyName: babyName || null }),
       });
+      if (!res.ok) throw new Error();
+      toast.success("Letter arrived!");
       loadLetters();
     } catch {
-      // silently fail
+      toast.error("Failed to generate letter");
     } finally {
       setGenerating(false);
     }
@@ -114,8 +124,16 @@ export default function LettersFromBabyScreen() {
         </div>
       )}
 
+      {/* Error */}
+      {error && !loading && (
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground">Couldn't load letters</p>
+          <Button onClick={loadLetters} variant="outline" size="sm" className="mt-2 rounded-full">Retry</Button>
+        </div>
+      )}
+
       {/* Letters list — reverse chronological */}
-      {!loading && letters.length > 0 && (
+      {!loading && !error && letters.length > 0 && (
         <div className="space-y-3">
           {[...letters].reverse().map((letter) => (
             <motion.div
@@ -142,20 +160,12 @@ export default function LettersFromBabyScreen() {
       )}
 
       {/* Empty state */}
-      {!loading && letters.length === 0 && !hasCurrentWeekLetter && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-10"
-        >
-          <BabyIcon className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="font-serif text-lg text-muted-foreground">
-            No letters yet
-          </p>
-          <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-            Generate your first letter to hear from your little one.
-          </p>
-        </motion.div>
+      {!loading && !error && letters.length === 0 && !hasCurrentWeekLetter && (
+        <EmptyState
+          icon={<BabyIcon className="w-7 h-7 text-muted-foreground/30" />}
+          title="No letters yet"
+          description="Generate your first letter to hear from your little one."
+        />
       )}
 
       {/* Keepsake note */}

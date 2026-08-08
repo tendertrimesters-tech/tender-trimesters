@@ -1,55 +1,99 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { PLAYLIST_PHASES, SONG_SUGGESTIONS } from '@/data/signature-features';
-import { Music, Plus, Trash2, Sparkles, Play } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PLAYLIST_PHASES, SONG_SUGGESTIONS } from "@/data/signature-features";
+import { Music, Plus, Trash2, Sparkles, Music2 } from "lucide-react";
+import EmptyState from "@/components/app/EmptyState";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+interface PlaylistTrack {
+  id: string;
+  phase: string;
+  title: string;
+  artist: string;
+}
 
 export default function BirthPlaylistScreen() {
-  const [tracks, setTracks] = useState<any[]>([]);
+  const [tracks, setTracks] = useState<PlaylistTrack[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [activePhase, setActivePhase] = useState(PLAYLIST_PHASES[0].id);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const load = () => {
-    fetch('/api/playlist-tracks')
-      .then((r) => r.json())
+  const load = useCallback(() => {
+    fetch("/api/playlist-tracks")
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => {
         setTracks(d.tracks || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError(true);
       });
-  };
+  }, []);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   const addTrack = async (title: string, artist: string) => {
+    // Prevent duplicates
+    const exists = tracks.some(
+      (t) => t.title.toLowerCase() === title.toLowerCase() && t.artist.toLowerCase() === artist.toLowerCase()
+    );
+    if (exists) {
+      toast.error("Already in your playlist");
+      return;
+    }
     try {
-      await fetch('/api/playlist-tracks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/playlist-tracks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phase: activePhase, title, artist }),
       });
-      toast.success('Added to playlist 🎵');
+      if (!res.ok) throw new Error();
+      toast.success("Added to playlist");
       load();
     } catch {
-      toast.error('Failed to add');
+      toast.error("Failed to add");
     }
   };
 
-  const deleteTrack = async (id: string) => {
-    await fetch(`/api/playlist-tracks?id=${id}`, { method: 'DELETE' });
-    toast.success('Track removed');
-    load();
+  const deleteTrack = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch(`/api/playlist-tracks?id=${deleteId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      toast.success("Track removed");
+      load();
+    } catch {
+      toast.error("Failed to remove");
+    }
+    setDeleteId(null);
   };
 
   const selectedPhase = PLAYLIST_PHASES.find((p) => p.id === activePhase);
   const suggestions = SONG_SUGGESTIONS[activePhase] || [];
 
   // Group saved tracks by phase
-  const tracksByPhase: Record<string, any[]> = {};
+  const tracksByPhase: Record<string, PlaylistTrack[]> = {};
   tracks.forEach((t) => {
     if (!tracksByPhase[t.phase]) tracksByPhase[t.phase] = [];
     tracksByPhase[t.phase].push(t);
@@ -59,7 +103,7 @@ export default function BirthPlaylistScreen() {
     <div className="space-y-5">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <div className="font-serif text-2xl text-moss-deep">Birth Playlist</div>
-        <div className="text-xs text-muted-foreground mt-1">The soundtrack for your baby's arrival</div>
+        <div className="text-xs text-muted-foreground mt-1">The soundtrack for your baby&apos;s arrival</div>
       </motion.div>
 
       {/* Phase tabs */}
@@ -70,10 +114,10 @@ export default function BirthPlaylistScreen() {
               key={phase.id}
               onClick={() => setActivePhase(phase.id)}
               className={cn(
-                'rounded-full px-4 py-2 text-xs font-medium whitespace-nowrap transition-colors',
+                "rounded-full px-4 py-2 text-xs font-medium whitespace-nowrap transition-colors",
                 activePhase === phase.id
-                  ? 'bg-moss text-cream'
-                  : 'bg-muted/40 text-muted-foreground hover:bg-muted/60',
+                  ? "bg-moss text-cream"
+                  : "bg-muted/40 text-muted-foreground hover:bg-muted/60",
               )}
             >
               {phase.icon} {phase.label}
@@ -105,24 +149,35 @@ export default function BirthPlaylistScreen() {
           <div className="text-sm text-muted-foreground">No suggestions loaded for this phase.</div>
         ) : (
           <div className="space-y-2">
-            {suggestions.map((s, i) => (
-              <Card key={i} className="rounded-2xl p-3 bg-card border-moss/15">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="w-4 h-4 text-rose-gold shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-moss-deep">{s.title}</div>
-                    <div className="text-xs text-muted-foreground">{s.artist}</div>
-                    <div className="text-xs text-foreground/60 italic mt-1">{s.reason}</div>
+            {suggestions.map((s) => {
+              const isAdded = tracks.some(
+                (t) => t.title.toLowerCase() === s.title.toLowerCase() && t.artist.toLowerCase() === s.artist.toLowerCase()
+              );
+              return (
+                <Card key={`${s.title}-${s.artist}`} className="rounded-2xl p-3 bg-card border-moss/15">
+                  <div className="flex items-center gap-3">
+                    <Music2 className="w-4 h-4 text-rose-gold shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-moss-deep">{s.title}</div>
+                      <div className="text-xs text-muted-foreground">{s.artist}</div>
+                      <div className="text-xs text-foreground/60 italic mt-1">{s.reason}</div>
+                    </div>
+                    <button
+                      onClick={() => !isAdded && addTrack(s.title, s.artist)}
+                      disabled={isAdded}
+                      className={cn(
+                        "shrink-0 text-xs rounded-full px-3 py-1 transition-colors",
+                        isAdded
+                          ? "bg-sage/30 text-moss-deep/50 cursor-default"
+                          : "bg-moss/10 text-moss hover:bg-moss/20"
+                      )}
+                    >
+                      {isAdded ? "Added" : <><Plus className="w-3 h-3 inline mr-1" />Add</>}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => addTrack(s.title, s.artist)}
-                    className="shrink-0 text-xs bg-moss/10 text-moss rounded-full px-3 py-1 hover:bg-moss/20 transition-colors"
-                  >
-                    <Plus className="w-3 h-3 inline mr-1" />Add
-                  </button>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         )}
       </motion.div>
@@ -132,9 +187,25 @@ export default function BirthPlaylistScreen() {
         <div className="flex items-center gap-2 mb-3">
           <Music className="w-4 h-4 text-moss" />
           <span className="text-sm font-medium text-moss-deep">My playlist</span>
+          {!loading && tracks.length > 0 && (
+            <span className="text-[10px] text-muted-foreground">({tracks.length} tracks)</span>
+          )}
         </div>
-        {!loading && tracks.length === 0 ? (
-          <div className="text-sm text-muted-foreground">Your playlist is empty. Add songs above.</div>
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+          </div>
+        ) : error ? (
+          <div className="text-center py-4">
+            <p className="text-sm text-muted-foreground">Couldn&apos;t load playlist</p>
+            <Button onClick={load} variant="outline" size="sm" className="mt-2 rounded-full">Retry</Button>
+          </div>
+        ) : tracks.length === 0 ? (
+          <EmptyState
+            icon={<Music className="w-7 h-7 text-rose-gold/40" />}
+            title="Your playlist is empty"
+            description="Add songs above."
+          />
         ) : (
           <div className="space-y-4">
             {PLAYLIST_PHASES.filter((p) => tracksByPhase[p.id]?.length).map((phase) => (
@@ -147,14 +218,14 @@ export default function BirthPlaylistScreen() {
                     <Card key={track.id} className="rounded-xl p-3 bg-blush/10 border-0">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-2 min-w-0">
-                          <Play className="w-3 h-3 text-rose-gold shrink-0" />
+                          <Music2 className="w-3 h-3 text-rose-gold shrink-0" />
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-moss-deep truncate">{track.title}</div>
                             <div className="text-xs text-muted-foreground truncate">{track.artist}</div>
                           </div>
                         </div>
                         <button
-                          onClick={() => deleteTrack(track.id)}
+                          onClick={() => setDeleteId(track.id)}
                           className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -168,6 +239,21 @@ export default function BirthPlaylistScreen() {
           </div>
         )}
       </motion.div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <AlertDialogContent className="bg-card rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-xl text-moss-deep">Remove this song?</AlertDialogTitle>
+            <AlertDialogDescription>You can always add it back.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteTrack} className="rounded-full bg-destructive hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

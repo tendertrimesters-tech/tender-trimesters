@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calcWeek, trimesterOf, useProfile } from "@/components/providers";
 import type { AppView } from "../AppShell";
-import { Baby, Heart, Sparkles, BookHeart, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart } from "lucide-react";
+import { Baby, Heart, Sparkles, BookHeart, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2, Crown } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +24,7 @@ const MOODS: { value: Mood; emoji: string; label: string; bg: string }[] = [
   { value: "energized", emoji: "✨", label: "Energized", bg: "bg-blush/40" },
 ];
 
-export default function HomeScreen({ onNavigate }: { onNavigate: (v: AppView) => void }) {
+export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigate: (v: AppView) => void; onNavigateToMore: (featureId?: string) => void }) {
   const { profile } = useProfile();
   const [weekData, setWeekData] = useState<any>(null);
   const [loadingWeek, setLoadingWeek] = useState(true);
@@ -174,7 +174,7 @@ export default function HomeScreen({ onNavigate }: { onNavigate: (v: AppView) =>
       </motion.div>
 
       {/* Quick actions grid */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <QuickAction
           icon={CalIcon}
           title="Appointments"
@@ -192,6 +192,22 @@ export default function HomeScreen({ onNavigate }: { onNavigate: (v: AppView) =>
           onClick={() => onNavigate("tempie")}
           highlight
         />
+        <QuickAction
+          icon={Users}
+          title="The Village"
+          desc="Share with other mamas"
+          accent="bg-sage/30"
+          color="text-moss-deep"
+          onClick={() => onNavigate("community")}
+        />
+        <QuickAction
+          icon={Flower2}
+          title="Meditate"
+          desc="Sensual guided journeys"
+          accent="bg-lavender/20"
+          color="text-moss-deep"
+          onClick={() => onNavigate("meditation")}
+        />
       </div>
 
       {/* Signature keepsakes grid */}
@@ -203,15 +219,15 @@ export default function HomeScreen({ onNavigate }: { onNavigate: (v: AppView) =>
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <KeepsakeCard emoji="💌" title="Baby Letters" accent="bg-blush/20" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="🔥" title="Fear to Flame" accent="bg-terracotta/15" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="🤍" title="Belly Bonding" accent="bg-sage/20" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="📖" title="Mother's Mother" accent="bg-butter" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="🌙" title="DreamKeeper" accent="bg-lavender/20" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="🌱" title="Name Garden" accent="bg-sage/25" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="⏳" title="Time Capsule" accent="bg-lavender/25" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="🎵" title="Birth Playlist" accent="bg-blush/25" onClick={() => onNavigate("more")} />
-          <KeepsakeCard emoji="🌊" title="Hormones" accent="bg-sage/15" onClick={() => onNavigate("more")} />
+          <KeepsakeCard emoji="💌" title="Baby Letters" accent="bg-blush/20" onClick={() => onNavigateToMore("letters")} />
+          <KeepsakeCard emoji="🔥" title="Fear to Flame" accent="bg-terracotta/15" onClick={() => onNavigateToMore("fear")} />
+          <KeepsakeCard emoji="🤍" title="Belly Bonding" accent="bg-sage/20" onClick={() => onNavigateToMore("rituals")} />
+          <KeepsakeCard emoji="📖" title="Mother's Mother" accent="bg-butter" onClick={() => onNavigateToMore("mother-story")} />
+          <KeepsakeCard emoji="🌙" title="DreamKeeper" accent="bg-lavender/20" onClick={() => onNavigateToMore("dreams")} />
+          <KeepsakeCard emoji="🌱" title="Name Garden" accent="bg-sage/25" onClick={() => onNavigateToMore("garden")} />
+          <KeepsakeCard emoji="⏳" title="Time Capsule" accent="bg-lavender/25" onClick={() => onNavigateToMore("capsule")} />
+          <KeepsakeCard emoji="🎵" title="Birth Playlist" accent="bg-blush/25" onClick={() => onNavigateToMore("playlist")} />
+          <KeepsakeCard emoji="🌊" title="Hormones" accent="bg-sage/15" onClick={() => onNavigateToMore("hormone")} />
         </div>
       </motion.div>
 

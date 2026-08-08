@@ -5,10 +5,23 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useProfile, calcWeek } from "@/components/providers";
 import { FEAR_CATEGORIES, FEAR_STAGE_LABELS } from "@/data/signature-features";
-import { Flame, Sparkles, Plus, ChevronRight, RefreshCw, Trash2 } from "lucide-react";
+import { Flame, Sparkles, RefreshCw, Trash2 } from "lucide-react";
+import EmptyState from "@/components/app/EmptyState";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type FearEntry = {
   id: string;
@@ -17,12 +30,13 @@ type FearEntry = {
   action: string | null;
   stage: string;
   week: number | null;
+  category?: string;
 };
 
 const STAGE_BORDER: Record<string, string> = {
   ember: "border-l-orange-400",
   spark: "border-l-yellow-400",
-  flame: "border-l-rose-gold",
+  flame: "border-l-amber-500",
 };
 
 export default function FearToFlameScreen() {
@@ -30,16 +44,22 @@ export default function FearToFlameScreen() {
   const currentWeek = calcWeek(profile?.dueDate) ?? 1;
 
   const [entries, setEntries] = useState<FearEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newFear, setNewFear] = useState("");
   const [category, setCategory] = useState<string>(FEAR_CATEGORIES[0]);
   const [submitting, setSubmitting] = useState(false);
   const [reframingId, setReframingId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const loadEntries = useCallback(() => {
     fetch("/api/fear-entries")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((d) => setEntries(d.entries || []))
-      .catch(() => {});
+      .catch(() => toast.error("Couldn't load fears"))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -50,15 +70,16 @@ export default function FearToFlameScreen() {
     if (!newFear.trim()) return;
     setSubmitting(true);
     try {
-      await fetch("/api/fear-entries", {
+      const res = await fetch("/api/fear-entries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fear: newFear, week: currentWeek }),
+        body: JSON.stringify({ fear: newFear, week: currentWeek, category }),
       });
+      if (!res.ok) throw new Error();
       setNewFear("");
       loadEntries();
     } catch {
-      // silent
+      toast.error("Failed to save fear");
     } finally {
       setSubmitting(false);
     }
@@ -67,17 +88,35 @@ export default function FearToFlameScreen() {
   const handlePatch = async (id: string, action: string) => {
     if (action === "reframe") setReframingId(id);
     try {
-      await fetch("/api/fear-entries", {
+      const res = await fetch("/api/fear-entries", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, action }),
       });
+      if (!res.ok) throw new Error();
       loadEntries();
     } catch {
-      // silent
+      if (action === "reframe") toast.error("Reframing failed. Try again?");
     } finally {
       setReframingId(null);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    try {
+      const res = await fetch("/api/fear-entries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: deleteId, action: "delete" }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Fear removed");
+      loadEntries();
+    } catch {
+      toast.error("Failed to delete");
+    }
+    setDeleteId(null);
   };
 
   const stageInfo = (stage: string) =>
@@ -127,21 +166,16 @@ export default function FearToFlameScreen() {
         </Card>
       </motion.div>
 
-      {entries.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-center py-12 space-y-3"
-        >
-          <Flame className="w-12 h-12 text-muted-foreground/30 mx-auto" />
-          <p className="text-sm text-muted-foreground">
-            Every fear you name is a fear you can face.
-          </p>
-          <p className="text-xs text-muted-foreground/70">
-            Start by naming one above.
-          </p>
-        </motion.div>
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+        </div>
+      ) : entries.length === 0 ? (
+        <EmptyState
+          icon={<Flame className="w-7 h-7 text-rose-gold/40" />}
+          title="Every fear you name is a fear you can face"
+          description="Start by naming one above."
+        />
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -166,7 +200,7 @@ export default function FearToFlameScreen() {
                         "text-xs font-medium px-2 py-0.5 rounded-full",
                         entry.stage === "ember" && "bg-orange-100 text-orange-700",
                         entry.stage === "spark" && "bg-yellow-100 text-yellow-700",
-                        entry.stage === "flame" && "bg-rose-gold/20 text-rose-gold"
+                        entry.stage === "flame" && "bg-amber-100 text-amber-700"
                       )}
                     >
                       {info.emoji} {info.label}
@@ -178,7 +212,7 @@ export default function FearToFlameScreen() {
                     )}
                   </div>
                   <button
-                    onClick={() => handlePatch(entry.id, "delete")}
+                    onClick={() => setDeleteId(entry.id)}
                     className="text-muted-foreground/50 hover:text-red-400 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -194,7 +228,7 @@ export default function FearToFlameScreen() {
                     {reframingId === entry.id ? (
                       <span className="inline-flex items-center gap-1 text-xs text-orange-500">
                         <RefreshCw className="w-3 h-3 animate-spin" />
-                        Reframing…
+                        Reframing...
                       </span>
                     ) : (
                       <button
@@ -223,7 +257,7 @@ export default function FearToFlameScreen() {
                         onClick={() => handlePatch(entry.id, "flame")}
                         className="text-xs bg-yellow-100 text-yellow-700 rounded-full px-3 py-1 hover:bg-yellow-200 transition-colors"
                       >
-                        I&rsquo;ve grown from this
+                        I've grown from this
                       </button>
                     </div>
                   </>
@@ -234,8 +268,8 @@ export default function FearToFlameScreen() {
                     <p className="text-sm text-foreground/80 italic mt-2 bg-sage/20 rounded-xl p-3 leading-relaxed">
                       {entry.reframed}
                     </p>
-                    <p className="text-xs text-rose-gold font-medium mt-2">
-                      🔥 This fear became your strength
+                    <p className="text-xs text-amber-600 font-medium mt-2">
+                      This fear became your strength
                     </p>
                   </>
                 )}
@@ -244,6 +278,21 @@ export default function FearToFlameScreen() {
           })}
         </motion.div>
       )}
+
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
+        <AlertDialogContent className="bg-card rounded-3xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-xl text-moss-deep">Delete this fear?</AlertDialogTitle>
+            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="rounded-full bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -74,9 +74,18 @@ const COLLECTIONS: FeatureCollection[] = [
   },
 ];
 
-export default function MoreScreen({ onNavigate }: { onNavigate: (v: AppView) => void }) {
+export default function MoreScreen({ onNavigate, initialFeature }: { onNavigate: (v: AppView) => void; initialFeature?: string }) {
   const { profile } = useProfile();
   const isPremium = profile?.isPremium;
+
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(initialFeature || null);
+
+  // Handle deep-linked feature from home screen keepsakes
+  useEffect(() => {
+    if (initialFeature) {
+      setSelectedFeature(initialFeature);
+    }
+  }, [initialFeature]);
 
   function handleFeatureClick(featureId: string) {
     // Map feature IDs to AppView or special navigation
@@ -99,8 +108,6 @@ export default function MoreScreen({ onNavigate }: { onNavigate: (v: AppView) =>
   function goBack() {
     setSelectedFeature(null);
   }
-
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
 
   // If a signature feature is selected, render it inline
   if (selectedFeature) {
@@ -172,8 +179,12 @@ export default function MoreScreen({ onNavigate }: { onNavigate: (v: AppView) =>
 // Dynamic feature renderer — lazy-loads signature feature screens
 function FeatureRenderer({ featureId, onBack }: { featureId: string; onBack: () => void }) {
   const [Screen, setScreen] = useState<React.ComponentType | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
+    setScreen(null);
+    setError(false);
+
     const imports: Record<string, () => Promise<any>> = {
       "letters": () => import("./LettersFromBabyScreen"),
       "garden": () => import("./NameGardenScreen"),
@@ -187,21 +198,31 @@ function FeatureRenderer({ featureId, onBack }: { featureId: string; onBack: () 
     };
 
     const loader = imports[featureId];
-    if (loader) {
-      loader().then((mod) => {
-        setScreen(() => mod.default);
-      });
+    if (!loader) {
+      setError(true);
+      return;
     }
+
+    loader()
+      .then((mod) => setScreen(() => mod.default))
+      .catch(() => setError(true));
   }, [featureId]);
+
+  if (error) {
+    return (
+      <div>
+        <button onClick={onBack} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-moss-deep transition-colors mb-4">
+          <ArrowRight className="w-3 h-3 rotate-180" /> Back to More
+        </button>
+        <div className="text-center py-12 text-muted-foreground text-sm">This feature couldn't load. <button onClick={onBack} className="text-moss underline">Go back</button></div>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-moss-deep transition-colors mb-4"
-      >
-        <ArrowRight className="w-3 h-3 rotate-180" />
-        Back to More
+      <button onClick={onBack} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-moss-deep transition-colors mb-4">
+        <ArrowRight className="w-3 h-3 rotate-180" /> Back to More
       </button>
       {Screen ? <Screen /> : (
         <div className="flex items-center justify-center py-20">

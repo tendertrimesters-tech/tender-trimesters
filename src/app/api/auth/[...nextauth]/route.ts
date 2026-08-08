@@ -39,23 +39,24 @@ export const authOptions: NextAuthOptions = {
               passwordHash,
             },
           });
-          return { id: user.id, email: user.email, name: user.name };
+          return { id: user.id, email: user.email, name: user.name ?? undefined };
         }
 
         const user = await db.user.findUnique({ where: { email } });
         if (!user) throw new Error("No account found with that email");
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) throw new Error("Incorrect password");
-        return { id: user.id, email: user.email, name: user.name };
+        return { id: user.id, email: user.email, name: user.name ?? undefined };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
+        const u = user as { id: string; email: string; name?: string };
+        token.id = u.id;
+        token.email = u.email;
+        token.name = u.name;
       }
       return token;
     },
@@ -63,7 +64,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
-        session.user.name = token.name as string;
+        if (token.name) session.user.name = token.name as string;
       }
       return session;
     },

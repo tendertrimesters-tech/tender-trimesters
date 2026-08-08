@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProfile, calcWeek, trimesterOf } from "@/components/providers";
 import { format } from "date-fns";
-import { Baby, Calendar as CalIcon, Heart, Sparkles, Crown, Copy, Check, LogOut, ChevronRight, User, Users, Lock, Star } from "lucide-react";
+import { Baby, Calendar as CalIcon, Heart, Crown, Copy, Check, LogOut, ChevronRight, User, Users, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { LucideIcon } from "lucide-react";
 
 export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) {
   const { profile, refresh } = useProfile();
@@ -23,7 +25,13 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
   const [copied, setCopied] = useState(false);
 
   if (!profile) {
-    return <div className="text-center text-muted-foreground text-sm py-12">Loading your profile...</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-36 rounded-3xl" />
+        <Skeleton className="h-24 rounded-3xl" />
+        <Skeleton className="h-48 rounded-3xl" />
+      </div>
+    );
   }
 
   const week = calcWeek(profile.dueDate);
@@ -35,21 +43,37 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
 
   async function copyPartnerLink() {
     if (!partnerLink) return;
-    await navigator.clipboard.writeText(partnerLink);
-    setCopied(true);
-    toast.success("Link copied");
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(partnerLink);
+      setCopied(true);
+      toast.success("Link copied");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for insecure contexts
+      const ta = document.createElement("textarea");
+      ta.value = partnerLink;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      toast.success("Link copied");
+      setTimeout(() => setCopied(false), 2000);
+    }
   }
 
   async function generatePartnerLink() {
-    const res = await fetch("/api/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ partnerLinkToken: "generate" }),
-    });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partnerLinkToken: "generate" }),
+      });
+      if (!res.ok) throw new Error();
       await refresh();
       toast.success("Partner link created");
+    } catch {
+      toast.error("Failed to create partner link");
     }
   }
 
@@ -164,12 +188,12 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
 
       <EditProfileDialog open={editOpen} onOpenChange={setEditOpen} onSaved={refresh} profile={profile} />
       <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} onUpgraded={refresh} />
-      {partnerLink && <PartnerPreviewDialog open={partnerOpen} onOpenChange={setPartnerOpen} link={partnerLink} />}
+      {partnerLink && <PartnerPreviewDialog open={partnerOpen} onOpenChange={setPartnerOpen} profile={profile} />}
     </div>
   );
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 p-4">
       <div className="w-9 h-9 rounded-xl bg-muted/40 flex items-center justify-center flex-shrink-0">
@@ -183,12 +207,22 @@ function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value
   );
 }
 
-function EditProfileDialog({ open, onOpenChange, onSaved, profile }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => Promise<void>; profile: any }) {
-  const [name, setName] = useState(profile?.name || "");
-  const [dueDate, setDueDate] = useState<Date | undefined>(profile?.dueDate ? new Date(profile.dueDate) : undefined);
-  const [babyName, setBabyName] = useState(profile?.babyName || "");
-  const [partnerName, setPartnerName] = useState(profile?.partnerName || "");
+function EditProfileDialog({ open, onOpenChange, onSaved, profile }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => Promise<void>; profile: Record<string, any> }) {
+  const [name, setName] = useState("");
+  const [dueDate, setDueDate] = useState<Date | undefined>();
+  const [babyName, setBabyName] = useState("");
+  const [partnerName, setPartnerName] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Reset form when dialog opens with latest profile data
+  useEffect(() => {
+    if (open && profile) {
+      setName(profile.name || "");
+      setDueDate(profile.dueDate ? new Date(profile.dueDate) : undefined);
+      setBabyName(profile.babyName || "");
+      setPartnerName(profile.partnerName || "");
+    }
+  }, [open, profile]);
 
   async function save() {
     setSaving(true);
@@ -259,17 +293,12 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
   const [tier, setTier] = useState<"one_time" | "monthly">("one_time");
   const [processing, setProcessing] = useState(false);
 
-  // Set NEXT_PUBLIC_STRIPE_CONFIGURED=1 in your env once you've added real Stripe keys.
-  // When true, the dialog routes through Stripe Checkout. When false (dev only),
-  // it falls back to the mock /api/premium endpoint so you can test the UX.
   const stripeLive = process.env.NEXT_PUBLIC_STRIPE_CONFIGURED === "1";
 
   async function purchase() {
     setProcessing(true);
     try {
       if (stripeLive) {
-        // Real Stripe flow: ask our backend to create a Checkout Session,
-        // then redirect the browser to Stripe's hosted checkout page.
         const res = await fetch("/api/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -281,12 +310,10 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
         }
         const { url } = await res.json();
         if (!url) throw new Error("No checkout URL returned");
-        // Redirect to Stripe — user pays there, then comes back to /?premium=success
         window.location.href = url;
         return;
       }
 
-      // Dev mock flow — flips isPremium without payment.
       const res = await fetch("/api/premium", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -294,7 +321,7 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
       });
       if (!res.ok) throw new Error();
       await onUpgraded();
-      toast.success(tier === "one_time" ? "Welcome to Premium 💛" : "You're Premium now 💛");
+      toast.success(tier === "one_time" ? "Welcome to Premium" : "You're Premium now");
       onOpenChange(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong. Try again?");
@@ -333,7 +360,7 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
               </div>
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
-              {["Ebook", "Affirmation deck", "Letters templates", "All premium features"].map((f) => (
+              {["Letters from Baby", "Fear to Flame", "Belly Bonding", "DreamKeeper", "Name Garden", "Time Capsule", "Bump Gallery", "Birth Playlist", "My Mother's Mother", "Hormone Horoscope", "Guided Meditations"].map((f) => (
                 <span key={f} className="text-[10px] bg-cream/60 text-moss-deep px-2 py-0.5 rounded-full">{f}</span>
               ))}
             </div>
@@ -357,7 +384,7 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
               </div>
             </div>
             <div className="mt-2 text-[10px] text-muted-foreground">
-              Same features, spread out. Includes everything in the bundle.
+              Same premium features with flexible payments. Includes all 9 signature features plus meditations and bump gallery.
             </div>
           </button>
 
@@ -385,7 +412,10 @@ function UpgradeDialog({ open, onOpenChange, onUpgraded }: { open: boolean; onOp
   );
 }
 
-function PartnerPreviewDialog({ open, onOpenChange, link }: { open: boolean; onOpenChange: (v: boolean) => void; link: string }) {
+function PartnerPreviewDialog({ open, onOpenChange, profile }: { open: boolean; onOpenChange: (v: boolean) => void; profile: Record<string, any> }) {
+  const week = calcWeek(profile.dueDate);
+  const trimester = trimesterOf(week);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card rounded-3xl max-w-md">
@@ -397,12 +427,23 @@ function PartnerPreviewDialog({ open, onOpenChange, link }: { open: boolean; onO
         </DialogHeader>
         <div className="mt-2 bg-gradient-moss text-cream rounded-2xl p-4">
           <div className="text-[10px] uppercase tracking-widest text-blush mb-1">Partner view preview</div>
-          <div className="font-serif text-xl">Week 16 · Avocado</div>
-          <div className="text-xs text-cream/70 mt-1">Due Aug 12, 2026</div>
+          <div className="font-serif text-xl">
+            {week ? `Week ${week} · T${trimester}` : "Set your due date to see week info"}
+          </div>
+          {profile.dueDate && (
+            <div className="text-xs text-cream/70 mt-1">Due {format(new Date(profile.dueDate), "MMM d, yyyy")}</div>
+          )}
           <div className="mt-3 bg-cream/10 backdrop-blur-sm rounded-xl p-3 text-xs">
-            <div className="text-blush font-semibold mb-1">Upcoming:</div>
-            <div>Anatomy Scan · Jul 15</div>
-            <div>OB Visit · Jul 28</div>
+            <div className="text-blush font-semibold mb-1">They'll see:</div>
+            <div>Your pregnancy progress & weekly updates</div>
+            <div>Upcoming appointments</div>
+            <div>Bump photo gallery (if any)</div>
+          </div>
+          <div className="mt-2 bg-cream/10 backdrop-blur-sm rounded-xl p-3 text-xs">
+            <div className="text-cream/60 font-semibold mb-1">They won't see:</div>
+            <div>Your journal entries</div>
+            <div>Fears, dreams, or letters</div>
+            <div>Any editable content</div>
           </div>
         </div>
         <Button onClick={() => onOpenChange(false)} className="w-full bg-moss hover:bg-moss-deep rounded-full">
