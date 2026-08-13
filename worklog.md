@@ -199,3 +199,28 @@ Stage Summary:
 - Landing page nav: Features → Keepsakes → Pricing → Stories → Bundle
 - Home screen: 4 quick actions (Appointments, Tempie, Village, Meditate) + 9 deep-linked keepsake cards
 - More hub: proper lazy loading with error handling + deep linking from home
+
+---
+Task ID: polish-pass-2-final
+Agent: main (orchestrator)
+Task: Polish all remaining 11 screens, answer business structure question, create day-by-day marketing schedule
+
+Work Log:
+- Audited all 13 unpolished screens via Explore subagent — identified 6 cross-cutting issues
+- Fixed 4 screens with weak error states (DreamKeeper, NameGarden, MemoryCapsule, BirthPlaylist) — replaced plain text+button with styled Card + icon + serif title (matching Calendar/Journal/MotherStory pattern)
+- Fixed ProfileScreen — added `profileLoading` from useProfile() hook, now shows proper error state with retry button instead of infinite skeletons when API fails
+- Fixed HormoneHoroscopeScreen — added toast notification on API failure ("Using offline hormone data" when fallback available, error toast otherwise)
+- Fixed FearToFlameScreen — replaced all generic Tailwind colors (orange-100/700, yellow-100/700, amber-100/700) with brand palette (terracotta, rose-gold, moss)
+- Fixed LettersFromBabyScreen — wrapped header in motion.div with animation, added Heart icon, changed week badge from sage to blush/rose-gold
+- Fixed NameGardenScreen — replaced raw HTML <input> with branded <Input> component for feeling edit field
+- TypeScript compile: zero errors in src/ (only pre-existing errors in examples/ and skills/)
+- Created 90-day day-by-day marketing schedule (marketing-schedule-90day.xlsx) with 3 sheets: full schedule (100 rows), content type legend, weekly KPI tracker
+- Answered business structure question: sole proprietor can open business banking, can form LLC later and convert to corporation
+
+Stage Summary:
+- All 18 app screens are now polished and consistent
+- Marketing schedule covers 90 days: Pre-Launch (14 days), Launch Week, Growth (3 weeks), Sustain (4 weeks), Expand (4 weeks)
+- Schedule color-coded by 9 content types using brand palette
+- Includes daily platforms, detailed tasks, CTAs, assets needed, and KPI targets
+- Weekly KPI tracker sheet for tracking signups, conversions, ad spend, CPA
+- Business structure guidance provided (see conversation)

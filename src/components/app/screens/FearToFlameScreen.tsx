@@ -35,9 +35,9 @@ type FearEntry = {
 };
 
 const STAGE_BORDER: Record<string, string> = {
-  ember: "border-l-orange-400",
-  spark: "border-l-yellow-400",
-  flame: "border-l-amber-500",
+  ember: "border-l-terracotta",
+  spark: "border-l-rose-gold",
+  flame: "border-l-moss",
 };
 
 export default function FearToFlameScreen() {
@@ -213,9 +213,9 @@ export default function FearToFlameScreen() {
                     <span
                       className={cn(
                         "text-xs font-medium px-2 py-0.5 rounded-full",
-                        entry.stage === "ember" && "bg-orange-100 text-orange-700",
-                        entry.stage === "spark" && "bg-yellow-100 text-yellow-700",
-                        entry.stage === "flame" && "bg-amber-100 text-amber-700"
+                        entry.stage === "ember" && "bg-terracotta/15 text-terracotta",
+                        entry.stage === "spark" && "bg-rose-gold/15 text-rose-gold",
+                        entry.stage === "flame" && "bg-moss/15 text-moss-deep"
                       )}
                     >
                       {info.emoji} {info.label}
@@ -241,14 +241,14 @@ export default function FearToFlameScreen() {
                 {entry.stage === "ember" && (
                   <div className="mt-3">
                     {reframingId === entry.id ? (
-                      <span className="inline-flex items-center gap-1 text-xs text-orange-500">
+                      <span className="inline-flex items-center gap-1 text-xs text-terracotta">
                         <RefreshCw className="w-3 h-3 animate-spin" />
                         Reframing...
                       </span>
                     ) : (
                       <button
                         onClick={() => handlePatch(entry.id, "reframe")}
-                        className="text-xs bg-orange-100 text-orange-700 rounded-full px-3 py-1 hover:bg-orange-200 transition-colors"
+                        className="text-xs bg-terracotta/15 text-terracotta rounded-full px-3 py-1 hover:bg-terracotta/25 transition-colors"
                       >
                         Reframe
                       </button>
@@ -270,7 +270,7 @@ export default function FearToFlameScreen() {
                     <div className="mt-3">
                       <button
                         onClick={() => handlePatch(entry.id, "flame")}
-                        className="text-xs bg-yellow-100 text-yellow-700 rounded-full px-3 py-1 hover:bg-yellow-200 transition-colors"
+                        className="text-xs bg-rose-gold/15 text-rose-gold rounded-full px-3 py-1 hover:bg-rose-gold/25 transition-colors"
                       >
                         I&apos;ve grown from this
                       </button>
@@ -283,7 +283,7 @@ export default function FearToFlameScreen() {
                     <p className="text-sm text-foreground/80 italic mt-2 bg-sage/20 rounded-xl p-3 leading-relaxed">
                       {entry.reframed}
                     </p>
-                    <p className="text-xs text-amber-600 font-medium mt-2">
+                    <p className="text-xs text-moss font-medium mt-2">
                       This fear became your strength
                     </p>
                   </>

@@ -225,10 +225,11 @@ export default function NameGardenScreen() {
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
           </div>
         ) : error ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground">Couldn't load your garden</p>
-            <Button onClick={load} variant="outline" size="sm" className="mt-2 rounded-full">Retry</Button>
-          </div>
+          <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+            <Sprout className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+            <div className="font-serif text-lg text-moss-deep">Couldn&apos;t load your garden</div>
+            <Button onClick={load} variant="outline" className="mt-4 rounded-full">Retry</Button>
+          </Card>
         ) : seeds.length === 0 ? (
           <EmptyState
             icon={<Sprout className="w-7 h-7 text-rose-gold/40" />}
@@ -259,11 +260,11 @@ export default function NameGardenScreen() {
                     <div className="font-serif text-xl text-moss-deep">{seed.name}</div>
                     {editingId === seed.id ? (
                       <div className="mt-2 flex gap-2">
-                        <input
+                        <Input
                           value={editFeeling}
                           onChange={(e) => setEditFeeling(e.target.value)}
                           placeholder="Update feeling..."
-                          className="flex-1 text-xs bg-muted/40 rounded-lg px-2 py-1 border-0 outline-none"
+                          className="flex-1 text-xs h-8 rounded-lg"
                           autoFocus
                           onKeyDown={(e) => e.key === "Enter" && updateFeeling(seed.id)}
                         />

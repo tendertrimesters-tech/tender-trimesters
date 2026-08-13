@@ -183,10 +183,11 @@ export default function DreamKeeperScreen() {
 
       {/* Error */}
       {error && !loading && (
-        <div className="text-center py-4">
-          <p className="text-sm text-muted-foreground">Couldn't load dreams</p>
-          <Button onClick={loadEntries} variant="outline" size="sm" className="mt-2 rounded-full">Retry</Button>
-        </div>
+        <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+          <Moon className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+          <div className="font-serif text-lg text-moss-deep">Couldn&apos;t load your dreams</div>
+          <Button onClick={loadEntries} variant="outline" className="mt-4 rounded-full">Retry</Button>
+        </Card>
       )}
 
       {/* Dream entries */}

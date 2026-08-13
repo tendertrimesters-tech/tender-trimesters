@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,24 +13,38 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProfile, calcWeek, trimesterOf } from "@/components/providers";
 import { format } from "date-fns";
-import { Baby, Calendar as CalIcon, Heart, Crown, Copy, Check, LogOut, ChevronRight, User, Users, Lock } from "lucide-react";
+import { Baby, Calendar as CalIcon, Heart, Crown, Copy, Check, LogOut, ChevronRight, User, Users, Lock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
 export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) {
-  const { profile, refresh } = useProfile();
+  const { profile, refresh, loading: profileLoading } = useProfile();
   const [editOpen, setEditOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  if (!profile) {
+  // Loading skeleton
+  if (profileLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-36 rounded-3xl" />
         <Skeleton className="h-24 rounded-3xl" />
         <Skeleton className="h-48 rounded-3xl" />
+      </div>
+    );
+  }
+
+  // Error state — profile is null and we're not loading
+  if (!profile) {
+    return (
+      <div className="space-y-4">
+        <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+          <AlertCircle className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+          <div className="font-serif text-lg text-moss-deep">Couldn&apos;t load your profile</div>
+          <Button onClick={refresh} variant="outline" className="mt-4 rounded-full">Retry</Button>
+        </Card>
       </div>
     );
   }

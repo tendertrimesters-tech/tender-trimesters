@@ -196,10 +196,11 @@ export default function BirthPlaylistScreen() {
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
           </div>
         ) : error ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground">Couldn&apos;t load playlist</p>
-            <Button onClick={load} variant="outline" size="sm" className="mt-2 rounded-full">Retry</Button>
-          </div>
+          <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+            <Music className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+            <div className="font-serif text-lg text-moss-deep">Couldn&apos;t load your playlist</div>
+            <Button onClick={load} variant="outline" className="mt-4 rounded-full">Retry</Button>
+          </Card>
         ) : tracks.length === 0 ? (
           <EmptyState
             icon={<Music className="w-7 h-7 text-rose-gold/40" />}

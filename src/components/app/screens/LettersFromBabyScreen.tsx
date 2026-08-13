@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, calcWeek } from "@/components/providers";
-import { Baby as BabyIcon, Sparkles, BookOpen } from "lucide-react";
+import { Baby as BabyIcon, Sparkles, BookOpen, Heart } from "lucide-react";
 import EmptyState from "@/components/app/EmptyState";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -74,14 +74,17 @@ export default function LettersFromBabyScreen() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div>
-        <h1 className="font-serif text-2xl text-moss-deep">
-          Letters from {babyName || "Baby"}
-        </h1>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="flex items-center gap-2">
+          <Heart className="w-5 h-5 text-rose-gold" />
+          <h1 className="font-serif text-2xl text-moss-deep">
+            Letters from {babyName || "Baby"}
+          </h1>
+        </div>
         <p className="text-xs text-muted-foreground mt-1">
           Love letters from your little one, week by week
         </p>
-      </div>
+      </motion.div>
 
       {/* Generate CTA for current week */}
       {!hasCurrentWeekLetter && currentWeek && (
@@ -144,7 +147,7 @@ export default function LettersFromBabyScreen() {
             >
               <Card className="bg-card border-moss/15 rounded-2xl p-5">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="bg-sage/30 rounded-full text-[10px] px-2 py-0.5 text-moss-deep font-medium">
+                  <span className="bg-blush/30 rounded-full text-[10px] px-2 py-0.5 text-rose-gold font-medium">
                     Week {letter.week}
                   </span>
                   <span className="text-[10px] text-muted-foreground">

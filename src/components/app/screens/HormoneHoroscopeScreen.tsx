@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getHormoneInsight, HORMONE_INSIGHTS } from "@/data/signature-features";
 import type { HormoneInsight } from "@/data/signature-features";
 import { Activity, Heart, Lightbulb, Waves } from "lucide-react";
+import { toast } from "sonner";
 
 export default function HormoneHoroscopeScreen() {
   const [selected, setSelected] = useState<HormoneInsight | null>(null);
@@ -40,7 +41,12 @@ export default function HormoneHoroscopeScreen() {
       })
       .catch(() => {
         // API failed — fall back to static data
-        if (fallback) setSelected(fallback);
+        if (fallback) {
+          setSelected(fallback);
+          toast.info("Using offline hormone data");
+        } else {
+          toast.error("Couldn't load hormone insight");
+        }
       })
       .finally(() => setLoading(false));
   }, [currentWeek]);
