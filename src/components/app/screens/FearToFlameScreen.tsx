@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useProfile, calcWeek } from "@/components/providers";
 import { FEAR_CATEGORIES, FEAR_STAGE_LABELS } from "@/data/signature-features";
@@ -45,6 +46,7 @@ export default function FearToFlameScreen() {
 
   const [entries, setEntries] = useState<FearEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [newFear, setNewFear] = useState("");
   const [category, setCategory] = useState<string>(FEAR_CATEGORIES[0]);
   const [submitting, setSubmitting] = useState(false);
@@ -52,13 +54,19 @@ export default function FearToFlameScreen() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const loadEntries = useCallback(() => {
+    setLoading(true);
     fetch("/api/fear-entries")
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();
       })
-      .then((d) => setEntries(d.entries || []))
-      .catch(() => toast.error("Couldn't load fears"))
+      .then((d) => {
+        setEntries(d.entries || []);
+        setError(false);
+      })
+      .catch(() => {
+        setError(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -142,18 +150,19 @@ export default function FearToFlameScreen() {
             placeholder="What are you afraid of, mama? Name it gently."
             value={newFear}
             onChange={(e) => setNewFear(e.target.value)}
-            className="resize-none"
+            className="resize-none rounded-xl"
           />
           <div className="flex items-center gap-2 mt-3">
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="text-xs rounded-full border border-moss/20 px-3 py-1.5 bg-background text-foreground"
-            >
-              {FEAR_CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-auto rounded-full text-xs border-moss/20 px-3 py-1.5 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FEAR_CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c} className="text-xs">{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
               onClick={handleSubmit}
               disabled={submitting || !newFear.trim()}
@@ -170,6 +179,12 @@ export default function FearToFlameScreen() {
         <div className="space-y-3">
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
         </div>
+      ) : error ? (
+        <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+          <Flame className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+          <div className="font-serif text-lg text-moss-deep">Couldn&apos;t load your fears</div>
+          <Button onClick={loadEntries} variant="outline" className="mt-4 rounded-full">Retry</Button>
+        </Card>
       ) : entries.length === 0 ? (
         <EmptyState
           icon={<Flame className="w-7 h-7 text-rose-gold/40" />}
@@ -257,7 +272,7 @@ export default function FearToFlameScreen() {
                         onClick={() => handlePatch(entry.id, "flame")}
                         className="text-xs bg-yellow-100 text-yellow-700 rounded-full px-3 py-1 hover:bg-yellow-200 transition-colors"
                       >
-                        I've grown from this
+                        I&apos;ve grown from this
                       </button>
                     </div>
                   </>
@@ -283,7 +298,7 @@ export default function FearToFlameScreen() {
         <AlertDialogContent className="bg-card rounded-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif text-xl text-moss-deep">Delete this fear?</AlertDialogTitle>
-            <AlertDialogDescription>This can't be undone.</AlertDialogDescription>
+            <AlertDialogDescription>This can&apos;t be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-full" onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>

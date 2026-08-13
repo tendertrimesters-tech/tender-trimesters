@@ -12,6 +12,7 @@ import { Lock, Unlock, Mail, Star, Handshake, Camera, Plus, Trash2, Calendar } f
 import EmptyState from "@/components/app/EmptyState";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -172,15 +173,16 @@ export default function MemoryCapsuleScreen() {
             />
             <div>
               <div className="text-xs text-muted-foreground mb-2">When should it unlock?</div>
-              <select
-                value={unlockOption}
-                onChange={(e) => setUnlockOption(Number(e.target.value))}
-                className="w-full rounded-xl border bg-card px-3 py-2 text-sm text-moss-deep"
-              >
-                {CAPSULE_UNLOCK_OPTIONS.map((opt, i) => (
-                  <option key={i} value={i}>{opt.label}</option>
-                ))}
-              </select>
+              <Select value={String(unlockOption)} onValueChange={(v) => setUnlockOption(Number(v))}>
+                <SelectTrigger className="w-full rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CAPSULE_UNLOCK_OPTIONS.map((opt, i) => (
+                    <SelectItem key={i} value={String(i)}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {selectedOpt && (
                 <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
                   <Calendar className="w-3 h-3" />

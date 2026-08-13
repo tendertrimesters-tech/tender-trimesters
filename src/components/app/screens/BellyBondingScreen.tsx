@@ -21,6 +21,7 @@ export default function BellyBondingScreen() {
   const [speaking, setSpeaking] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
   const [streakLoading, setStreakLoading] = useState(true);
+  const [streakError, setStreakError] = useState(false);
   const [showPast, setShowPast] = useState(false);
 
   const loadStreak = useCallback(() => {
@@ -33,8 +34,11 @@ export default function BellyBondingScreen() {
       .then((d) => {
         const weeks = new Set((d.rituals || []).map((r: any) => r.week));
         setStreakCount(weeks.size);
+        setStreakError(false);
       })
-      .catch(() => toast.error("Couldn't load streak"))
+      .catch(() => {
+        setStreakError(true);
+      })
       .finally(() => setStreakLoading(false));
   }, []);
 
@@ -179,6 +183,11 @@ export default function BellyBondingScreen() {
         <p className="text-xs text-muted-foreground">Your bonding journey</p>
         {streakLoading ? (
           <Skeleton className="h-2 rounded-full" />
+        ) : streakError ? (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-sage/20 rounded-full h-2" />
+            <span className="text-xs text-muted-foreground">?</span>
+          </div>
         ) : (
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-sage/20 rounded-full h-2">

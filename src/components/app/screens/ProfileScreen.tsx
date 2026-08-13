@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +81,7 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
   return (
     <div className="space-y-5">
       {/* Profile header */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft">
         <div className="p-6">
           <div className="flex items-start gap-4">
@@ -112,10 +114,11 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
           </div>
         </div>
       </Card>
+      </motion.div>
 
       {/* Premium banner (if not premium) */}
       {!profile.isPremium && (
-        <button onClick={() => setUpgradeOpen(true)} className="text-left w-full">
+        <motion.button initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} onClick={() => setUpgradeOpen(true)} className="text-left w-full">
           <Card className="bg-gradient-premium text-cream rounded-3xl p-5 hover:opacity-95 transition-opacity shadow-premium">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-cream/20 backdrop-blur-sm flex items-center justify-center">
@@ -128,10 +131,11 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
               <ChevronRight className="w-4 h-4 text-cream/70" />
             </div>
           </Card>
-        </button>
+        </motion.button>
       )}
 
       {/* Quick info rows */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
       <Card className="bg-card border-moss/15 rounded-3xl divide-y divide-border/30">
         <InfoRow icon={User} label="Name" value={profile.name || "—"} />
         <InfoRow icon={CalIcon} label="Due date" value={profile.dueDate ? format(new Date(profile.dueDate), "MMM d, yyyy") : "—"} />
@@ -139,12 +143,14 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
         {profile.partnerName && <InfoRow icon={Heart} label="Partner" value={profile.partnerName} />}
         <InfoRow icon={Crown} label="Plan" value={profile.isPremium ? `Premium (${profile.premiumTier === "monthly" ? "Monthly" : "One-time"})` : "Free"} />
       </Card>
+      </motion.div>
 
       <Button onClick={() => setEditOpen(true)} variant="outline" className="w-full rounded-full h-11 border-moss/30">
         Edit profile
       </Button>
 
       {/* Partner access */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
       <Card className="bg-card border-moss/15 rounded-3xl p-5">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-sage/40 flex items-center justify-center">
@@ -175,16 +181,18 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
           </Button>
         )}
       </Card>
+      </motion.div>
 
       {/* Sign out */}
-      <Button onClick={onSignOut} variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 rounded-full">
-        <LogOut className="w-4 h-4 mr-2" /> Sign out
-      </Button>
-
-      <div className="text-center text-[10px] text-muted-foreground pt-2">
-        Tender Trimesters · by Mommies Matter<br />
-        Made with love by Helena-Ann Baker
-      </div>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+        <Button onClick={onSignOut} variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 rounded-full">
+          <LogOut className="w-4 h-4 mr-2" /> Sign out
+        </Button>
+        <div className="text-center text-[10px] text-muted-foreground pt-2">
+          Tender Trimesters · by Mommies Matter<br />
+          Made with love by Helena-Ann Baker
+        </div>
+      </motion.div>
 
       <EditProfileDialog open={editOpen} onOpenChange={setEditOpen} onSaved={refresh} profile={profile} />
       <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} onUpgraded={refresh} />

@@ -80,7 +80,7 @@ export default function JournalScreen() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
           <div className="font-serif text-2xl text-moss-deep">Journal</div>
           {!loading && (
@@ -90,7 +90,7 @@ export default function JournalScreen() {
         <Button onClick={() => setAddOpen(true)} className="bg-moss hover:bg-moss-deep rounded-full h-9">
           <Plus className="w-4 h-4 mr-1" /> New
         </Button>
-      </div>
+      </motion.div>
 
       {loading ? (
         <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}</div>
@@ -243,6 +243,7 @@ function NewEntryDialog({
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const uploadingRef = useRef(false);
 
   function reset() {
     setTitle(""); setBody(""); setMood(""); setWeek(defaultWeek || ""); setCraving(""); setBabyName(""); setPhotoUrl("");
@@ -258,6 +259,8 @@ function NewEntryDialog({
       toast.error("Photo is too large (max 10MB)");
       return;
     }
+    if (uploadingRef.current) return;
+    uploadingRef.current = true;
     setUploading(true);
     try {
       const fd = new FormData();
@@ -271,6 +274,7 @@ function NewEntryDialog({
       toast.error("Upload failed");
     } finally {
       setUploading(false);
+      uploadingRef.current = false;
     }
   }
 

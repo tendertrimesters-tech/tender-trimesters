@@ -84,6 +84,10 @@ export default function TempieScreen() {
     setInput("");
     setSending(true);
 
+    // Reset textarea height
+    const ta = document.querySelector('#tempie-input') as HTMLTextAreaElement | null;
+    if (ta) { ta.style.height = 'auto'; }
+
     const userMsg: Msg = {
       id: `temp-${Date.now()}`,
       role: "user",
@@ -196,8 +200,14 @@ export default function TempieScreen() {
       <div className="flex-shrink-0">
         <Card className="bg-card border-moss/15 rounded-3xl p-2 flex gap-2 items-end">
           <Textarea
+            id="tempie-input"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              const el = e.target;
+              el.style.height = 'auto';
+              el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
