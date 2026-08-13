@@ -17,6 +17,7 @@ import MoreScreen from "./screens/MoreScreen";
 import CommunityScreen from "./screens/CommunityScreen";
 import BumpPhotosScreen from "./screens/BumpPhotosScreen";
 import { useAuth, useProfile } from "@/components/providers";
+import AmbientBackground from "./AmbientBackground";
 
 export type AppView = "home" | "calendar" | "journal" | "tempie" | "meditation" | "more" | "profile" | "community" | "bump-photos";
 
@@ -58,7 +59,8 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
   // Wrapped in Suspense because useSearchParams() requires it during static rendering.
 
   return (
-    <div className="min-h-screen bg-gradient-cream flex flex-col">
+    <div className="min-h-screen bg-gradient-cream flex flex-col relative">
+      <AmbientBackground />
       <Suspense fallback={null}>
         <PremiumSuccessHandler />
       </Suspense>

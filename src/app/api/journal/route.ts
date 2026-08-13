@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Entry body required" }, { status: 400 });
   }
 
-  const entry = await db.journalEntry.create({
+  try {
+    const entry = await db.journalEntry.create({
     data: {
       userId: session.user.id,
       week: week ? Number(week) : null,
@@ -39,6 +40,10 @@ export async function POST(req: NextRequest) {
     },
   });
   return NextResponse.json({ entry });
+  } catch (err) {
+    console.error("Journal create failed:", err);
+    return NextResponse.json({ error: "Failed to save entry. Please try again." }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {

@@ -298,13 +298,18 @@ function NewEntryDialog({
           photoUrl: photoUrl || null,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || `Server error (${res.status})`);
+      }
       toast.success("Entry saved");
       reset();
       onOpenChange(false);
       onAdded();
-    } catch {
-      toast.error("Failed to save");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      console.error("Journal save failed:", msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

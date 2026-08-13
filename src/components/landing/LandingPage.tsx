@@ -34,6 +34,7 @@ import {
   Star,
   ChevronRight,
 } from "lucide-react";
+import AmbientBackground from "../app/AmbientBackground";
 
 type LandingPageProps = {
   onOpenApp: () => void;
@@ -47,7 +48,8 @@ export default function LandingPage({ onOpenApp }: LandingPageProps) {
   const [termsOpen, setTermsOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-cream">
+    <div className="min-h-screen bg-gradient-cream relative">
+      <AmbientBackground />
       <MilestoneTicker />
       <Nav onOpenAuth={() => setAuthOpen(true)} onOpenApp={onOpenApp} />
       <Hero onJoinWaitlist={() => setWaitlistOpen(true)} onOpenApp={onOpenApp} />

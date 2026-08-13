@@ -307,3 +307,41 @@ Stage Summary:
 - Tempie AI responding with personalized messages (uses Helena-Ann, Baby Quinn, Jordan context)
 - Profile shows new 'Your data' section with Export/Delete buttons
 - Fixed critical middleware bug that would have blocked launch on Next.js 16
+
+---
+Task ID: visual-overhaul
+Agent: main (orchestrator)
+Task: Fix bland colors, add ambient background visuals, improve journal error handling — based on Helena-Ann's real user testing
+
+Work Log:
+- **Journal bug**: Added try/catch to journal POST API route with proper error logging. Improved client-side error display to show actual server error messages (not generic "Failed to save"). Added console.error logging for debugging.
+- **Color palette overhaul** — the whole palette was too pastel/washed out:
+  - Background: #F5EFE0 → #F0E8D4 (warmer, more golden)
+  - Cards: #FFFBF2 → #FAF5E8 (more contrast against background)
+  - Moss: #6B7A5A → #5E7A4A (richer, more alive green — less gray)
+  - Moss deep: #3A4233 → #2E3D26 (darker, more dramatic)
+  - Rose gold: #B76E79 → #B06070 (deeper, more saturated)
+  - Blush: #FADADD → #F2C0C6 (actually visible pink now, not just white-pink)
+  - Blush deep: #F4C2C2 → #E8989F (real pink)
+  - Sage: #CFE3DC → #B8D4B8 (slightly deeper)
+  - Lavender: #D9C2E6 → #C8A8D8 (richer purple)
+  - Terracotta: #C97B5C → #C06A48 (warmer, deeper)
+  - Butter: #FFF6E5 → #FFEED0 (warmer gold)
+  - Borders: #DDD3BE → #D6CCAE (more visible)
+  - Muted text: #6B6354 → #6B5E4A (warmer)
+  - Updated all gradients (cream, moss, blush, premium) and shadows to match
+- **Ambient background visuals** — created AmbientBackground component with 4 floating organic blobs:
+  - Golden glow (top right) — 25s drift cycle
+  - Rose pink wash (bottom left) — 30s drift cycle
+  - Sage green breath (center left) — 35s drift cycle
+  - Lavender whisper (top left) — 28s drift cycle
+  - All blobs use 80px blur, very low opacity (12-20%), radial gradients
+  - CSS-only animations (zero JS overhead), masked to center 70% so edges stay clean
+  - Added to both AppShell (all app screens) and LandingPage
+- Updated all chart colors, sidebar tokens, and gradient utilities to match new palette
+
+Stage Summary:
+- Colors are now noticeably warmer, richer, and have better contrast
+- 4 ambient blobs create a living, breathing background that's subtle but present
+- Journal errors now show real messages for debugging
+- Zero TypeScript errors, dev server returns 200
