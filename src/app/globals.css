@@ -66,37 +66,37 @@
   --radius: 0.75rem;
 
   /* Brand palette — rich earthy + warm feminine */
-  --cream: #F0E8D4;          /* Hearth Cream — warm golden background */
-  --cream-deep: #E6DABB;      /* deeper cream for contrast */
-  --moss: #5E7A4A;            /* Serene Moss — richer, more alive green */
-  --moss-deep: #2E3D26;       /* Deep Moss — dark sections, richer */
-  --terracotta: #C06A48;      /* Dusty Terracotta — warmer, deeper */
-  --blush: #F2C0C6;           /* Blush Pink — actually visible now */
-  --blush-deep: #E8989F;      /* deeper blush — real pink */
-  --rose-gold: #B06070;       /* Rose Gold — deeper, more saturated */
-  --sage: #B8D4B8;            /* Sage Green — slightly deeper */
-  --lavender: #C8A8D8;        /* Dusty Lavender — richer purple */
-  --butter: #FFEED0;          /* Butter Cream — warmer gold */
-  --ink: #28231E;             /* warm near-black, slightly deeper */
+  --cream: #F5EDDA;          /* Hearth Cream — warm golden background */
+  --cream-deep: #EAD8B4;      /* deeper cream for contrast */
+  --moss: #5B8A3E;            /* Serene Moss — more saturated, alive green */
+  --moss-deep: #2A3F1E;       /* Deep Moss — dark sections, richer */
+  --terracotta: #C4603A;      /* Dusty Terracotta — warmer, deeper orange */
+  --blush: #F0B0B8;           /* Blush Pink — more saturated */
+  --blush-deep: #E0808A;      /* deeper blush — real pink */
+  --rose-gold: #B8556A;       /* Rose Gold — deeper, more saturated */
+  --sage: #A8D0A8;            /* Sage Green — more saturated */
+  --lavender: #C498D8;        /* Dusty Lavender — richer purple */
+  --butter: #FFE8C0;          /* Butter Cream — warmer, richer gold */
+  --ink: #24201B;             /* warm near-black, slightly deeper */
 
   /* shadcn semantic mapping */
-  --background: #F0E8D4;
-  --foreground: #28231E;
-  --card: #FAF5E8;
-  --card-foreground: #28231E;
-  --popover: #FAF5E8;
-  --popover-foreground: #28231E;
-  --primary: #5E7A4A;
-  --primary-foreground: #F0E8D4;
-  --secondary: #E6DABB;
-  --secondary-foreground: #2E3D26;
-  --muted: #E2D8C2;
+  --background: #F5EDDA;
+  --foreground: #24201B;
+  --card: #FBF7ED;
+  --card-foreground: #24201B;
+  --popover: #FBF7ED;
+  --popover-foreground: #24201B;
+  --primary: #5B8A3E;
+  --primary-foreground: #F5EDDA;
+  --secondary: #EAD8B4;
+  --secondary-foreground: #2A3F1E;
+  --muted: #E8DCC4;
   --muted-foreground: #6B5E4A;
-  --accent: #F2C0C6;
-  --accent-foreground: #2E3D26;
+  --accent: #F0B0B8;
+  --accent-foreground: #2A3F1E;
   --destructive: #B84240;
-  --border: #D6CCAE;
-  --input: #D6CCAE;
+  --border: #D8CEAC;
+  --input: #D8CEAC;
   --ring: #B06070;
   --chart-1: #5E7A4A;
   --chart-2: #C06A48;
@@ -177,25 +177,25 @@
     text-wrap: balance;
   }
   .bg-gradient-cream {
-    background: linear-gradient(135deg, #F0E8D4 0%, #FFEED0 50%, #F0E8D4 100%);
+    background: linear-gradient(145deg, #F5EDDA 0%, #FFE8C0 40%, #F5EDDA 100%);
   }
   .bg-gradient-moss {
-    background: linear-gradient(135deg, #2E3D26 0%, #5E7A4A 100%);
+    background: linear-gradient(145deg, #2A3F1E 0%, #5B8A3E 100%);
   }
   .bg-gradient-blush {
-    background: linear-gradient(135deg, #F2C0C6 0%, #FFEED0 100%);
+    background: linear-gradient(145deg, #F0B0B8 0%, #FFE8C0 100%);
   }
   .bg-gradient-premium {
-    background: linear-gradient(135deg, #B06070 0%, #C06A48 100%);
+    background: linear-gradient(145deg, #B8556A 0%, #C4603A 100%);
   }
   .text-gradient-moss {
-    background: linear-gradient(135deg, #5E7A4A 0%, #2E3D26 100%);
+    background: linear-gradient(145deg, #5B8A3E 0%, #2A3F1E 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   .text-gradient-rose {
-    background: linear-gradient(135deg, #B06070 0%, #C06A48 100%);
+    background: linear-gradient(145deg, #B8556A 0%, #C4603A 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -255,55 +255,125 @@
   .animate-pulse-soft {
     animation: pulse-soft 2s ease-in-out infinite;
   }
-  /* ─── Ambient background blobs ─── */
+  /* ─── Ambient background — watercolor washes ─── */
   .ambient-blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
     will-change: transform;
   }
+
+  /* Primary watercolor washes — visible, lush, slow */
   .blob-1 {
-    width: 600px; height: 600px;
-    top: -15%; right: -10%;
-    background: radial-gradient(circle, rgba(255, 210, 130, 0.18) 0%, transparent 70%);
-    animation: drift-1 25s ease-in-out infinite;
+    width: 700px; height: 700px;
+    top: -20%; right: -15%;
+    background: radial-gradient(circle, rgba(240, 176, 184, 0.35) 0%, rgba(255, 232, 192, 0.15) 50%, transparent 75%);
+    filter: blur(60px);
+    animation: drift-1 28s ease-in-out infinite;
   }
   .blob-2 {
-    width: 500px; height: 500px;
-    bottom: -10%; left: -8%;
-    background: radial-gradient(circle, rgba(242, 192, 198, 0.20) 0%, transparent 70%);
-    animation: drift-2 30s ease-in-out infinite;
+    width: 600px; height: 600px;
+    bottom: -15%; left: -12%;
+    background: radial-gradient(circle, rgba(168, 208, 168, 0.30) 0%, rgba(184, 152, 216, 0.12) 50%, transparent 75%);
+    filter: blur(65px);
+    animation: drift-2 34s ease-in-out infinite;
   }
   .blob-3 {
-    width: 450px; height: 450px;
-    top: 40%; left: -5%;
-    background: radial-gradient(circle, rgba(184, 212, 184, 0.15) 0%, transparent 70%);
-    animation: drift-3 35s ease-in-out infinite;
+    width: 550px; height: 550px;
+    top: 35%; left: -8%;
+    background: radial-gradient(circle, rgba(255, 232, 192, 0.28) 0%, rgba(240, 176, 184, 0.10) 50%, transparent 70%);
+    filter: blur(55px);
+    animation: drift-3 38s ease-in-out infinite;
   }
   .blob-4 {
-    width: 400px; height: 400px;
-    top: -5%; left: 20%;
-    background: radial-gradient(circle, rgba(200, 168, 216, 0.12) 0%, transparent 70%);
-    animation: drift-4 28s ease-in-out infinite;
+    width: 500px; height: 500px;
+    top: -8%; left: 25%;
+    background: radial-gradient(circle, rgba(196, 152, 216, 0.25) 0%, rgba(168, 208, 168, 0.10) 50%, transparent 70%);
+    filter: blur(50px);
+    animation: drift-4 32s ease-in-out infinite;
   }
+
+  /* Secondary layer — deeper, slower, adds depth */
+  .blob-5 {
+    width: 800px; height: 800px;
+    top: -30%; left: -20%;
+    background: radial-gradient(circle, rgba(184, 85, 106, 0.08) 0%, transparent 60%);
+    filter: blur(100px);
+    animation: drift-5 45s ease-in-out infinite;
+  }
+  .blob-6 {
+    width: 700px; height: 700px;
+    bottom: -25%; right: -20%;
+    background: radial-gradient(circle, rgba(91, 138, 62, 0.07) 0%, transparent 60%);
+    filter: blur(90px);
+    animation: drift-6 50s ease-in-out infinite;
+  }
+
+  /* Botanical silhouette layer — very subtle organic shapes */
+  .botanical-shape {
+    position: absolute;
+    opacity: 0.04;
+    filter: blur(1px);
+    will-change: transform;
+  }
+  .botanical-1 {
+    width: 200px; height: 200px;
+    bottom: 15%; right: -3%;
+    animation: botanical-sway-1 20s ease-in-out infinite;
+  }
+  .botanical-2 {
+    width: 160px; height: 160px;
+    top: 20%; left: -2%;
+    animation: botanical-sway-2 24s ease-in-out infinite;
+  }
+  .botanical-3 {
+    width: 120px; height: 120px;
+    top: 55%; right: 5%;
+    animation: botanical-sway-3 18s ease-in-out infinite;
+  }
+
   @keyframes drift-1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-40px, 30px) scale(1.05); }
-    66% { transform: translate(20px, -20px) scale(0.97); }
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    33% { transform: translate(-50px, 40px) scale(1.08) rotate(3deg); }
+    66% { transform: translate(30px, -25px) scale(0.95) rotate(-2deg); }
   }
   @keyframes drift-2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -25px) scale(1.03); }
-    66% { transform: translate(-20px, 15px) scale(0.98); }
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    33% { transform: translate(40px, -30px) scale(1.06) rotate(-3deg); }
+    66% { transform: translate(-25px, 20px) scale(0.97) rotate(2deg); }
   }
   @keyframes drift-3 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(25px, 20px) scale(1.04); }
-    66% { transform: translate(-15px, -30px) scale(0.96); }
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    33% { transform: translate(30px, 25px) scale(1.05) rotate(2deg); }
+    66% { transform: translate(-20px, -35px) scale(0.96) rotate(-3deg); }
   }
   @keyframes drift-4 {
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    33% { transform: translate(-25px, 30px) scale(1.04) rotate(-2deg); }
+    66% { transform: translate(35px, -20px) scale(0.98) rotate(3deg); }
+  }
+  @keyframes drift-5 {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-20px, 25px) scale(1.02); }
-    66% { transform: translate(30px, -15px) scale(0.99); }
+    50% { transform: translate(60px, 40px) scale(1.1); }
+  }
+  @keyframes drift-6 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-50px, -30px) scale(1.08); }
+  }
+  @keyframes botanical-sway-1 {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(5deg) scale(1.03); }
+    50% { transform: rotate(-3deg) scale(0.98); }
+    75% { transform: rotate(2deg) scale(1.01); }
+  }
+  @keyframes botanical-sway-2 {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-4deg) scale(1.02); }
+    50% { transform: rotate(6deg) scale(0.97); }
+    75% { transform: rotate(-2deg) scale(1.01); }
+  }
+  @keyframes botanical-sway-3 {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    33% { transform: rotate(3deg) scale(1.04); }
+    66% { transform: rotate(-5deg) scale(0.96); }
   }
 }

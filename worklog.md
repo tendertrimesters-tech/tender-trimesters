@@ -375,3 +375,26 @@ Stage Summary:
 - Key files changed: prisma/schema.prisma, 4 API routes, 7 screen components, AppShell.tsx, MoreScreen.tsx
 - New file: src/components/app/screens/AppointmentsScreen.tsx
 - Guided meditation voice recording explicitly deferred per Helena-Ann's request
+---
+Task ID: 2
+Agent: Super Z (main)
+Task: Visual design upgrade - color vibrancy + watercolor background visuals
+
+Work Log:
+- Boosted saturation on all brand palette colors (moss, blush, rose-gold, sage, lavender, butter, terracotta)
+- Updated semantic color tokens (background, card, primary, etc.) to match new palette
+- Rewrote gradient utilities with richer color values and 145deg angle
+- Rewrote all 4 ambient background blobs: increased opacity from 0.12-0.20 to 0.25-0.35
+- Added 2 new deep background blobs (blob-5, blob-6) for warmth and depth
+- Reduced blur from 80px to 50-65px so blobs are more defined (watercolor not fog)
+- Added rotation to drift animations for organic movement
+- Added 3 botanical SVG silhouettes (leaf, leaf, wildflower) with gentle sway animations
+- Widened the mask gradient from 70%/30%→80% to 80%/40%→90% so colors are visible across more screen
+- Botanical shapes rendered at 4% opacity with gentle 18-24s sway cycles
+
+Stage Summary:
+- Colors significantly more saturated while staying warm and feminine
+- Background now shows visible watercolor-style color washes (blush, butter, sage, lavender)
+- Slow transparent botanical shapes add organic feeling
+- All changes in globals.css + AmbientBackground.tsx
+- Build passes cleanly
