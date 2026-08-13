@@ -41,18 +41,25 @@ export const metadata: Metadata = {
     "Mommies Matter",
   ],
   authors: [{ name: "Helena-Ann Baker" }],
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
   openGraph: {
     title: "Tender Trimesters — Your Pregnancy, One Week at a Time",
     description:
       "A nurturing weekly pregnancy calendar with daily affirmations, mood tracking, a private journal, and Tempie — your 24/7 AI companion.",
     siteName: "Tender Trimesters",
     type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Tender Trimesters — Your Pregnancy, One Week at a Time" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Tender Trimesters",
     description: "Your pregnancy, one week at a time.",
+    images: ["/og-image.png"],
   },
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://tendertrimesters.com"),
 };
 
 export default function RootLayout({

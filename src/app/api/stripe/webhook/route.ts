@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        console.log(`[stripe/webhook] premium activated for ${userId} (${tier})`);
+        // premium activated
         break;
       }
 
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
               stripeSubscriptionId: null,
             },
           });
-          console.log(`[stripe/webhook] premium revoked for ${user.id} (subscription deleted)`);
+          // premium revoked
         }
         break;
       }

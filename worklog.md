@@ -224,3 +224,31 @@ Stage Summary:
 - Includes daily platforms, detailed tasks, CTAs, assets needed, and KPI targets
 - Weekly KPI tracker sheet for tracking signups, conversions, ad spend, CPA
 - Business structure guidance provided (see conversation)
+
+---
+Task ID: launch-readiness
+Agent: main (orchestrator)
+Task: Add all missing launch-critical files — legal pages, error handling, SEO, assets, config fixes
+
+Work Log:
+- Created /src/app/privacy/page.tsx — full Privacy Policy (10 sections: data collection, usage, AI features, security, rights, cookies, third-party, children, changes, contact)
+- Created /src/app/terms/page.tsx — full Terms of Service (12 sections: acceptance, description, accounts, subscriptions, user content, AI disclaimer, medical disclaimer, partner access, prohibited conduct, liability, termination, contact)
+- Created /src/app/not-found.tsx — branded 404 page with moss/cream palette and pregnancy-themed copy
+- Created /src/app/error.tsx — branded error boundary with retry button
+- Created /src/app/loading.tsx — branded loading spinner with 'Growing something beautiful...' copy
+- Created /src/app/sitemap.ts — dynamic sitemap with /, /privacy, /terms entries
+- Generated /public/og-image.png (1200x630) — brand-colored OG image with TENDER TRIMESTERS text, moss/blush/rose-gold palette
+- Generated /public/favicon.ico (32x32) — moss circle with 'T' letter
+- Generated /public/apple-icon.png (180x180) — same design for iOS
+- Created .env.example — documents all 8 required env vars (DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL, 4x Stripe keys, ZAI_API_KEY)
+- Updated layout.tsx — added icons config, OG image, Twitter image, metadataBase
+- Fixed next.config.ts — removed ignoreBuildErrors, enabled reactStrictMode
+- Cleaned up console.log in stripe webhook (replaced with comments)
+- Landing page already had Privacy/Terms dialogs in footer — full-page routes now also exist for SEO
+
+Stage Summary:
+- All 7 launch blockers resolved: legal pages, OG image, favicon, not-found/error/loading pages, sitemap, .env.example
+- TypeScript compiles with zero errors in src/
+- Dev server returns 200 on /, /privacy, /terms
+- next.config is now production-safe (strict mode on, build errors not ignored)
+- App is launch-ready pending: production database (Postgres), Stripe keys, NEXTAUTH_SECRET, domain DNS
