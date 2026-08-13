@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { fear, week } = body;
+  const { fear, week, category } = body;
 
   if (!fear || fear.trim().length < 1) {
     return NextResponse.json({ error: "Fear description is required" }, { status: 400 });
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       fear: fear.trim(),
       week: week ? Number(week) : null,
+      category: category?.trim() || null,
       stage: "ember",
     },
   });
@@ -72,7 +73,9 @@ export async function PATCH(req: NextRequest) {
   if (action === "reframe") {
     try {
       const zai = await ZAI.create();
-      const systemPrompt = `You are a warm, wise pregnancy companion. A pregnant mama has shared a fear: '${existing.fear}'. Gently reframe it into courage (2-3 sentences of warmth and truth). Then suggest one small grounding action (1 sentence). Return JSON like: {"reframed": "...", "action": "..."}.`;
+      const categoryContext = existing.category ? ` This fear is about ${existing.category}.` : "";
+      const weekContext = existing.week ? ` She is at week ${existing.week} of pregnancy.` : "";
+      const systemPrompt = `You are a warm, wise pregnancy companion.${weekContext} A pregnant mama has shared a fear: '${existing.fear}'.${categoryContext} Gently reframe it into courage (2-3 sentences of warmth and truth). Then suggest one small grounding action (1 sentence). Return JSON like: {"reframed": "...", "action": "..."}. Be specific, not generic.`;
       const completion = await zai.chat.completions.create({
         messages: [{ role: "system", content: systemPrompt }],
         thinking: { type: "disabled" },

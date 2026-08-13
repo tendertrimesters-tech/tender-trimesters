@@ -20,13 +20,21 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { week } = body;
+  const { week, babyName } = body;
 
   if (!week) {
     return NextResponse.json({ error: "Week is required" }, { status: 400 });
   }
 
   const weekNum = Number(week);
+
+  // Prevent duplicate letter for the same week
+  const existing = await db.babyLetter.findFirst({
+    where: { userId: session.user.id, week: weekNum },
+  });
+  if (existing) {
+    return NextResponse.json({ error: "Letter for this week already exists", letter: existing }, { status: 409 });
+  }
 
   // Fetch weekly content for context
   const weeklyContent = await db.weeklyContent.findUnique({ where: { week: weekNum } });
@@ -38,7 +46,8 @@ export async function POST(req: NextRequest) {
 
   try {
     const zai = await ZAI.create();
-    const systemPrompt = `You are a baby writing a tender letter to their mama from inside the womb. The mama is at week ${weekNum} of pregnancy. Baby development context: ${babySize} - ${babySizeDesc}. Body changes mama is experiencing: ${bodyChanges}. Emotional changes: ${emotionalChanges}. Write a short, deeply loving letter (150-200 words) in the baby's voice. Be specific about what they're experiencing this week — what they can see, hear, feel. Reference the mama's experiences with empathy. End with something that makes the mama feel deeply loved. Don't be cutesy or baby-talk. Be poetic and real.`;
+    const name = babyName || "Mama";
+    const systemPrompt = `You are a baby writing a tender letter to their mama from inside the womb. The mama is at week ${weekNum} of pregnancy. The mama calls you ${name}. Baby development context: ${babySize} - ${babySizeDesc}. Body changes mama is experiencing: ${bodyChanges}. Emotional changes: ${emotionalChanges}. Write a short, deeply loving letter (150-200 words) in the baby's voice. Use the name "${name}" naturally. Be specific about what they're experiencing this week — what they can see, hear, feel. Reference the mama's experiences with empathy. End with something that makes the mama feel deeply loved. Don't be cutesy or baby-talk. Be poetic and real.`;
 
     const completion = await zai.chat.completions.create({
       messages: [{ role: "system", content: systemPrompt }],

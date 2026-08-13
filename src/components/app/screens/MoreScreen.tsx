@@ -81,10 +81,9 @@ export default function MoreScreen({ onNavigate, initialFeature }: { onNavigate:
   const [selectedFeature, setSelectedFeature] = useState<string | null>(initialFeature || null);
 
   // Handle deep-linked feature from home screen keepsakes
+  // Also reset when navigating back to More menu (initialFeature becomes undefined)
   useEffect(() => {
-    if (initialFeature) {
-      setSelectedFeature(initialFeature);
-    }
+    setSelectedFeature(initialFeature || null);
   }, [initialFeature]);
 
   function handleFeatureClick(featureId: string) {
@@ -195,6 +194,7 @@ function FeatureRenderer({ featureId, onBack }: { featureId: string; onBack: () 
       "hormone": () => import("./HormoneHoroscopeScreen"),
       "rituals": () => import("./BellyBondingScreen"),
       "playlist": () => import("./BirthPlaylistScreen"),
+      "appointments": () => import("./AppointmentsScreen"),
     };
 
     const loader = imports[featureId];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -241,6 +241,16 @@ export default function MeditationScreen() {
     );
   }
 
+  // ─── Stable callback for meditation completion ──────────────
+  const handleMeditationComplete = useCallback((medId: string, durSec: number) => {
+    setSessionHistory((prev) => ({ ...prev, [medId]: true }));
+    fetch("/api/meditation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ meditationId: medId, durationSec: durSec, completed: true }),
+    }).catch(() => {});
+  }, []);
+
   // ─── PLAYER VIEW ─────────────────────────────────────────────────
 
   if (subView === "player" && activeMeditation) {
@@ -249,15 +259,7 @@ export default function MeditationScreen() {
         meditation={activeMeditation}
         onClose={() => setSubView("library")}
         onJournal={() => setSubView("journal")}
-        onCompleted={(medId, durSec) => {
-          setSessionHistory((prev) => ({ ...prev, [medId]: true }));
-          // Log session to API
-          fetch("/api/meditation", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ meditationId: medId, durationSec: durSec, completed: true }),
-          }).catch(() => {});
-        }}
+        onCompleted={handleMeditationComplete}
       />
     );
   }
@@ -463,6 +465,16 @@ function MeditationPlayer({
     }
   }
 
+  function handleClose() {
+    // Stop timer and reset before closing
+    setPlaying(false);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    onClose();
+  }
+
   // Breathing circle animation scale
   const breathScale =
     breathPhase === "in" ? "scale-100" :
@@ -476,11 +488,11 @@ function MeditationPlayer({
     <div className="fixed inset-0 z-50 bg-gradient-cream flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3">
-        <button onClick={onClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
+        <button onClick={handleClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
           <ChevronLeft className="w-5 h-5 text-moss-deep" />
         </button>
         <div className="text-xs text-muted-foreground font-medium">{meditation.title}</div>
-        <button onClick={onClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
+        <button onClick={handleClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
           <X className="w-5 h-5 text-moss-deep" />
         </button>
       </div>
@@ -594,7 +606,7 @@ function MeditationPlayer({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-muted-foreground"
           >
             <ChevronLeft className="w-5 h-5" />

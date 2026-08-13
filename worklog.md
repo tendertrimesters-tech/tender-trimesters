@@ -345,3 +345,33 @@ Stage Summary:
 - 4 ambient blobs create a living, breathing background that's subtle but present
 - Journal errors now show real messages for debugging
 - Zero TypeScript errors, dev server returns 200
+---
+Task ID: 1
+Agent: Super Z (main)
+Task: Fix 8 bugs reported by Helena-Ann from user testing
+
+Work Log:
+- Explored full codebase via subagent — identified 12 bugs across 10 files
+- Added `category` column to FearEntry model in Prisma schema
+- Added `mood` and `interpretation` columns to DreamEntry model in Prisma schema
+- Pushed schema changes to SQLite dev DB via `prisma db push`
+- Fixed baby-letters API: now uses babyName in prompt, added duplicate-week guard (409)
+- Fixed fear-entries API: saves category, includes it in AI reframe prompt for better results
+- Fixed dream-entries API: saves mood, generates AI interpretation alongside symbols/themes
+- Enhanced DreamKeeperScreen: shows AI interpretation card ("Dream whisper") and mood badge
+- Enhanced FearToFlameScreen: displays category badge on each fear card
+- Fixed BellyBondingScreen: checks if today's ritual already completed on mount, cleans up speech synthesis on unmount
+- Fixed AppShell "More" tab: now calls `navigateToMore()` (no arg) instead of `setView("more")` so it resets to the menu from any sub-screen
+- Fixed MoreScreen: useEffect now resets `selectedFeature` when `initialFeature` becomes undefined
+- Created standalone AppointmentsScreen.tsx (extracted from CalendarScreen) and added to More menu's FeatureRenderer
+- Fixed MeditationScreen timer: stabilized `onCompleted` callback with `useCallback` to prevent interval restart on every render
+- Fixed MeditationScreen close: added `handleClose` that explicitly clears interval before calling `onClose`
+- Fixed BirthPlaylistScreen: added custom song input (title + artist), fixed `artist` type to `string | null` for null safety
+- Removed stale `examples/` and `skills/` directories that caused build failures
+
+Stage Summary:
+- All 8 reported issues fixed + 4 additional bugs discovered and fixed
+- Build passes cleanly with `next build`
+- Key files changed: prisma/schema.prisma, 4 API routes, 7 screen components, AppShell.tsx, MoreScreen.tsx
+- New file: src/components/app/screens/AppointmentsScreen.tsx
+- Guided meditation voice recording explicitly deferred per Helena-Ann's request

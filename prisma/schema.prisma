@@ -211,6 +211,7 @@ model FearEntry {
   fear        String   // the original fear
   reframed    String?  // AI-reframed courage
   action      String?  // grounding action
+  category    String?  // fear category (e.g. "Birth", "Body", "Relationship")
   stage       String   @default("ember") // "ember" | "spark" | "flame"
   week        Int?
   createdAt   DateTime @default(now())
@@ -227,15 +228,17 @@ model BabyLetter {
 }
 
 model DreamEntry {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String?
-  body      String   // the dream description
-  symbols   String?  // AI-extracted recurring symbols (JSON array)
-  themes    String?  // AI-extracted themes (JSON array)
-  week      Int?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String?
+  body        String   // the dream description
+  mood        String?  // mood the user selected (e.g. "peaceful", "anxious", "vivid")
+  symbols     String?  // AI-extracted recurring symbols (JSON array)
+  themes      String?  // AI-extracted themes (JSON array)
+  interpretation String? // AI dream interpretation
+  week        Int?
+  createdAt   DateTime @default(now())
 }
 
 model NameSeed {

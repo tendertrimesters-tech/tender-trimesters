@@ -35,6 +35,7 @@ interface DreamEntry {
   mood: string | null;
   symbols: string | null;
   themes: string | null;
+  interpretation: string | null;
   createdAt: string;
 }
 
@@ -309,6 +310,24 @@ function DreamCard({
                 </span>
               ))}
             </div>
+          )}
+
+          {/* AI Interpretation */}
+          {entry.interpretation && (
+            <div className="mt-3 bg-lavender/15 rounded-xl p-3 border-l-2 border-lavender/40">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3 h-3 text-lavender" />
+                <span className="text-[10px] uppercase tracking-widest text-lavender font-medium">Dream whisper</span>
+              </div>
+              <p className="text-sm text-foreground/80 italic leading-relaxed">{entry.interpretation}</p>
+            </div>
+          )}
+
+          {/* Mood badge */}
+          {entry.mood && (
+            <span className="inline-block mt-2 bg-blush/25 text-rose-gold rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize">
+              {entry.mood}
+            </span>
           )}
 
           {/* Date + week */}

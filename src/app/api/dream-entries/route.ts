@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { title, body: text, week } = body;
+  const { title, body: text, week, mood } = body;
 
   if (!text || text.trim().length < 1) {
     return NextResponse.json({ error: "Dream body is required" }, { status: 400 });
@@ -33,19 +33,22 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       title: title?.trim() || null,
       body: text.trim(),
+      mood: mood?.trim() || null,
       week: week ? Number(week) : null,
     },
   });
 
-  // Use AI to analyze the dream for symbols and themes
+  // Use AI to analyze the dream for symbols, themes, and interpretation
   try {
     const zai = await ZAI.create();
-    const systemPrompt = `Analyze this pregnancy dream and extract recurring symbols and emotional themes. Dream: '${text.trim()}'. Return JSON: {"symbols": ["symbol1", "symbol2"], "themes": ["theme1", "theme2"]}. Keep to 3-5 symbols and 2-3 themes.`;
+    const moodContext = mood ? ` The dreamer felt ${mood} upon waking.` : "";
+    const weekContext = week ? ` She is at week ${week} of pregnancy.` : "";
+    const systemPrompt = `You are a dream interpreter who specializes in pregnancy dreams.${weekContext}${moodContext} Analyze this dream: '${text.trim()}'. Return JSON: {"symbols": ["symbol1", "symbol2", "symbol3"], "themes": ["theme1", "theme2"], "interpretation": "A warm 2-3 sentence interpretation connecting the dream to the mama's pregnancy journey. Be insightful and specific, not vague."}. Keep to 3-5 symbols and 2-3 themes. The interpretation should feel personal and meaningful.`;
 
     const completion = await zai.chat.completions.create({
       messages: [{ role: "system", content: systemPrompt }],
       thinking: { type: "disabled" },
-      temperature: 0.6,
+      temperature: 0.7,
     });
 
     const raw = completion.choices[0]?.message?.content?.trim() || "";
@@ -54,16 +57,17 @@ export async function POST(req: NextRequest) {
       const parsed = JSON.parse(jsonMatch[0]);
       const symbols = Array.isArray(parsed.symbols) ? JSON.stringify(parsed.symbols) : null;
       const themes = Array.isArray(parsed.themes) ? JSON.stringify(parsed.themes) : null;
+      const interpretation = typeof parsed.interpretation === "string" ? parsed.interpretation : null;
 
       const updated = await db.dreamEntry.update({
         where: { id: entry.id },
-        data: { symbols, themes },
+        data: { symbols, themes, interpretation },
       });
       return NextResponse.json({ entry: updated });
     }
   } catch (e) {
     console.error("Dream analysis error:", e);
-    // Return the entry without symbols/themes if analysis fails
+    // Return the entry without analysis if it fails
   }
 
   return NextResponse.json({ entry });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ export default function BellyBondingScreen() {
   const [streakLoading, setStreakLoading] = useState(true);
   const [streakError, setStreakError] = useState(false);
   const [showPast, setShowPast] = useState(false);
+  const speakingRef = useRef(false);
 
   const loadStreak = useCallback(() => {
     setStreakLoading(true);
@@ -32,19 +33,33 @@ export default function BellyBondingScreen() {
         return r.json();
       })
       .then((d) => {
-        const weeks = new Set((d.rituals || []).map((r: any) => r.week));
+        const rituals = d.rituals || [];
+        const weeks = new Set(rituals.map((r: any) => r.week));
         setStreakCount(weeks.size);
+        // Check if this week's ritual is already completed
+        if (weeks.has(currentWeek)) {
+          setCompleted(true);
+        }
         setStreakError(false);
       })
       .catch(() => {
         setStreakError(true);
       })
       .finally(() => setStreakLoading(false));
-  }, []);
+  }, [currentWeek]);
 
   useEffect(() => {
     loadStreak();
   }, [loadStreak]);
+
+  // Cleanup speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && window.speechSynthesis && speakingRef.current) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const handleComplete = async () => {
     try {
@@ -74,13 +89,15 @@ export default function BellyBondingScreen() {
     if (speaking) {
       window.speechSynthesis.cancel();
       setSpeaking(false);
+      speakingRef.current = false;
     } else {
       const utterance = new SpeechSynthesisUtterance(ritual.phrase);
       utterance.rate = 0.85;
-      utterance.onerror = () => setSpeaking(false);
-      utterance.onend = () => setSpeaking(false);
+      utterance.onerror = () => { setSpeaking(false); speakingRef.current = false; };
+      utterance.onend = () => { setSpeaking(false); speakingRef.current = false; };
       window.speechSynthesis.speak(utterance);
       setSpeaking(true);
+      speakingRef.current = true;
     }
   };
 

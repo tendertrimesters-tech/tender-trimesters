@@ -109,7 +109,7 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
           <NavButton active={view === "calendar"} onClick={() => setView("calendar")} icon={Calendar} label="Calendar" />
           <NavButton active={view === "journal"} onClick={() => setView("journal")} icon={BookHeart} label="Journal" />
           <NavButton active={view === "tempie"} onClick={() => setView("tempie")} icon={MessageCircleHeart} label="Tempie" highlight />
-          <NavButton active={view === "more"} onClick={() => setView("more")} icon={Grid3X3} label="More" />
+          <NavButton active={view === "more"} onClick={() => navigateToMore()} icon={Grid3X3} label="More" />
           <NavButton active={view === "profile"} onClick={() => setView("profile")} icon={User} label="Profile" />
         </div>
       </nav>
@@ -120,7 +120,7 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
         <DesktopNavButton active={view === "calendar"} onClick={() => setView("calendar")} icon={Calendar} label="Calendar" />
         <DesktopNavButton active={view === "journal"} onClick={() => setView("journal")} icon={BookHeart} label="Journal" />
         <DesktopNavButton active={view === "tempie"} onClick={() => setView("tempie")} icon={MessageCircleHeart} label="Tempie" highlight />
-        <DesktopNavButton active={view === "more"} onClick={() => setView("more")} icon={Grid3X3} label="More" />
+        <DesktopNavButton active={view === "more"} onClick={() => navigateToMore()} icon={Grid3X3} label="More" />
         <DesktopNavButton active={view === "profile"} onClick={() => setView("profile")} icon={User} label="Profile" />
       </nav>
     </div>

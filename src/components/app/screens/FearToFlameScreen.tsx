@@ -220,6 +220,9 @@ export default function FearToFlameScreen() {
                     >
                       {info.emoji} {info.label}
                     </span>
+                    {entry.category && (
+                      <span className="text-[10px] bg-sage/20 text-moss-deep/70 rounded-full px-2 py-0.5">{entry.category}</span>
+                    )}
                     {entry.week && (
                       <span className="text-[10px] text-muted-foreground">
                         Wk {entry.week}

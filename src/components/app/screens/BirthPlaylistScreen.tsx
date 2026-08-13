@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PLAYLIST_PHASES, SONG_SUGGESTIONS } from "@/data/signature-features";
-import { Music, Plus, Trash2, Sparkles, Music2 } from "lucide-react";
+import { Music, Plus, Trash2, Sparkles, Music2, Search } from "lucide-react";
 import EmptyState from "@/components/app/EmptyState";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -25,7 +26,7 @@ interface PlaylistTrack {
   id: string;
   phase: string;
   title: string;
-  artist: string;
+  artist: string | null;
 }
 
 export default function BirthPlaylistScreen() {
@@ -34,6 +35,9 @@ export default function BirthPlaylistScreen() {
   const [error, setError] = useState(false);
   const [activePhase, setActivePhase] = useState(PLAYLIST_PHASES[0].id);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState("");
+  const [customArtist, setCustomArtist] = useState("");
+  const [addingCustom, setAddingCustom] = useState(false);
 
   const load = useCallback(() => {
     fetch("/api/playlist-tracks")
@@ -53,10 +57,10 @@ export default function BirthPlaylistScreen() {
 
   useEffect(() => { load(); }, [load]);
 
-  const addTrack = async (title: string, artist: string) => {
+  const addTrack = async (title: string, artist: string | null) => {
     // Prevent duplicates
     const exists = tracks.some(
-      (t) => t.title.toLowerCase() === title.toLowerCase() && t.artist.toLowerCase() === artist.toLowerCase()
+      (t) => t.title.toLowerCase() === title.toLowerCase() && (t.artist || "").toLowerCase() === (artist || "").toLowerCase()
     );
     if (exists) {
       toast.error("Already in your playlist");
@@ -151,7 +155,7 @@ export default function BirthPlaylistScreen() {
           <div className="space-y-2">
             {suggestions.map((s) => {
               const isAdded = tracks.some(
-                (t) => t.title.toLowerCase() === s.title.toLowerCase() && t.artist.toLowerCase() === s.artist.toLowerCase()
+                (t) => t.title.toLowerCase() === s.title.toLowerCase() && (t.artist || "").toLowerCase() === (s.artist || "").toLowerCase()
               );
               return (
                 <Card key={`${s.title}-${s.artist}`} className="rounded-2xl p-3 bg-card border-moss/15">
@@ -180,6 +184,48 @@ export default function BirthPlaylistScreen() {
             })}
           </div>
         )}
+      </motion.div>
+
+      {/* Add your own song */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Search className="w-4 h-4 text-moss" />
+          <span className="text-sm font-medium text-moss-deep">Add your own song</span>
+        </div>
+        <Card className="rounded-2xl p-4 bg-card border-moss/15">
+          <div className="space-y-2">
+            <Input
+              value={customTitle}
+              onChange={(e) => setCustomTitle(e.target.value)}
+              placeholder="Song title"
+              className="rounded-xl text-sm"
+            />
+            <Input
+              value={customArtist}
+              onChange={(e) => setCustomArtist(e.target.value)}
+              placeholder="Artist (optional)"
+              className="rounded-xl text-sm"
+            />
+            <Button
+              onClick={async () => {
+                if (!customTitle.trim()) {
+                  toast.error("Enter a song title");
+                  return;
+                }
+                setAddingCustom(true);
+                await addTrack(customTitle.trim(), customArtist.trim() || null);
+                setCustomTitle("");
+                setCustomArtist("");
+                setAddingCustom(false);
+              }}
+              disabled={!customTitle.trim() || addingCustom}
+              className="w-full bg-moss/10 text-moss hover:bg-moss/20 rounded-full text-sm"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
+              Add to {selectedPhase?.label}
+            </Button>
+          </div>
+        </Card>
       </motion.div>
 
       {/* My playlist */}
