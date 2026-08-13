@@ -1,5 +1,13 @@
 // Tender Trimesters — Prisma schema
-// SQLite for dev. Swap to Postgres for prod when ready.
+//
+// PRODUCTION MIGRATION CHECKLIST:
+//   1. Change provider below to "postgresql"
+//   2. Set DATABASE_URL to your Postgres connection string:
+//      postgresql://user:password@host:5432/dbname?schema=public
+//   3. Run: npx prisma migrate dev --name init
+//   4. Run: npx prisma generate
+//
+// SQLite works great for local dev. Do NOT use SQLite in production.
 
 generator client {
   provider = "prisma-client-js"

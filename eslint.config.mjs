@@ -8,31 +8,31 @@ const __dirname = dirname(__filename);
 
 const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
   rules: {
-    // TypeScript rules
+    // TypeScript — keep off for now (many intentional any casts in auth routes)
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/prefer-as-const": "off",
-    "@typescript-eslint/no-unused-disable-directive": "off",
-    
-    // React rules
-    "react-hooks/exhaustive-deps": "off",
+    "@typescript-eslint/prefer-as-const": "warn",
+    "@typescript-eslint/no-unused-disable-directive": "warn",
+
+    // React
+    "react-hooks/exhaustive-deps": "warn",
     "react-hooks/purity": "off",
     "react/no-unescaped-entities": "off",
     "react/display-name": "off",
     "react/prop-types": "off",
     "react-compiler/react-compiler": "off",
-    
-    // Next.js rules
+
+    // Next.js
     "@next/next/no-img-element": "off",
-    "@next/next/no-html-link-for-pages": "off",
-    
-    // General JavaScript rules
-    "prefer-const": "off",
-    "no-unused-vars": "off",
-    "no-console": "off",
-    "no-debugger": "off",
+    "@next/next/no-html-link-for-pages": "warn",
+
+    // General — catch real bugs, allow intentional patterns
+    "prefer-const": "warn",
+    "no-unused-vars": "warn",
+    "no-console": ["warn", { allow: ["warn", "error"] }],
+    "no-debugger": "warn",
     "no-empty": "off",
     "no-irregular-whitespace": "off",
     "no-case-declarations": "off",
@@ -40,11 +40,11 @@ const eslintConfig = [...nextCoreWebVitals, ...nextTypescript, {
     "no-mixed-spaces-and-tabs": "off",
     "no-redeclare": "off",
     "no-undef": "off",
-    "no-unreachable": "off",
-    "no-useless-escape": "off",
+    "no-unreachable": "warn",
+    "no-useless-escape": "warn",
   },
 }, {
-  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills"]
+  ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts", "examples/**", "skills", "scripts/**", "tool-results/**"]
 }];
 
 export default eslintConfig;

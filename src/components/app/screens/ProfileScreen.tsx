@@ -13,7 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProfile, calcWeek, trimesterOf } from "@/components/providers";
 import { format } from "date-fns";
-import { Baby, Calendar as CalIcon, Heart, Crown, Copy, Check, LogOut, ChevronRight, User, Users, Lock, AlertCircle } from "lucide-react";
+import { Baby, Calendar as CalIcon, Heart, Crown, Copy, Check, LogOut, ChevronRight, User, Users, Lock, AlertCircle, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -197,8 +197,54 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
       </Card>
       </motion.div>
 
+      {/* Data & Account */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <Card className="bg-card border-moss/15 rounded-3xl p-5">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-3">Your data</div>
+        <div className="space-y-2">
+          <Button
+            onClick={async () => {
+              try {
+                const res = await fetch("/api/account/export");
+                if (!res.ok) throw new Error();
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `tender-trimesters-export-${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.success("Your data has been exported");
+              } catch {
+                toast.error("Export failed. Please try again.");
+              }
+            }}
+            variant="outline" size="sm" className="w-full justify-start rounded-xl border-moss/20"
+          >
+            <Download className="w-4 h-4 mr-2 text-moss" /> Export all my data
+          </Button>
+          <Button
+            onClick={async () => {
+              if (!confirm("This will permanently delete your account and ALL your data — journal entries, photos, letters, everything. This cannot be undone.\n\nAre you sure?")) return;
+              try {
+                const res = await fetch("/api/account/delete", { method: "DELETE" });
+                if (!res.ok) throw new Error();
+                toast.success("Account deleted. Redirecting...");
+                setTimeout(() => onSignOut(), 1500);
+              } catch {
+                toast.error("Deletion failed. Please try again.");
+              }
+            }}
+            variant="outline" size="sm" className="w-full justify-start rounded-xl border-destructive/30 text-destructive hover:bg-destructive/5 hover:text-destructive"
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Delete my account
+          </Button>
+        </div>
+      </Card>
+      </motion.div>
+
       {/* Sign out */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
         <Button onClick={onSignOut} variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 rounded-full">
           <LogOut className="w-4 h-4 mr-2" /> Sign out
         </Button>

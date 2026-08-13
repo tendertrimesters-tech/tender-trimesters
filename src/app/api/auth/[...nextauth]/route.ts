@@ -28,8 +28,8 @@ export const authOptions: NextAuthOptions = {
           if (!credentials.name || credentials.name.trim().length < 1) {
             throw new Error("Please enter your name");
           }
-          if (credentials.password.length < 6) {
-            throw new Error("Password must be at least 6 characters");
+          if (credentials.password.length < 8) {
+            throw new Error("Password must be at least 8 characters");
           }
           const passwordHash = await bcrypt.hash(credentials.password, 10);
           const user = await db.user.create({

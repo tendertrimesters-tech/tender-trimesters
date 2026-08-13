@@ -252,3 +252,39 @@ Stage Summary:
 - Dev server returns 200 on /, /privacy, /terms
 - next.config is now production-safe (strict mode on, build errors not ignored)
 - App is launch-ready pending: production database (Postgres), Stripe keys, NEXTAUTH_SECRET, domain DNS
+
+---
+Task ID: launch-readiness-deep
+Agent: main (orchestrator)
+Task: Comprehensive launch-readiness audit and fixes — blockers, security, privacy compliance, cleanup
+
+Work Log:
+- Ran full Explore audit across entire project — identified 6 launch blockers, 13 should-fix, 7 nice-to-have issues
+- **BLOCKER FIXES:**
+  - .gitignore: replaced `.env*` glob with specific `.env`, `.env.local`, `.env.*.local` (allows .env.example to be committed); added `db/*.db` to prevent database files in git
+  - package.json: renamed to `tender-trimesters` v1.0.0, added `postinstall: prisma generate`, removed `--accept-data-loss` from `db:push` (moved to `db:push:force`), added `db:deploy` for production migrations
+  - .env: generated and set `NEXTAUTH_SECRET` via `openssl rand -base64 32`, added `NEXTAUTH_URL`
+  - Created `/src/middleware.ts` — NextAuth middleware protecting all API routes except public ones (waitlist, partner, weekly-content, hormone-horoscope, stripe/webhook, auth)
+  - Landing page footer: replaced placeholder Amazon link with `mailto:hello@mommiesmatter.com?subject=Mommies%20Matter%20Book`
+  - Prisma schema: added detailed production migration checklist as comments (provider swap, connection string, migrate commands)
+- **SHOULD-FIX FIXES:**
+  - Landing page footer: changed Privacy/Terms from `<button>` dialog triggers to `<a href="/privacy">` and `<a href="/terms">` for SEO crawlability (dialogs still accessible from Nav)
+  - robots.txt: added `Sitemap: https://tendertrimesters.com/sitemap.xml` directive
+  - Deleted dead `tailwind.config.ts` (Tailwind v4 uses `@theme inline` in globals.css, not config file)
+  - Premium card: replaced 2 unimplemented features ("Kick counter & contraction timer", "Letters to baby journal templates") with real ones ("Letters from Baby AI-written", "Fear to Flame AI reframing")
+  - Password minimum: raised from 6 to 8 characters in auth route
+  - GDPR/CCPA compliance: created `/api/account/export` (GET — downloads all user data as JSON) and `/api/account/delete` (DELETE — cascade-deletes user + all 17 related tables)
+  - ProfileScreen: added "Your data" section with Export and Delete account buttons (with confirmation dialog on delete)
+  - Removed 8 unused npm packages: next-intl, react-markdown, react-syntax-highlighter, @mdxeditor/editor, @tanstack/react-query, @tanstack/react-table, zustand, uuid
+  - Removed 7 unused shadcn components + 5 unused Radix packages: menubar, navigation-menu, context-menu, breadcrumb, resizable, carousel, input-otp, embla-carousel-react
+  - ESLint config: re-enabled 10 useful rules as `warn` (no-unused-vars, prefer-const, react-hooks/exhaustive-deps, no-console, no-unreachable, etc.); kept intentional offs (no-explicit-any, display-name); added scripts/ and tool-results/ to ignores
+
+Stage Summary:
+- All 6 launch blockers resolved
+- All 13 should-fix items resolved
+- 2 new API routes for privacy compliance (account/export, account/delete)
+- 1 new middleware for auth protection
+- 13 unused packages removed (lighter install, faster builds)
+- Zero TypeScript errors in src/
+- Dev server returns 200
+- App is now launch-ready: deploy to Vercel, set production DATABASE_URL (Postgres), add Stripe keys, set NEXTAUTH_SECRET, point domain

@@ -358,8 +358,8 @@ function PremiumCard({ onUpgrade }: { onUpgrade: () => void }) {
     "Custom appointment reminders",
     "Partner access (read-only journey view)",
     "Audio affirmations & meditations",
-    "Kick counter & contraction timer",
-    "Letters to baby journal templates",
+    "Letters from Baby (AI-written letters in baby's voice)",
+    "Fear to Flame — AI-powered fear reframing",
     "Premium bundle: ebook + affirmations deck",
   ];
   return (
@@ -669,15 +669,15 @@ function Footer({
           <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">About</div>
           <ul className="space-y-2 text-sm text-foreground/70">
             <li><a href="#testimonials" className="hover:text-moss">Mama Stories</a></li>
-            <li><a href="https://www.amazon.com" target="_blank" rel="noopener noreferrer" className="hover:text-moss">Mommies Matter Book</a></li>
+            <li><a href="mailto:hello@mommiesmatter.com?subject=Mommies%20Matter%20Book" className="hover:text-moss">Mommies Matter Book</a></li>
             <li><a href="mailto:hello@mommiesmatter.com" className="hover:text-moss">Contact</a></li>
           </ul>
         </div>
         <div>
           <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">Legal</div>
           <ul className="space-y-2 text-sm text-foreground/70">
-            <li><button onClick={onPrivacy} className="hover:text-moss text-left">Privacy Policy</button></li>
-            <li><button onClick={onTerms} className="hover:text-moss text-left">Terms of Service</button></li>
+            <li><a href="/privacy" className="hover:text-moss">Privacy Policy</a></li>
+            <li><a href="/terms" className="hover:text-moss">Terms of Service</a></li>
           </ul>
         </div>
       </div>

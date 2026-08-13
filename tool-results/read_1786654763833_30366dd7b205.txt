@@ -1,0 +1,927 @@
+     1→     1→"use client";
+     2→     2→
+     3→     3→import { useState } from "react";
+     4→     4→import { motion, AnimatePresence } from "framer-motion";
+     5→     5→import { signIn } from "next-auth/react";
+     6→     6→import { Button } from "@/components/ui/button";
+     7→     7→import { Card } from "@/components/ui/card";
+     8→     8→import { Input } from "@/components/ui/input";
+     9→     9→import { Label } from "@/components/ui/label";
+    10→    10→import { Textarea } from "@/components/ui/textarea";
+    11→    11→import {
+    12→    12→  Dialog,
+    13→    13→  DialogContent,
+    14→    14→  DialogHeader,
+    15→    15→  DialogTitle,
+    16→    16→  DialogDescription,
+    17→    17→} from "@/components/ui/dialog";
+    18→    18→import { toast } from "sonner";
+    19→    19→import {
+    20→    20→  Heart,
+    21→    21→  Sparkles,
+    22→    22→  Calendar,
+    23→    23→  BookHeart,
+    24→    24→  MessageCircleHeart,
+    25→    25→  Camera,
+    26→    26→  Bell,
+    27→    27→  Users,
+    28→    28→  Baby,
+    29→    29→  Check,
+    30→    30→  ArrowRight,
+    31→    31→  Moon,
+    32→    32→  Sun,
+    33→    33→  Leaf,
+    34→    34→  Star,
+    35→    35→  ChevronRight,
+    36→    36→} from "lucide-react";
+    37→    37→
+    38→    38→type LandingPageProps = {
+    39→    39→  onOpenApp: () => void;
+    40→    40→};
+    41→    41→
+    42→    42→export default function LandingPage({ onOpenApp }: LandingPageProps) {
+    43→    43→  const [waitlistOpen, setWaitlistOpen] = useState(false);
+    44→    44→  const [authOpen, setAuthOpen] = useState(false);
+    45→    45→  const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
+    46→    46→  const [privacyOpen, setPrivacyOpen] = useState(false);
+    47→    47→  const [termsOpen, setTermsOpen] = useState(false);
+    48→    48→
+    49→    49→  return (
+    50→    50→    <div className="min-h-screen bg-gradient-cream">
+    51→    51→      <MilestoneTicker />
+    52→    52→      <Nav onOpenAuth={() => setAuthOpen(true)} onOpenApp={onOpenApp} />
+    53→    53→      <Hero onJoinWaitlist={() => setWaitlistOpen(true)} onOpenApp={onOpenApp} />
+    54→    54→      <FreeVsPremium onUpgrade={() => setAuthOpen(true)} />
+    55→    55→      <VisualShowcase />
+    56→    56→      <SignatureFeatures />
+    57→    57→      <Testimonials />
+    58→    58→      <PremiumBundle onUpgrade={() => setAuthOpen(true)} />
+    59→    59→      <WaitlistCTA onJoin={() => setWaitlistOpen(true)} />
+    60→    60→      <Footer
+    61→    61→        onPrivacy={() => setPrivacyOpen(true)}
+    62→    62→        onTerms={() => setTermsOpen(true)}
+    63→    63→      />
+    64→    64→
+    65→    65→      <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+    66→    66→      <AuthDialog
+    67→    67→        open={authOpen}
+    68→    68→        onOpenChange={setAuthOpen}
+    69→    69→        mode={authMode}
+    70→    70→        setMode={setAuthMode}
+    71→    71→        onSuccess={onOpenApp}
+    72→    72→      />
+    73→    73→      <PrivacyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
+    74→    74→      <TermsDialog open={termsOpen} onOpenChange={setTermsOpen} />
+    75→    75→    </div>
+    76→    76→  );
+    77→    77→}
+    78→    78→
+    79→    79→/* ─────────────────────────── NAV ─────────────────────────── */
+    80→    80→
+    81→    81→function Nav({ onOpenAuth, onOpenApp }: { onOpenAuth: () => void; onOpenApp: () => void }) {
+    82→    82→  return (
+    83→    83→    <header className="sticky top-0 z-40 backdrop-blur-md bg-cream/80 border-b border-border/40">
+    84→    84→      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+    85→    85→        <div className="flex items-center gap-2">
+    86→    86→          <Logo />
+    87→    87→          <div>
+    88→    88→            <div className="font-serif text-xl leading-none text-moss-deep">Tender Trimesters</div>
+    89→    89→            <div className="text-[10px] tracking-[0.18em] uppercase text-muted-foreground">by Mommies Matter</div>
+    90→    90→          </div>
+    91→    91→        </div>
+    92→    92→        <nav className="hidden md:flex items-center gap-8 text-sm">
+    93→    93→          <a href="#features" className="text-foreground/70 hover:text-moss transition-colors">Features</a>
+    94→    94→          <a href="#signature" className="text-foreground/70 hover:text-moss transition-colors">Keepsakes</a>
+    95→    95→          <a href="#comparison" className="text-foreground/70 hover:text-moss transition-colors">Pricing</a>
+    96→    96→          <a href="#testimonials" className="text-foreground/70 hover:text-moss transition-colors">Stories</a>
+    97→    97→          <a href="#bundle" className="text-foreground/70 hover:text-moss transition-colors">Bundle</a>
+    98→    98→        </nav>
+    99→    99→        <div className="flex items-center gap-2">
+   100→   100→          <Button variant="ghost" size="sm" onClick={onOpenAuth} className="hidden sm:flex">
+   101→   101→            Sign in
+   102→   102→          </Button>
+   103→   103→          <Button size="sm" onClick={onOpenApp} className="bg-moss hover:bg-moss-deep">
+   104→   104→            Open the App <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+   105→   105→          </Button>
+   106→   106→        </div>
+   107→   107→      </div>
+   108→   108→    </header>
+   109→   109→  );
+   110→   110→}
+   111→   111→
+   112→   112→function Logo() {
+   113→   113→  return (
+   114→   114→    <div className="w-9 h-9 rounded-full bg-gradient-moss flex items-center justify-center shadow-soft">
+   115→   115→      <Leaf className="w-4 h-4 text-cream" />
+   116→   116→    </div>
+   117→   117→  );
+   118→   118→}
+   119→   119→
+   120→   120→/* ─────────────────────────── MILESTONE TICKER ─────────────────────────── */
+   121→   121→
+   122→   122→function MilestoneTicker() {
+   123→   123→  const items = [
+   124→   124→    "Week 4 · Missed your period?",
+   125→   125→    "Week 8 · First heartbeat",
+   126→   126→    "Week 12 · End of trimester 1",
+   127→   127→    "Week 16 · Bump makes its debut",
+   128→   128→    "Week 20 · Halfway there",
+   129→   129→    "Week 24 · Viability milestone",
+   130→   130→    "Week 28 · Third trimester begins",
+   131→   131→    "Week 36 · Early term approaching",
+   132→   132→    "Week 40 · Due date",
+   133→   133→  ];
+   134→   134→  const doubled = [...items, ...items];
+   135→   135→  return (
+   136→   136→    <div className="bg-moss-deep text-cream py-2 overflow-hidden">
+   137→   137→      <div className="flex gap-12 whitespace-nowrap animate-ticker">
+   138→   138→        {doubled.map((item, i) => (
+   139→   139→          <span key={i} className="text-xs tracking-wider font-medium flex items-center gap-2">
+   140→   140→            <Sparkles className="w-3 h-3 text-blush" />
+   141→   141→            {item}
+   142→   142→          </span>
+   143→   143→        ))}
+   144→   144→      </div>
+   145→   145→    </div>
+   146→   146→  );
+   147→   147→}
+   148→   148→
+   149→   149→/* ─────────────────────────── HERO ─────────────────────────── */
+   150→   150→
+   151→   151→function Hero({ onJoinWaitlist, onOpenApp }: { onJoinWaitlist: () => void; onOpenApp: () => void }) {
+   152→   152→  return (
+   153→   153→    <section className="relative overflow-hidden">
+   154→   154→      <div className="absolute inset-0 -z-10">
+   155→   155→        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blush/40 rounded-full blur-3xl opacity-60" />
+   156→   156→        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sage/40 rounded-full blur-3xl opacity-50" />
+   157→   157→      </div>
+   158→   158→
+   159→   159→      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+   160→   160→        <motion.div
+   161→   161→          initial={{ opacity: 0, y: 16 }}
+   162→   162→          animate={{ opacity: 1, y: 0 }}
+   163→   163→          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+   164→   164→        >
+   165→   165→          <div className="inline-flex items-center gap-2 bg-blush/50 text-rose-gold px-3 py-1 rounded-full text-xs font-medium mb-6">
+   166→   166→            <Sparkles className="w-3 h-3" />
+   167→   167→            Your 24/7 pregnancy companion
+   168→   168→          </div>
+   169→   169→          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-moss-deep text-balance">
+   170→   170→            Your pregnancy,<br />
+   171→   171→            <span className="text-gradient-moss italic">one week</span> at a time.
+   172→   172→          </h1>
+   173→   173→          <p className="mt-6 text-lg text-foreground/70 leading-relaxed max-w-md">
+   174→   174→            A nurturing weekly calendar, daily affirmations, a private journal, mood tracking, and Tempie — your AI companion who's there at 3am when you need her most.
+   175→   175→          </p>
+   176→   176→
+   177→   177→          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+   178→   178→            <Button
+   179→   179→              size="lg"
+   180→   180→              onClick={onOpenApp}
+   181→   181→              className="bg-moss hover:bg-moss-deep text-cream px-7 h-12 rounded-full"
+   182→   182→            >
+   183→   183→              Open the App <ArrowRight className="ml-2 w-4 h-4" />
+   184→   184→            </Button>
+   185→   185→            <Button
+   186→   186→              size="lg"
+   187→   187→              variant="outline"
+   188→   188→              onClick={onJoinWaitlist}
+   189→   189→              className="border-moss/30 text-moss-deep hover:bg-moss/5 px-7 h-12 rounded-full"
+   190→   190→            >
+   191→   191→              Join the waitlist
+   192→   192→            </Button>
+   193→   193→          </div>
+   194→   194→
+   195→   195→          <div className="mt-8 flex items-center gap-6 text-xs text-muted-foreground">
+   196→   196→            <div className="flex items-center gap-1.5">
+   197→   197→              <Check className="w-3.5 h-3.5 text-moss" />
+   198→   198→              Free forever tier
+   199→   199→            </div>
+   200→   200→            <div className="flex items-center gap-1.5">
+   201→   201→              <Check className="w-3.5 h-3.5 text-moss" />
+   202→   202→              Private &amp; secure
+   203→   203→            </div>
+   204→   204→            <div className="flex items-center gap-1.5">
+   205→   205→              <Check className="w-3.5 h-3.5 text-moss" />
+   206→   206→              40 weeks of content
+   207→   207→            </div>
+   208→   208→          </div>
+   209→   209→        </motion.div>
+   210→   210→
+   211→   211→        <motion.div
+   212→   212→          initial={{ opacity: 0, scale: 0.95 }}
+   213→   213→          animate={{ opacity: 1, scale: 1 }}
+   214→   214→          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+   215→   215→          className="relative"
+   216→   216→        >
+   217→   217→          <HeroCard />
+   218→   218→        </motion.div>
+   219→   219→      </div>
+   220→   220→    </section>
+   221→   221→  );
+   222→   222→}
+   223→   223→
+   224→   224→function HeroCard() {
+   225→   225→  return (
+   226→   226→    <div className="relative">
+   227→   227→      {/* Main phone-card */}
+   228→   228→      <Card className="relative z-10 bg-card border-moss/15 shadow-soft rounded-[28px] overflow-hidden">
+   229→   229→        <div className="bg-gradient-moss p-5 text-cream">
+   230→   230→          <div className="flex items-center justify-between text-[10px] uppercase tracking-widest opacity-80">
+   231→   231→            <span>Week 16</span>
+   232→   232→            <span>Second Trimester</span>
+   233→   233→          </div>
+   234→   234→          <div className="mt-2 flex items-center gap-3">
+   235→   235→            <Baby className="w-8 h-8 text-blush" />
+   236→   236→            <div>
+   237→   237→              <div className="font-serif text-2xl leading-none">Avocado</div>
+   238→   238→              <div className="text-xs opacity-70">About 4.6 inches long</div>
+   239→   239→            </div>
+   240→   240→          </div>
+   241→   241→        </div>
+   242→   242→
+   243→   243→        <div className="p-5 space-y-4">
+   244→   244→          <div className="bg-blush/30 rounded-2xl p-4">
+   245→   245→            <div className="text-[10px] uppercase tracking-widest text-rose-gold mb-1">Today's Affirmation</div>
+   246→   246→            <p className="font-script text-xl text-moss-deep">My changing body is beautiful.</p>
+   247→   247→          </div>
+   248→   248→
+   249→   249→          <div>
+   250→   250→            <div className="text-xs font-semibold text-moss-deep mb-2 flex items-center gap-1.5">
+   251→   251→              <Leaf className="w-3.5 h-3.5" /> Best Friend Tip
+   252→   252→            </div>
+   253→   253→            <p className="text-sm text-foreground/75 leading-relaxed">
+   254→   254→              Invest in 2-3 quality maternity basics. You'll live in them for months.
+   255→   255→            </p>
+   256→   256→          </div>
+   257→   257→
+   258→   258→          <div className="flex items-center justify-between bg-sage/30 rounded-xl p-3">
+   259→   259→            <div className="flex items-center gap-2">
+   260→   260→              <MessageCircleHeart className="w-4 h-4 text-moss" />
+   261→   261→              <span className="text-xs font-medium text-moss-deep">Tempie's here</span>
+   262→   262→            </div>
+   263→   263→            <span className="text-[10px] text-muted-foreground">24/7 companion</span>
+   264→   264→          </div>
+   265→   265→        </div>
+   266→   266→      </Card>
+   267→   267→
+   268→   268→      {/* Floating affirmation chip */}
+   269→   269→      <motion.div
+   270→   270→        initial={{ opacity: 0, y: 20 }}
+   271→   271→        animate={{ opacity: 1, y: 0 }}
+   272→   272→        transition={{ delay: 0.6, duration: 0.6 }}
+   273→   273→        className="absolute -top-3 -right-3 z-20 bg-cream shadow-premium rounded-2xl px-4 py-2 border border-rose-gold/20"
+   274→   274→      >
+   275→   275→        <div className="font-script text-rose-gold text-lg">you've got this, mama</div>
+   276→   276→      </motion.div>
+   277→   277→
+   278→   278→      {/* Floating mood chip */}
+   279→   279→      <motion.div
+   280→   280→        initial={{ opacity: 0, y: 20 }}
+   281→   281→        animate={{ opacity: 1, y: 0 }}
+   282→   282→        transition={{ delay: 0.8, duration: 0.6 }}
+   283→   283→        className="absolute -bottom-4 -left-4 z-20 bg-cream shadow-soft rounded-2xl px-4 py-3 border border-moss/15"
+   284→   284→      >
+   285→   285→        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Today's mood</div>
+   286→   286→        <div className="flex items-center gap-2">
+   287→   287→          <span className="text-2xl">🌸</span>
+   288→   288→          <span className="text-sm font-medium text-moss-deep">Glowing</span>
+   289→   289→        </div>
+   290→   290→      </motion.div>
+   291→   291→    </div>
+   292→   292→  );
+   293→   293→}
+   294→   294→
+   295→   295→/* ─────────────────────────── FREE VS PREMIUM ─────────────────────────── */
+   296→   296→
+   297→   297→function FreeVsPremium({ onUpgrade }: { onUpgrade: () => void }) {
+   298→   298→  return (
+   299→   299→    <section id="comparison" className="py-20 md:py-28 bg-cream">
+   300→   300→      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+   301→   301→        <div className="text-center max-w-2xl mx-auto mb-14">
+   302→   302→          <div className="text-xs uppercase tracking-[0.2em] text-terracotta mb-3">Choose your journey</div>
+   303→   303→          <h2 className="font-serif text-4xl md:text-5xl text-moss-deep">Free, or fully held.</h2>
+   304→   304→          <p className="mt-4 text-foreground/70">
+   305→   305→            Start free, forever. When you're ready for the deeper layers — Tempie at 3am, partner access, bump photos, and the full Mommies Matter bundle — premium is a one-time $9.99.
+   306→   306→          </p>
+   307→   307→        </div>
+   308→   308→
+   309→   309→        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+   310→   310→          <FreeCard />
+   311→   311→          <PremiumCard onUpgrade={onUpgrade} />
+   312→   312→        </div>
+   313→   313→      </div>
+   314→   314→    </section>
+   315→   315→  );
+   316→   316→}
+   317→   317→
+   318→   318→function FreeCard() {
+   319→   319→  const features = [
+   320→   320→    "Weekly milestone calendar (40 weeks)",
+   321→   321→    "Baby size tracker with fruit comparisons",
+   322→   322→    "Daily affirmations",
+   323→   323→    "Mood check-ins with simple trends",
+   324→   324→    "Private journal (text + mood)",
+   325→   325→    "Tempie AI chat — 5 messages / day",
+   326→   326→  ];
+   327→   327→  return (
+   328→   328→    <Card className="bg-card border-moss/15 rounded-[28px] p-7 shadow-soft">
+   329→   329→      <div className="flex items-baseline justify-between mb-1">
+   330→   330→        <h3 className="font-serif text-3xl text-moss-deep">Free</h3>
+   331→   331→        <div className="text-xs uppercase tracking-widest text-muted-foreground">Forever</div>
+   332→   332→      </div>
+   333→   333→      <div className="flex items-baseline gap-1 mb-6">
+   334→   334→        <span className="font-serif text-5xl text-moss-deep">$0</span>
+   335→   335→      </div>
+   336→   336→      <ul className="space-y-3">
+   337→   337→        {features.map((f) => (
+   338→   338→          <li key={f} className="flex items-start gap-3">
+   339→   339→            <div className="mt-0.5 w-5 h-5 rounded-full bg-moss/15 flex items-center justify-center flex-shrink-0">
+   340→   340→              <Check className="w-3 h-3 text-moss" />
+   341→   341→            </div>
+   342→   342→            <span className="text-sm text-foreground/80">{f}</span>
+   343→   343→          </li>
+   344→   344→        ))}
+   345→   345→      </ul>
+   346→   346→      <div className="mt-7 text-xs text-muted-foreground italic">
+   347→   347→        No credit card. No trial expiration. Just here for you.
+   348→   348→      </div>
+   349→   349→    </Card>
+   350→   350→  );
+   351→   351→}
+   352→   352→
+   353→   353→function PremiumCard({ onUpgrade }: { onUpgrade: () => void }) {
+   354→   354→  const features = [
+   355→   355→    "Everything in Free, plus:",
+   356→   356→    "Tempie AI chat — unlimited, 24/7",
+   357→   357→    "Bump photo gallery by week",
+   358→   358→    "Custom appointment reminders",
+   359→   359→    "Partner access (read-only journey view)",
+   360→   360→    "Audio affirmations & meditations",
+   361→   361→    "Kick counter & contraction timer",
+   362→   362→    "Letters to baby journal templates",
+   363→   363→    "Premium bundle: ebook + affirmations deck",
+   364→   364→  ];
+   365→   365→  return (
+   366→   366→    <Card className="relative bg-gradient-to-br from-cream to-blush/20 border-rose-gold/30 rounded-[28px] p-7 shadow-premium">
+   367→   367→      <div className="absolute -top-3 left-7 bg-gradient-premium text-cream text-[10px] uppercase tracking-widest px-3 py-1 rounded-full">
+   368→   368→        Most loved
+   369→   369→      </div>
+   370→   370→      <div className="flex items-baseline justify-between mb-1">
+   371→   371→        <h3 className="font-serif text-3xl text-rose-gold">Premium</h3>
+   372→   372→        <div className="text-xs uppercase tracking-widest text-rose-gold/70">One-time</div>
+   373→   373→      </div>
+   374→   374→      <div className="flex items-baseline gap-2 mb-6">
+   375→   375→        <span className="font-serif text-5xl text-moss-deep">$9.99</span>
+   376→   376→        <span className="text-sm text-muted-foreground line-through">$19.99</span>
+   377→   377→      </div>
+   378→   378→      <ul className="space-y-3">
+   379→   379→        {features.map((f, i) => (
+   380→   380→          <li key={f} className={`flex items-start gap-3 ${i === 0 ? "font-semibold text-moss-deep" : ""}`}>
+   381→   381→            <div className="mt-0.5 w-5 h-5 rounded-full bg-rose-gold/20 flex items-center justify-center flex-shrink-0">
+   382→   382→              <Star className="w-3 h-3 text-rose-gold fill-rose-gold" />
+   383→   383→            </div>
+   384→   384→            <span className={`text-sm ${i === 0 ? "text-moss-deep" : "text-foreground/80"}`}>{f}</span>
+   385→   385→          </li>
+   386→   386→        ))}
+   387→   387→      </ul>
+   388→   388→      <Button
+   389→   389→        onClick={onUpgrade}
+   390→   390→        className="mt-7 w-full bg-gradient-premium text-cream hover:opacity-90 h-12 rounded-full"
+   391→   391→      >
+   392→   392→        Start free, upgrade anytime
+   393→   393→      </Button>
+   394→   394→      <div className="mt-3 text-center text-xs text-muted-foreground">
+   395→   395→        Or $4.99/month if you prefer to spread it out
+   396→   396→      </div>
+   397→   397→    </Card>
+   398→   398→  );
+   399→   399→}
+   400→   400→
+   401→   401→/* ─────────────────────────── VISUAL SHOWCASE ─────────────────────────── */
+   402→   402→
+   403→   403→function VisualShowcase() {
+   404→   404→  const items = [
+   405→   405→    { icon: Calendar, label: "Weekly Milestones", desc: "40 weeks of baby's growth, your body, your emotions.", bg: "bg-sage/40", color: "text-moss-deep" },
+   406→   406→    { icon: BookHeart, label: "Private Journal", desc: "Notes, moods, cravings, baby names — all in one place.", bg: "bg-blush/40", color: "text-rose-gold" },
+   407→   407→    { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", bg: "bg-butter", color: "text-moss-deep" },
+   408→   408→    { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", bg: "bg-lavender/40", color: "text-moss-deep" },
+   409→   409→    { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", bg: "bg-sage/40", color: "text-moss-deep" },
+   410→   410→    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", bg: "bg-blush/40", color: "text-rose-gold" },
+   411→   411→  ];
+   412→   412→  return (
+   413→   413→    <section id="features" className="py-20 md:py-28 bg-gradient-to-b from-cream to-butter/30">
+   414→   414→      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+   415→   415→        <div className="text-center max-w-2xl mx-auto mb-14">
+   416→   416→          <div className="text-xs uppercase tracking-[0.2em] text-terracotta mb-3">What's inside</div>
+   417→   417→          <h2 className="font-serif text-4xl md:text-5xl text-moss-deep">A sanctuary for every week.</h2>
+   418→   418→          <p className="mt-4 text-foreground/70">
+   419→   419→            Every feature designed with one question: does this make a mama feel more held?
+   420→   420→          </p>
+   421→   421→        </div>
+   422→   422→
+   423→   423→        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+   424→   424→          {items.map((item, i) => (
+   425→   425→            <motion.div
+   426→   426→              key={item.label}
+   427→   427→              initial={{ opacity: 0, y: 20 }}
+   428→   428→              whileInView={{ opacity: 1, y: 0 }}
+   429→   429→              viewport={{ once: true }}
+   430→   430→              transition={{ delay: i * 0.08, duration: 0.5 }}
+   431→   431→            >
+   432→   432→              <Card className={`${item.bg} border-transparent rounded-3xl p-6 h-full hover:shadow-soft transition-shadow`}>
+   433→   433→                <div className="w-12 h-12 rounded-2xl bg-cream/60 flex items-center justify-center mb-4">
+   434→   434→                  <item.icon className={`w-5 h-5 ${item.color}`} />
+   435→   435→                </div>
+   436→   436→                <h3 className={`font-serif text-xl mb-2 ${item.color}`}>{item.label}</h3>
+   437→   437→                <p className="text-sm text-foreground/70 leading-relaxed">{item.desc}</p>
+   438→   438→              </Card>
+   439→   439→            </motion.div>
+   440→   440→          ))}
+   441→   441→        </div>
+   442→   442→      </div>
+   443→   443→    </section>
+   444→   444→  );
+   445→   445→}
+   446→   446→
+   447→   447→/* ─────────────────────────── SIGNATURE FEATURES ─────────────────────────── */
+   448→   448→
+   449→   449→function SignatureFeatures() {
+   450→   450→  const features = [
+   451→   451→    { emoji: "💌", title: "Letters from Baby", desc: "Each week your baby writes you a tender letter in their own voice — a keepsake to hold forever.", accent: "bg-blush/30" },
+   452→   452→    { emoji: "🔥", title: "Fear to Flame", desc: "Name a fear. Watch AI gently reframe it into courage. Track your growing bravery.", accent: "bg-terracotta/20" },
+   453→   453→    { emoji: "📖", title: "My Mother's Mother", desc: "12 guided interview prompts that capture a generational keepsake you'll treasure.", accent: "bg-butter" },
+   454→   454→    { emoji: "🌙", title: "DreamKeeper", desc: "Log your vivid pregnancy dreams. AI surfaces the recurring symbols and themes.", accent: "bg-lavender/20" },
+   455→   455→    { emoji: "🌊", title: "Hormone Horoscope", desc: "A poetic, science-backed forecast of what your hormones are doing — and why you feel the way you do.", accent: "bg-sage/20" },
+   456→   456→    { emoji: "🌱", title: "The Name Garden", desc: "Plant name ideas as seeds. Watch them grow. Track how your feelings shift week to week.", accent: "bg-sage/30" },
+   457→   457→    { emoji: "⏳", title: "Memory Capsule", desc: "Seal letters, wishes, and promises now that unlock for your child on a future date you choose.", accent: "bg-lavender/30" },
+   458→   458→    { emoji: "🎵", title: "Birth Playlist Composer", desc: "Build the soundtrack for labor by phase — early, active, pushing, first cry, golden hour.", accent: "bg-blush/20" },
+   459→   459→    { emoji: "🤍", title: "Belly Bonding Rituals", desc: "A daily 60-second ritual — a phrase, a hand position, a breath — building your bond before birth.", accent: "bg-blush/30" },
+   460→   460→  ];
+   461→   461→
+   462→   462→  return (
+   463→   463→    <section id="signature" className="py-20 px-4 sm:px-6">
+   464→   464→      <div className="max-w-5xl mx-auto">
+   465→   465→        <motion.div
+   466→   466→          initial={{ opacity: 0, y: 20 }}
+   467→   467→          whileInView={{ opacity: 1, y: 0 }}
+   468→   468→          viewport={{ once: true }}
+   469→   469→          className="text-center mb-12"
+   470→   470→        >
+   471→   471→          <div className="text-[10px] uppercase tracking-[0.2em] text-rose-gold font-semibold mb-2">Unlike any other pregnancy app</div>
+   472→   472→          <h2 className="font-serif text-3xl sm:text-4xl text-moss-deep">Nine features you won't find anywhere else</h2>
+   473→   473→          <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto">
+   474→   474→            Every other pregnancy app gives you a calendar and a checklist. We give you a deeply personal, keepsake-driven experience that honors the emotional journey of becoming a mother.
+   475→   475→          </p>
+   476→   476→        </motion.div>
+   477→   477→
+   478→   478→        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+   479→   479→          {features.map((f, i) => (
+   480→   480→            <motion.div
+   481→   481→              key={f.title}
+   482→   482→              initial={{ opacity: 0, y: 16 }}
+   483→   483→              whileInView={{ opacity: 1, y: 0 }}
+   484→   484→              viewport={{ once: true }}
+   485→   485→              transition={{ delay: 0.04 * i }}
+   486→   486→            >
+   487→   487→              <Card className="rounded-2xl p-5 h-full border-moss/10 hover:shadow-soft transition-shadow">
+   488→   488→                <div className="flex items-start gap-3">
+   489→   489→                  <span className="text-2xl">{f.emoji}</span>
+   490→   490→                  <div>
+   491→   491→                    <div className="font-serif text-base text-moss-deep">{f.title}</div>
+   492→   492→                    <p className="text-xs text-foreground/70 leading-relaxed mt-1">{f.desc}</p>
+   493→   493→                  </div>
+   494→   494→                </div>
+   495→   495→              </Card>
+   496→   496→            </motion.div>
+   497→   497→          ))}
+   498→   498→        </div>
+   499→   499→      </div>
+   500→   500→    </section>
+   501→   501→  );
+   502→   502→}
+   503→   503→
+   504→   504→/* ─────────────────────────── TESTIMONIALS ─────────────────────────── */
+   505→   505→
+   506→   506→function Testimonials() {
+   507→   507→  const quotes = [
+   508→   508→    {
+   509→   509→      text: "It feels like a friend is checking in with me. The weekly tips feel personal — not clinical.",
+   510→   510→      name: "First-time mom, week 22",
+   511→   511→    },
+   512→   512→    {
+   513→   513→      text: "Tempie answered my 3am panic about whether my baby's kicks were normal. She didn't replace my OB, but she helped me breathe until morning.",
+   514→   514→      name: "Mama of one, week 28",
+   515→   515→    },
+   516→   516→    {
+   517→   517→      text: "I cried when I read the affirmation on week 16. 'My changing body is beautiful.' I needed that.",
+   518→   518→      name: "Tender Trimesters mama",
+   519→   519→    },
+   520→   520→  ];
+   521→   521→  return (
+   522→   522→    <section id="testimonials" className="py-20 md:py-28 bg-cream">
+   523→   523→      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+   524→   524→        <div className="text-center max-w-2xl mx-auto mb-14">
+   525→   525→          <div className="text-xs uppercase tracking-[0.2em] text-terracotta mb-3">Mama stories</div>
+   526→   526→          <h2 className="font-serif text-4xl md:text-5xl text-moss-deep">You are not alone in this.</h2>
+   527→   527→        </div>
+   528→   528→        <div className="grid md:grid-cols-3 gap-6">
+   529→   529→          {quotes.map((q, i) => (
+   530→   530→            <motion.div
+   531→   531→              key={i}
+   532→   532→              initial={{ opacity: 0, y: 20 }}
+   533→   533→              whileInView={{ opacity: 1, y: 0 }}
+   534→   534→              viewport={{ once: true }}
+   535→   535→              transition={{ delay: i * 0.1 }}
+   536→   536→            >
+   537→   537→              <Card className="bg-card border-moss/10 rounded-3xl p-6 h-full">
+   538→   538→                <div className="font-script text-3xl text-rose-gold/40 mb-2 leading-none">"</div>
+   539→   539→                <p className="text-foreground/80 leading-relaxed text-[15px] italic">{q.text}</p>
+   540→   540→                <div className="mt-5 pt-5 border-t border-border/40 text-xs text-muted-foreground">
+   541→   541→                  — {q.name}
+   542→   542→                </div>
+   543→   543→              </Card>
+   544→   544→            </motion.div>
+   545→   545→          ))}
+   546→   546→        </div>
+   547→   547→      </div>
+   548→   548→    </section>
+   549→   549→  );
+   550→   550→}
+   551→   551→
+   552→   552→/* ─────────────────────────── PREMIUM BUNDLE ─────────────────────────── */
+   553→   553→
+   554→   554→function PremiumBundle({ onUpgrade }: { onUpgrade: () => void }) {
+   555→   555→  const includes = [
+   556→   556→    { title: "Mommies Matter Ebook", desc: "Helena-Ann's full guide — 17 chapters covering epidural decisions, feeding, NICU, postpartum healing, and more.", icon: BookHeart },
+   557→   557→    { title: "Affirmation Card Deck", desc: "40 printable affirmation cards — one per week of pregnancy. Print, frame, or pin to your mirror.", icon: Sparkles },
+   558→   558→    { title: "First-Trimester Checklist", desc: "The survival guide for weeks 1-13: what to eat, what to ask your OB, what to skip.", icon: Check },
+   559→   559→    { title: "Letters to Baby Templates", desc: "Writing prompts for each trimester. Document the journey you'll want to remember forever.", icon: Heart },
+   560→   560→  ];
+   561→   561→  return (
+   562→   562→    <section id="bundle" className="py-20 md:py-28 bg-gradient-to-b from-cream to-blush/15">
+   563→   563→      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+   564→   564→        <Card className="bg-gradient-moss text-cream rounded-[36px] overflow-hidden shadow-premium">
+   565→   565→          <div className="p-8 md:p-14">
+   566→   566→            <div className="text-center mb-10">
+   567→   567→              <div className="text-xs uppercase tracking-[0.2em] text-blush mb-3">Premium Bundle</div>
+   568→   568→              <h2 className="font-serif text-4xl md:text-5xl">Everything mama needs, in one place.</h2>
+   569→   569→              <p className="mt-4 text-cream/70 max-w-xl mx-auto">
+   570→   570→                The full Mommies Matter digital library — bundled with the app for one price. No subscriptions required (though we offer one if you prefer).
+   571→   571→              </p>
+   572→   572→            </div>
+   573→   573→
+   574→   574→            <div className="grid sm:grid-cols-2 gap-4 mb-10">
+   575→   575→              {includes.map((item) => (
+   576→   576→                <div key={item.title} className="bg-cream/10 backdrop-blur-sm rounded-2xl p-5 flex gap-4">
+   577→   577→                  <div className="w-10 h-10 rounded-xl bg-blush/20 flex items-center justify-center flex-shrink-0">
+   578→   578→                    <item.icon className="w-5 h-5 text-blush" />
+   579→   579→                  </div>
+   580→   580→                  <div>
+   581→   581→                    <div className="font-serif text-lg">{item.title}</div>
+   582→   582→                    <div className="text-xs text-cream/70 mt-1 leading-relaxed">{item.desc}</div>
+   583→   583→                  </div>
+   584→   584→                </div>
+   585→   585→              ))}
+   586→   586→            </div>
+   587→   587→
+   588→   588→            <div className="text-center">
+   589→   589→              <div className="inline-flex items-baseline gap-3 mb-6">
+   590→   590→                <span className="text-cream/50 line-through text-lg">$29.99</span>
+   591→   591→                <span className="font-serif text-6xl text-blush">$9.99</span>
+   592→   592→                <span className="text-cream/60 text-sm">one-time</span>
+   593→   593→              </div>
+   594→   594→              <div>
+   595→   595→                <Button
+   596→   596→                  onClick={onUpgrade}
+   597→   597→                  size="lg"
+   598→   598→                  className="bg-cream text-moss-deep hover:bg-blush px-10 h-14 rounded-full text-base"
+   599→   599→                >
+   600→   600→                  Get the Bundle <ArrowRight className="ml-2 w-4 h-4" />
+   601→   601→                </Button>
+   602→   602→              </div>
+   603→   603→              <div className="mt-4 text-xs text-cream/60">
+   604→   604→                Or included free with Premium monthly ($4.99/mo)
+   605→   605→              </div>
+   606→   606→            </div>
+   607→   607→          </div>
+   608→   608→        </Card>
+   609→   609→      </div>
+   610→   610→    </section>
+   611→   611→  );
+   612→   612→}
+   613→   613→
+   614→   614→/* ─────────────────────────── WAITLIST CTA ─────────────────────────── */
+   615→   615→
+   616→   616→function WaitlistCTA({ onJoin }: { onJoin: () => void }) {
+   617→   617→  return (
+   618→   618→    <section className="py-20 md:py-24 bg-moss-deep text-cream">
+   619→   619→      <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+   620→   620→        <Moon className="w-10 h-10 text-blush mx-auto mb-5" />
+   621→   621→        <h2 className="font-serif text-4xl md:text-5xl leading-tight">
+   622→   622→          The waitlist is open.<br />Be the first to hold this.
+   623→   623→        </h2>
+   624→   624→        <p className="mt-5 text-cream/70 max-w-lg mx-auto">
+   625→   625→          Join 200+ mamas getting early access, free affirmation drops, and Helena-Ann's letters from the journey.
+   626→   626→        </p>
+   627→   627→        <Button
+   628→   628→          onClick={onJoin}
+   629→   629→          size="lg"
+   630→   630→          className="mt-8 bg-blush text-moss-deep hover:bg-blush-deep px-10 h-14 rounded-full text-base"
+   631→   631→        >
+   632→   632→          Join the Waitlist <ArrowRight className="ml-2 w-4 h-4" />
+   633→   633→        </Button>
+   634→   634→      </div>
+   635→   635→    </section>
+   636→   636→  );
+   637→   637→}
+   638→   638→
+   639→   639→/* ─────────────────────────── FOOTER ─────────────────────────── */
+   640→   640→
+   641→   641→function Footer({
+   642→   642→  onPrivacy,
+   643→   643→  onTerms,
+   644→   644→}: {
+   645→   645→  onPrivacy: () => void;
+   646→   646→  onTerms: () => void;
+   647→   647→}) {
+   648→   648→  return (
+   649→   649→    <footer className="bg-cream border-t border-border/40 py-12">
+   650→   650→      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-4 gap-8">
+   651→   651→        <div>
+   652→   652→          <div className="flex items-center gap-2 mb-3">
+   653→   653→            <Logo />
+   654→   654→            <div className="font-serif text-lg text-moss-deep">Tender Trimesters</div>
+   655→   655→          </div>
+   656→   656→          <p className="text-xs text-muted-foreground leading-relaxed">
+   657→   657→            A Mommies Matter product. Built with love by Helena-Ann Baker — mama, author, and your companion on this journey.
+   658→   658→          </p>
+   659→   659→        </div>
+   660→   660→        <div>
+   661→   661→          <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">The App</div>
+   662→   662→          <ul className="space-y-2 text-sm text-foreground/70">
+   663→   663→            <li><a href="#features" className="hover:text-moss">Features</a></li>
+   664→   664→            <li><a href="#comparison" className="hover:text-moss">Pricing</a></li>
+   665→   665→            <li><a href="#bundle" className="hover:text-moss">Bundle</a></li>
+   666→   666→          </ul>
+   667→   667→        </div>
+   668→   668→        <div>
+   669→   669→          <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">About</div>
+   670→   670→          <ul className="space-y-2 text-sm text-foreground/70">
+   671→   671→            <li><a href="#testimonials" className="hover:text-moss">Mama Stories</a></li>
+   672→   672→            <li><a href="https://www.amazon.com" target="_blank" rel="noopener noreferrer" className="hover:text-moss">Mommies Matter Book</a></li>
+   673→   673→            <li><a href="mailto:hello@mommiesmatter.com" className="hover:text-moss">Contact</a></li>
+   674→   674→          </ul>
+   675→   675→        </div>
+   676→   676→        <div>
+   677→   677→          <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">Legal</div>
+   678→   678→          <ul className="space-y-2 text-sm text-foreground/70">
+   679→   679→            <li><button onClick={onPrivacy} className="hover:text-moss text-left">Privacy Policy</button></li>
+   680→   680→            <li><button onClick={onTerms} className="hover:text-moss text-left">Terms of Service</button></li>
+   681→   681→          </ul>
+   682→   682→        </div>
+   683→   683→      </div>
+   684→   684→      <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-10 pt-6 border-t border-border/30 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
+   685→   685→        <div>© {new Date().getFullYear()} Mommies Matter. All rights reserved.</div>
+   686→   686→        <div className="font-script text-rose-gold text-base">made with love, mama</div>
+   687→   687→      </div>
+   688→   688→    </footer>
+   689→   689→  );
+   690→   690→}
+   691→   691→
+   692→   692→/* ─────────────────────────── DIALOGS ─────────────────────────── */
+   693→   693→
+   694→   694→function WaitlistDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+   695→   695→  const [name, setName] = useState("");
+   696→   696→  const [email, setEmail] = useState("");
+   697→   697→  const [loading, setLoading] = useState(false);
+   698→   698→  const [done, setDone] = useState(false);
+   699→   699→
+   700→   700→  async function submit() {
+   701→   701→    if (!email || !email.includes("@")) {
+   702→   702→      toast.error("Please enter a valid email");
+   703→   703→      return;
+   704→   704→    }
+   705→   705→    setLoading(true);
+   706→   706→    try {
+   707→   707→      const res = await fetch("/api/waitlist", {
+   708→   708→        method: "POST",
+   709→   709→        headers: { "Content-Type": "application/json" },
+   710→   710→        body: JSON.stringify({ email, name, source: "landing_dialog" }),
+   711→   711→      });
+   712→   712→      if (!res.ok) throw new Error();
+   713→   713→      setDone(true);
+   714→   714→      toast.success("You're on the list, mama 💛");
+   715→   715→    } catch {
+   716→   716→      toast.error("Something went wrong. Try again?");
+   717→   717→    } finally {
+   718→   718→      setLoading(false);
+   719→   719→    }
+   720→   720→  }
+   721→   721→
+   722→   722→  return (
+   723→   723→    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setTimeout(() => { setDone(false); setName(""); setEmail(""); }, 300); }}>
+   724→   724→      <DialogContent className="bg-card rounded-3xl max-w-md">
+   725→   725→        {done ? (
+   726→   726→          <div className="text-center py-6">
+   727→   727→            <div className="w-16 h-16 rounded-full bg-blush/40 mx-auto flex items-center justify-center mb-4">
+   728→   728→              <Heart className="w-7 h-7 text-rose-gold fill-rose-gold" />
+   729→   729→            </div>
+   730→   730→            <h3 className="font-serif text-2xl text-moss-deep mb-2">Welcome, mama.</h3>
+   731→   731→            <p className="text-sm text-foreground/70">
+   732→   732→              You're on the list. Watch your inbox for a confirmation and Helena-Ann's first letter.
+   733→   733→            </p>
+   734→   734→          </div>
+   735→   735→        ) : (
+   736→   736→          <>
+   737→   737→            <DialogHeader>
+   738→   738→              <DialogTitle className="font-serif text-2xl text-moss-deep">Join the waitlist</DialogTitle>
+   739→   739→              <DialogDescription>
+   740→   740→                Be first to know when premium drops, get free affirmation cards, and hear from Helena-Ann.
+   741→   741→              </DialogDescription>
+   742→   742→            </DialogHeader>
+   743→   743→            <div className="space-y-4 mt-2">
+   744→   744→              <div>
+   745→   745→                <Label htmlFor="wl-name">Your name (optional)</Label>
+   746→   746→                <Input id="wl-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mama" className="mt-1.5 rounded-xl" />
+   747→   747→              </div>
+   748→   748→              <div>
+   749→   749→                <Label htmlFor="wl-email">Email</Label>
+   750→   750→                <Input id="wl-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="mt-1.5 rounded-xl" />
+   751→   751→              </div>
+   752→   752→              <Button onClick={submit} disabled={loading} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11">
+   753→   753→                {loading ? "Adding you..." : "Join the waitlist"}
+   754→   754→              </Button>
+   755→   755→              <p className="text-xs text-muted-foreground text-center">
+   756→   756→                No spam, ever. Just mama things.
+   757→   757→              </p>
+   758→   758→            </div>
+   759→   759→          </>
+   760→   760→        )}
+   761→   761→      </DialogContent>
+   762→   762→    </Dialog>
+   763→   763→  );
+   764→   764→}
+   765→   765→
+   766→   766→function AuthDialog({
+   767→   767→  open,
+   768→   768→  onOpenChange,
+   769→   769→  mode,
+   770→   770→  setMode,
+   771→   771→  onSuccess,
+   772→   772→}: {
+   773→   773→  open: boolean;
+   774→   774→  onOpenChange: (v: boolean) => void;
+   775→   775→  mode: "signin" | "signup";
+   776→   776→  setMode: (m: "signin" | "signup") => void;
+   777→   777→  onSuccess: () => void;
+   778→   778→}) {
+   779→   779→  const [name, setName] = useState("");
+   780→   780→  const [email, setEmail] = useState("");
+   781→   781→  const [password, setPassword] = useState("");
+   782→   782→  const [loading, setLoading] = useState(false);
+   783→   783→  const [error, setError] = useState("");
+   784→   784→
+   785→   785→  async function submit() {
+   786→   786→    setError("");
+   787→   787→    setLoading(true);
+   788→   788→    try {
+   789→   789→      const result = await signIn("credentials", {
+   790→   790→        email,
+   791→   791→        password,
+   792→   792→        name,
+   793→   793→        mode,
+   794→   794→        redirect: false,
+   795→   795→      });
+   796→   796→      if (!result || result.error) {
+   797→   797→        throw new Error(result?.error || "Authentication failed");
+   798→   798→      }
+   799→   799→      toast.success(mode === "signup" ? "Welcome to Tender Trimesters 💛" : "Welcome back, mama");
+   800→   800→      onOpenChange(false);
+   801→   801→      // Force reload so SessionProvider picks up the new session
+   802→   802→      setTimeout(() => window.location.reload(), 200);
+   803→   803→    } catch (e: unknown) {
+   804→   804→      const err = e as Error;
+   805→   805→      setError(err.message || "Something went wrong");
+   806→   806→    } finally {
+   807→   807→      setLoading(false);
+   808→   808→    }
+   809→   809→  }
+   810→   810→
+   811→   811→  return (
+   812→   812→    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) { setError(""); setName(""); setEmail(""); setPassword(""); } }}>
+   813→   813→      <DialogContent className="bg-card rounded-3xl max-w-md">
+   814→   814→        <DialogHeader>
+   815→   815→          <DialogTitle className="font-serif text-2xl text-moss-deep">
+   816→   816→            {mode === "signup" ? "Create your account" : "Welcome back, mama"}
+   817→   817→          </DialogTitle>
+   818→   818→          <DialogDescription>
+   819→   819→            {mode === "signup"
+   820→   820→              ? "Your private pregnancy journal starts here. Free forever."
+   821→   821→              : "Sign in to continue your journey."}
+   822→   822→          </DialogDescription>
+   823→   823→        </DialogHeader>
+   824→   824→        <div className="space-y-4 mt-2">
+   825→   825→          {mode === "signup" && (
+   826→   826→            <div>
+   827→   827→              <Label htmlFor="au-name">Your name</Label>
+   828→   828→              <Input id="au-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mama" className="mt-1.5 rounded-xl" />
+   829→   829→            </div>
+   830→   830→          )}
+   831→   831→          <div>
+   832→   832→            <Label htmlFor="au-email">Email</Label>
+   833→   833→            <Input id="au-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="mt-1.5 rounded-xl" />
+   834→   834→          </div>
+   835→   835→          <div>
+   836→   836→            <Label htmlFor="au-pw">Password</Label>
+   837→   837→            <Input id="au-pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" className="mt-1.5 rounded-xl" />
+   838→   838→          </div>
+   839→   839→          {error && (
+   840→   840→            <div className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+   841→   841→              {error}
+   842→   842→            </div>
+   843→   843→          )}
+   844→   844→          <Button onClick={submit} disabled={loading} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11">
+   845→   845→            {loading ? "One moment..." : mode === "signup" ? "Create account" : "Sign in"}
+   846→   846→          </Button>
+   847→   847→          <div className="text-center text-sm text-muted-foreground">
+   848→   848→            {mode === "signup" ? (
+   849→   849→              <>Already have an account?{" "}
+   850→   850→                <button onClick={() => setMode("signin")} className="text-moss hover:underline font-medium">Sign in</button>
+   851→   851→              </>
+   852→   852→            ) : (
+   853→   853→              <>New here?{" "}
+   854→   854→                <button onClick={() => setMode("signup")} className="text-moss hover:underline font-medium">Create an account</button>
+   855→   855→              </>
+   856→   856→            )}
+   857→   857→          </div>
+   858→   858→        </div>
+   859→   859→      </DialogContent>
+   860→   860→    </Dialog>
+   861→   861→  );
+   862→   862→}
+   863→   863→
+   864→   864→function PrivacyDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+   865→   865→  return (
+   866→   866→    <Dialog open={open} onOpenChange={onOpenChange}>
+   867→   867→      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto scroll-soft">
+   868→   868→        <DialogHeader>
+   869→   869→          <DialogTitle className="font-serif text-2xl text-moss-deep">Privacy Policy</DialogTitle>
+   870→   870→        </DialogHeader>
+   871→   871→        <div className="prose prose-sm max-w-none text-foreground/80 space-y-3">
+   872→   872→          <p><strong className="text-moss-deep">Last updated:</strong> {new Date().toLocaleDateString()}</p>
+   873→   873→          <p>Tender Trimesters (operated under Mommies Matter) is committed to protecting your privacy. This policy explains what we collect and how we use it.</p>
+   874→   874→          <h4 className="font-serif text-lg text-moss-deep mt-4">What we collect</h4>
+   875→   875→          <ul className="list-disc pl-5 space-y-1">
+   876→   876→            <li>Account info: name, email, password (hashed).</li>
+   877→   877→            <li>Pregnancy profile: due date, baby name (optional), partner name (optional).</li>
+   878→   878→            <li>Your content: journal entries, mood check-ins, photos you upload, chat messages with Tempie.</li>
+   879→   879→            <li>Appointments you log (dates, types, notes).</li>
+   880→   880→          </ul>
+   881→   881→          <h4 className="font-serif text-lg text-moss-deep mt-4">How we use it</h4>
+   882→   882→          <ul className="list-disc pl-5 space-y-1">
+   883→   883→            <li>To personalize your weekly content and Tempie's responses.</li>
+   884→   884→            <li>To display your data back to you (and to your partner if you generate a partner link).</li>
+   885→   885→            <li>To send waitlist emails and product updates (you can opt out anytime).</li>
+   886→   886→            <li>We never sell your data. We never share it with advertisers.</li>
+   887→   887→          </ul>
+   888→   888→          <h4 className="font-serif text-lg text-moss-deep mt-4">Your rights</h4>
+   889→   889→          <p>You can export or delete all your data at any time from Profile &gt; Settings. Email hello@mommiesmatter.com for help.</p>
+   890→   890→          <h4 className="font-serif text-lg text-moss-deep mt-4">AI chats</h4>
+   891→   891→          <p>Conversations with Tempie are stored privately in your account so she can remember context. We do not use your chats to train external models.</p>
+   892→   892→          <h4 className="font-serif text-lg text-moss-deep mt-4">Contact</h4>
+   893→   893→          <p>Questions? Email hello@mommiesmatter.com.</p>
+   894→   894→        </div>
+   895→   895→      </DialogContent>
+   896→   896→    </Dialog>
+   897→   897→  );
+   898→   898→}
+   899→   899→
+   900→   900→function TermsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+   901→   901→  return (
+   902→   902→    <Dialog open={open} onOpenChange={onOpenChange}>
+   903→   903→      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto scroll-soft">
+   904→   904→        <DialogHeader>
+   905→   905→          <DialogTitle className="font-serif text-2xl text-moss-deep">Terms of Service</DialogTitle>
+   906→   906→        </DialogHeader>
+   907→   907→        <div className="prose prose-sm max-w-none text-foreground/80 space-y-3">
+   908→   908→          <p><strong className="text-moss-deep">Last updated:</strong> {new Date().toLocaleDateString()}</p>
+   909→   909→          <h4 className="font-serif text-lg text-moss-deep mt-4">Not medical advice</h4>
+   910→   910→          <p>Tender Trimesters and Tempie (the AI companion) are educational and emotional support tools only. They are NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult your OB-GYN, midwife, or other qualified health provider with any questions about your pregnancy.</p>
+   911→   911→          <p>If you experience any of the following, call your provider immediately: heavy bleeding, severe abdominal pain, severe headache with vision changes, fever above 100.4°F, decreased fetal movement, or any other symptom that feels wrong. Trust your gut.</p>
+   912→   912→          <h4 className="font-serif text-lg text-moss-deep mt-4">Your account</h4>
+   913→   913→          <p>You are responsible for keeping your password secure. You must be 18 or older to create an account, or have parental consent.</p>
+   914→   914→          <h4 className="font-serif text-lg text-moss-deep mt-4">Your content</h4>
+   915→   915→          <p>You retain ownership of all journal entries, photos, and messages you create. By using the app, you grant us a limited license to store and display that content back to you (and to your partner if you generate a partner link).</p>
+   916→   916→          <h4 className="font-serif text-lg text-moss-deep mt-4">Premium purchases</h4>
+   917→   917→          <p>One-time premium purchases ($9.99) are non-refundable after 14 days. Monthly subscriptions can be canceled anytime; you retain access until the end of your billing period.</p>
+   918→   918→          <h4 className="font-serif text-lg text-moss-deep mt-4">Acceptable use</h4>
+   919→   919→          <p>Don't harass other users in the community feed. Don't upload content that's illegal or violates others' privacy. We reserve the right to remove content or suspend accounts that violate these terms.</p>
+   920→   920→          <h4 className="font-serif text-lg text-moss-deep mt-4">Changes</h4>
+   921→   921→          <p>We may update these terms. We'll notify you by email for material changes.</p>
+   922→   922→        </div>
+   923→   923→      </DialogContent>
+   924→   924→    </Dialog>
+   925→   925→  );
+   926→   926→}
+   927→   927→
