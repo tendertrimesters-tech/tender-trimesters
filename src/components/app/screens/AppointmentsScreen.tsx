@@ -212,10 +212,11 @@ function AddAppointmentDialog({ open, onOpenChange, onAdded }: { open: boolean; 
   const [saving, setSaving] = useState(false);
 
   async function submit() {
-    if (!title || !date || !time) {
-      toast.error("Title, date, and time required");
-      return;
-    }
+    const t = title.trim();
+    if (!t) { toast.error("Please enter a title"); return; }
+    if (!date) { toast.error("Please select a date"); return; }
+    if (!time) { toast.error("Please select a time"); return; }
+    setTitle(t);
     setSaving(true);
     try {
       const datetime = new Date(`${date}T${time}`);

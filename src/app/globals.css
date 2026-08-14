@@ -81,22 +81,22 @@
 
   /* shadcn semantic mapping */
   --background: #F8F0DC;
-  --foreground: #1E1A16;
-  --card: #FDF9F0;
-  --card-foreground: #1E1A16;
+  --foreground: #1A1610;
+  --card: #FAF5EA;
+  --card-foreground: #1A1610;
   --popover: #FDF9F0;
   --popover-foreground: #1E1A16;
   --primary: #4E9632;
   --primary-foreground: #F8F0DC;
   --secondary: #E8D4A8;
   --secondary-foreground: #1E3A10;
-  --muted: #ECDCC0;
-  --muted-foreground: #5E5038;
+  --muted: #E0D0B0;
+  --muted-foreground: #3E3420;
   --accent: #F298A8;
   --accent-foreground: #1E3A10;
   --destructive: #D04040;
-  --border: #D4C8A0;
-  --input: #D4C8A0;
+  --border: #C8BC90;
+  --input: #C8BC90;
   --ring: #C44860;
   --chart-1: #4E9632;
   --chart-2: #D05832;
