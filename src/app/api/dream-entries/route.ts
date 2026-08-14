@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import OpenAI from "openai";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -40,14 +40,14 @@ export async function POST(req: NextRequest) {
 
   // Use AI to analyze the dream for symbols, themes, and interpretation
   try {
-    const zai = await ZAI.create();
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const moodContext = mood ? ` The dreamer felt ${mood} upon waking.` : "";
     const weekContext = week ? ` She is at week ${week} of pregnancy.` : "";
     const systemPrompt = `You are a dream interpreter who specializes in pregnancy dreams.${weekContext}${moodContext} Analyze this dream: '${text.trim()}'. Return JSON: {"symbols": ["symbol1", "symbol2", "symbol3"], "themes": ["theme1", "theme2"], "interpretation": "A warm 2-3 sentence interpretation connecting the dream to the mama's pregnancy journey. Be insightful and specific, not vague."}. Keep to 3-5 symbols and 2-3 themes. The interpretation should feel personal and meaningful.`;
 
-    const completion = await zai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [{ role: "system", content: systemPrompt }],
-      thinking: { type: "disabled" },
       temperature: 0.7,
     });
 

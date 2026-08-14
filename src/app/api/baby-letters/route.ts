@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import OpenAI from "openai";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -45,13 +45,13 @@ export async function POST(req: NextRequest) {
   const emotionalChanges = weeklyContent?.emotionalChanges || "a mix of feelings";
 
   try {
-    const zai = await ZAI.create();
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const name = babyName || "Mama";
     const systemPrompt = `You are a baby writing a tender letter to their mama from inside the womb. The mama is at week ${weekNum} of pregnancy. The mama calls you ${name}. Baby development context: ${babySize} - ${babySizeDesc}. Body changes mama is experiencing: ${bodyChanges}. Emotional changes: ${emotionalChanges}. Write a short, deeply loving letter (150-200 words) in the baby's voice. Use the name "${name}" naturally. Be specific about what they're experiencing this week — what they can see, hear, feel. Reference the mama's experiences with empathy. End with something that makes the mama feel deeply loved. Don't be cutesy or baby-talk. Be poetic and real.`;
 
-    const completion = await zai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [{ role: "system", content: systemPrompt }],
-      thinking: { type: "disabled" },
       temperature: 0.85,
       max_tokens: 400,
     });

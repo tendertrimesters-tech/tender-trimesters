@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import OpenAI from "openai";
 
 const TEMPIE_SYSTEM = `You are Tempie, the 24/7 AI companion inside the Tender Trimesters pregnancy app. You were created by Helena-Ann Baker, author of "Mommies Matter," as part of her vision to support new and expecting mothers.
 
@@ -108,10 +108,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: chatMessages,
-      thinking: { type: "disabled" },
       temperature: 0.8,
       max_tokens: 600,
     });

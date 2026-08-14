@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import OpenAI from "openai";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -72,13 +72,13 @@ export async function PATCH(req: NextRequest) {
   // Reframe mode — AI generates a gentle reframe and grounding action
   if (action === "reframe") {
     try {
-      const zai = await ZAI.create();
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const categoryContext = existing.category ? ` This fear is about ${existing.category}.` : "";
       const weekContext = existing.week ? ` She is at week ${existing.week} of pregnancy.` : "";
       const systemPrompt = `You are a warm, wise pregnancy companion.${weekContext} A pregnant mama has shared a fear: '${existing.fear}'.${categoryContext} Gently reframe it into courage (2-3 sentences of warmth and truth). Then suggest one small grounding action (1 sentence). Return JSON like: {"reframed": "...", "action": "..."}. Be specific, not generic.`;
-      const completion = await zai.chat.completions.create({
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
         messages: [{ role: "system", content: systemPrompt }],
-        thinking: { type: "disabled" },
         temperature: 0.8,
       });
 
