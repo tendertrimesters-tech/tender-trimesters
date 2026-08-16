@@ -14,7 +14,6 @@ export default function AmbientBackground() {
       aria-hidden="true"
       className="
         fixed inset-0 pointer-events-none overflow-hidden -z-10
-        [mask-image:radial-gradient(ellipse_85%_85%_at_50%_50%,black_80%,transparent_100%)]
       "
     >
       {/* Primary watercolor washes */}
