@@ -108,6 +108,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("Tempie error: OPENAI_API_KEY is not set");
+      throw new Error("OPENAI_API_KEY not configured");
+    }
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -125,8 +129,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ reply });
-  } catch (e) {
-    console.error("Tempie chat error:", e);
+  } catch (e: any) {
+    console.error("Tempie chat error:", e?.message || e);
     const fallback = "Mama, I'm having trouble connecting right now. Take a breath, drink some water, and try again in a moment. I'm not going anywhere. 💛";
     await db.chatMessage.create({
       data: { userId: session.user.id, role: "assistant", content: fallback },
