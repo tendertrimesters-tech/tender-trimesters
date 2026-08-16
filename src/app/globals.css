@@ -65,52 +65,52 @@
 :root {
   --radius: 0.75rem;
 
-  /* Brand palette — vibrant warm feminine */
-  --cream: #F8F0DC;          /* Hearth Cream — warm golden background */
-  --cream-deep: #E8D4A8;      /* deeper cream for contrast */
-  --moss: #4E9632;            /* Vibrant Moss — alive, lush green */
-  --moss-deep: #1E3A10;       /* Deep Moss — rich dark green */
-  --terracotta: #D05832;      /* Warm Terracotta — richer, more alive orange */
-  --blush: #F298A8;           /* Vibrant Blush — real pink, not dusty */
-  --blush-deep: #E06878;      /* deeper blush — bold pink */
-  --rose-gold: #C44860;       /* Rose Gold — richer, more vivid */
-  --sage: #8AC888;            /* Vibrant Sage — alive green */
-  --lavender: #B888E0;        /* Vibrant Lavender — richer purple */
-  --butter: #FFDCA0;          /* Butter Cream — richer gold */
-  --ink: #1E1A16;             /* warm near-black, slightly deeper */
+  /* Brand palette — soft vibrancy */
+  --cream: #F6EDDA;          /* Hearth Cream — warm golden background */
+  --cream-deep: #E6D2AA;      /* deeper cream for contrast */
+  --moss: #559238;            /* Moss — lush but not neon */
+  --moss-deep: #243C18;       /* Deep Moss — rich dark green */
+  --terracotta: #CA5C36;      /* Warm Terracotta — alive but earthy */
+  --blush: #F0A0AC;           /* Blush — soft pink with presence */
+  --blush-deep: #E07882;      /* deeper blush — real pink */
+  --rose-gold: #BE5068;       /* Rose Gold — rich but not harsh */
+  --sage: #98CC94;            /* Sage — alive green, gentle */
+  --lavender: #BE90DC;        /* Lavender — present but soft */
+  --butter: #FFE2B0;          /* Butter Cream — warm gold */
+  --ink: #1E1A16;             /* warm near-black */
 
   /* shadcn semantic mapping */
-  --background: #F8F0DC;
+  --background: #F6EDDA;
   --foreground: #1A1610;
-  --card: #FAF5EA;
+  --card: #F9F4E8;
   --card-foreground: #1A1610;
   --popover: #FDF9F0;
   --popover-foreground: #1E1A16;
-  --primary: #4E9632;
-  --primary-foreground: #F8F0DC;
+  --primary: #559238;
+  --primary-foreground: #F6EDDA;
   --secondary: #E8D4A8;
   --secondary-foreground: #1E3A10;
   --muted: #E0D0B0;
-  --muted-foreground: #3E3420;
-  --accent: #F298A8;
+  --muted-foreground: #4A3E28;
+  --accent: #F0A0AC;
   --accent-foreground: #1E3A10;
   --destructive: #D04040;
   --border: #C8BC90;
   --input: #C8BC90;
-  --ring: #C44860;
-  --chart-1: #4E9632;
-  --chart-2: #D05832;
-  --chart-3: #C44860;
-  --chart-4: #8AC888;
-  --chart-5: #B888E0;
+  --ring: #BE5068;
+  --chart-1: #559238;
+  --chart-2: #CA5C36;
+  --chart-3: #BE5068;
+  --chart-4: #98CC94;
+  --chart-5: #BE90DC;
   --sidebar: #FBF5E4;
   --sidebar-foreground: #1E1A16;
-  --sidebar-primary: #4E9632;
+  --sidebar-primary: #559238;
   --sidebar-primary-foreground: #F0E8D0;
-  --sidebar-accent: #F2A8B4;
+  --sidebar-accent: #F0A0AC;
   --sidebar-accent-foreground: #1E3A10;
   --sidebar-border: #D0C4A0;
-  --sidebar-ring: #C44860;
+  --sidebar-ring: #BE5068;
 }
 
 .dark {
@@ -177,34 +177,34 @@
     text-wrap: balance;
   }
   .bg-gradient-cream {
-    background: linear-gradient(145deg, #F8F0DC 0%, #FFDCA0 40%, #F8F0DC 100%);
+    background: linear-gradient(145deg, #F6EDDA 0%, #FFE2B0 40%, #F6EDDA 100%);
   }
   .bg-gradient-moss {
-    background: linear-gradient(145deg, #1E3A10 0%, #4E9632 100%);
+    background: linear-gradient(145deg, #243C18 0%, #559238 100%);
   }
   .bg-gradient-blush {
-    background: linear-gradient(145deg, #F298A8 0%, #FFDCA0 100%);
+    background: linear-gradient(145deg, #F0A0AC 0%, #FFE2B0 100%);
   }
   .bg-gradient-premium {
-    background: linear-gradient(145deg, #C44860 0%, #D05832 100%);
+    background: linear-gradient(145deg, #BE5068 0%, #CA5C36 100%);
   }
   .text-gradient-moss {
-    background: linear-gradient(145deg, #4E9632 0%, #1E3A10 100%);
+    background: linear-gradient(145deg, #559238 0%, #243C18 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   .text-gradient-rose {
-    background: linear-gradient(145deg, #C44860 0%, #D05832 100%);
+    background: linear-gradient(145deg, #BE5068 0%, #CA5C36 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   .shadow-soft {
-    box-shadow: 0 4px 24px -8px rgba(30, 58, 16, 0.18), 0 2px 6px -2px rgba(30, 58, 16, 0.12);
+    box-shadow: 0 4px 24px -8px rgba(36, 60, 24, 0.16), 0 2px 6px -2px rgba(36, 60, 24, 0.10);
   }
   .shadow-premium {
-    box-shadow: 0 8px 32px -8px rgba(196, 72, 96, 0.35), 0 2px 8px -2px rgba(196, 72, 96, 0.2);
+    box-shadow: 0 8px 32px -8px rgba(190, 80, 104, 0.30), 0 2px 8px -2px rgba(190, 80, 104, 0.18);
   }
   .border-hairline {
     border-width: 0.5px;
@@ -244,7 +244,7 @@
     100% { background-position: 200% 0; }
   }
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent, rgba(196, 72, 96, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(190, 80, 104, 0.18), transparent);
     background-size: 200% 100%;
     animation: shimmer 2.5s infinite;
   }
@@ -266,28 +266,28 @@
   .blob-1 {
     width: 700px; height: 700px;
     top: -20%; right: -15%;
-    background: radial-gradient(circle, rgba(242, 152, 168, 0.45) 0%, rgba(255, 220, 160, 0.2) 50%, transparent 75%);
+    background: radial-gradient(circle, rgba(240, 160, 172, 0.38) 0%, rgba(255, 226, 176, 0.16) 50%, transparent 75%);
     filter: blur(60px);
     animation: drift-1 28s ease-in-out infinite;
   }
   .blob-2 {
     width: 600px; height: 600px;
     bottom: -15%; left: -12%;
-    background: radial-gradient(circle, rgba(138, 200, 136, 0.38) 0%, rgba(184, 136, 224, 0.16) 50%, transparent 75%);
+    background: radial-gradient(circle, rgba(152, 204, 148, 0.32) 0%, rgba(190, 144, 220, 0.14) 50%, transparent 75%);
     filter: blur(65px);
     animation: drift-2 34s ease-in-out infinite;
   }
   .blob-3 {
     width: 550px; height: 550px;
     top: 35%; left: -8%;
-    background: radial-gradient(circle, rgba(255, 220, 160, 0.35) 0%, rgba(242, 152, 168, 0.14) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 226, 176, 0.30) 0%, rgba(240, 160, 172, 0.12) 50%, transparent 70%);
     filter: blur(55px);
     animation: drift-3 38s ease-in-out infinite;
   }
   .blob-4 {
     width: 500px; height: 500px;
     top: -8%; left: 25%;
-    background: radial-gradient(circle, rgba(184, 136, 224, 0.32) 0%, rgba(138, 200, 136, 0.14) 50%, transparent 70%);
+    background: radial-gradient(circle, rgba(190, 144, 220, 0.28) 0%, rgba(152, 204, 148, 0.12) 50%, transparent 70%);
     filter: blur(50px);
     animation: drift-4 32s ease-in-out infinite;
   }
@@ -296,14 +296,14 @@
   .blob-5 {
     width: 800px; height: 800px;
     top: -30%; left: -20%;
-    background: radial-gradient(circle, rgba(196, 72, 96, 0.12) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(190, 80, 104, 0.10) 0%, transparent 60%);
     filter: blur(100px);
     animation: drift-5 45s ease-in-out infinite;
   }
   .blob-6 {
     width: 700px; height: 700px;
     bottom: -25%; right: -20%;
-    background: radial-gradient(circle, rgba(78, 150, 50, 0.10) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(85, 146, 56, 0.08) 0%, transparent 60%);
     filter: blur(90px);
     animation: drift-6 50s ease-in-out infinite;
   }
@@ -311,7 +311,7 @@
   /* Botanical silhouette layer — very subtle organic shapes */
   .botanical-shape {
     position: absolute;
-    opacity: 0.04;
+    opacity: 0.07;
     filter: blur(1px);
     will-change: transform;
   }
