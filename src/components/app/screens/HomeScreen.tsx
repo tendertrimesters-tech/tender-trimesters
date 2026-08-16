@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calcWeek, trimesterOf, useProfile } from "@/components/providers";
 import type { AppView } from "../AppShell";
-import { Baby, Heart, Sparkles, BookHeart, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2, Crown } from "lucide-react";
+import { Baby, Heart, Sparkles, BookHeart, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2, Crown, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -82,8 +83,9 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
     <div className="space-y-6">
       {/* Week tracker hero */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft">
-          <div className="p-6 sm:p-7">
+        <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft relative">
+          <Image src="/images/hero.webp" alt="" fill className="absolute inset-0 object-cover opacity-20 mix-blend-overlay pointer-events-none" />
+          <div className="relative p-6 sm:p-7">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="text-[10px] uppercase tracking-widest text-blush mb-1">
@@ -104,7 +106,7 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
             </div>
 
             {weekData && (
-              <div className="bg-cream/10 backdrop-blur-sm rounded-2xl p-4">
+              <div className="bg-cream/15 backdrop-blur-sm rounded-2xl p-4">
                 <div className="text-[10px] uppercase tracking-widest text-blush mb-1">Baby this week</div>
                 <div className="flex items-baseline gap-2">
                   <span className="font-serif text-2xl">{weekData.babySize}</span>
@@ -191,6 +193,7 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           color="text-rose-gold"
           onClick={() => onNavigate("tempie")}
           highlight
+          image="/images/letters.webp"
         />
         <QuickAction
           icon={Users}
@@ -207,6 +210,7 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           accent="bg-lavender/20"
           color="text-moss-deep"
           onClick={() => onNavigate("meditation")}
+          image="/images/meditation.webp"
         />
       </div>
 
@@ -219,15 +223,15 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <KeepsakeCard emoji="💌" title="Baby Letters" accent="bg-blush/20" onClick={() => onNavigateToMore("letters")} />
-          <KeepsakeCard emoji="🔥" title="Fear to Flame" accent="bg-terracotta/15" onClick={() => onNavigateToMore("fear")} />
-          <KeepsakeCard emoji="🤍" title="Belly Bonding" accent="bg-sage/20" onClick={() => onNavigateToMore("rituals")} />
-          <KeepsakeCard emoji="📖" title="Mother's Mother" accent="bg-butter" onClick={() => onNavigateToMore("mother-story")} />
-          <KeepsakeCard emoji="🌙" title="DreamKeeper" accent="bg-lavender/20" onClick={() => onNavigateToMore("dreams")} />
-          <KeepsakeCard emoji="🌱" title="Name Garden" accent="bg-sage/25" onClick={() => onNavigateToMore("garden")} />
-          <KeepsakeCard emoji="⏳" title="Time Capsule" accent="bg-lavender/25" onClick={() => onNavigateToMore("capsule")} />
-          <KeepsakeCard emoji="🎵" title="Birth Playlist" accent="bg-blush/25" onClick={() => onNavigateToMore("playlist")} />
-          <KeepsakeCard emoji="🌊" title="Hormones" accent="bg-sage/15" onClick={() => onNavigateToMore("hormone")} />
+          <KeepsakeCard emoji="💌" title="Baby Letters" accent="bg-blush/20" image="/images/letters.webp" onClick={() => onNavigateToMore("letters")} />
+          <KeepsakeCard emoji="🔥" title="Fear to Flame" accent="bg-terracotta/15" image="/images/fear.webp" onClick={() => onNavigateToMore("fear")} />
+          <KeepsakeCard emoji="🤍" title="Belly Bonding" accent="bg-sage/20" image="/images/belly.webp" onClick={() => onNavigateToMore("rituals")} />
+          <KeepsakeCard emoji="📖" title="Mother's Mother" accent="bg-butter" image="/images/mother.webp" onClick={() => onNavigateToMore("mother-story")} />
+          <KeepsakeCard emoji="🌙" title="DreamKeeper" accent="bg-lavender/20" image="/images/dreams.webp" onClick={() => onNavigateToMore("dreams")} />
+          <KeepsakeCard emoji="🌱" title="Name Garden" accent="bg-sage/25" image="/images/garden.webp" onClick={() => onNavigateToMore("garden")} />
+          <KeepsakeCard emoji="⏳" title="Time Capsule" accent="bg-lavender/25" image="/images/capsule.webp" onClick={() => onNavigateToMore("capsule")} />
+          <KeepsakeCard emoji="🎵" title="Birth Playlist" accent="bg-blush/25" image="/images/playlist.webp" onClick={() => onNavigateToMore("playlist")} />
+          <KeepsakeCard emoji="🌊" title="Hormones" accent="bg-sage/15" image="/images/hormone.webp" onClick={() => onNavigateToMore("hormone")} />
         </div>
       </motion.div>
 
@@ -313,26 +317,32 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
   );
 }
 
-function KeepsakeCard({ emoji, title, accent, onClick }: { emoji: string; title: string; accent: string; onClick: () => void }) {
+function KeepsakeCard({ emoji, title, accent, image, onClick }: { emoji: string; title: string; accent: string; image?: string; onClick: () => void }) {
   return (
     <button onClick={onClick} className="text-left">
-      <div className={cn("rounded-2xl p-3 h-full transition-all hover:shadow-soft border border-transparent hover:border-moss/10", accent)}>
-        <div className="text-xl mb-1">{emoji}</div>
-        <div className="text-[11px] font-medium text-moss-deep leading-tight">{title}</div>
+      <div className={cn("rounded-2xl h-full transition-all hover:shadow-soft border border-transparent hover:border-moss/10 overflow-hidden relative", accent)}>
+        {image && <Image src={image} alt={title} width={160} height={100} className="w-full h-20 object-cover opacity-60" />}
+        <div className="p-3 pt-2">
+          <div className="text-lg mb-0.5">{emoji}</div>
+          <div className="text-[11px] font-medium text-moss-deep leading-tight">{title}</div>
+        </div>
       </div>
     </button>
   );
 }
 
-function QuickAction({ icon: Icon, title, desc, accent, color, onClick, highlight }: { icon: any; title: string; desc: string; accent: string; color: string; onClick: () => void; highlight?: boolean }) {
+function QuickAction({ icon: Icon, title, desc, accent, color, onClick, highlight, image }: { icon: any; title: string; desc: string; accent: string; color: string; onClick: () => void; highlight?: boolean; image?: string }) {
   return (
     <button onClick={onClick} className="text-left">
-      <Card className={cn("rounded-3xl p-5 h-full border-transparent hover:shadow-soft transition-shadow", accent, highlight && "ring-1 ring-rose-gold/30")}>
-        <div className="w-10 h-10 rounded-xl bg-cream/60 flex items-center justify-center mb-3">
-          <Icon className={cn("w-5 h-5", color)} />
+      <Card className={cn("rounded-3xl h-full border-transparent hover:shadow-soft transition-shadow overflow-hidden relative", accent, highlight && "ring-1 ring-rose-gold/30")}>
+        {image && <Image src={image} alt={title} width={300} height={150} className="w-full h-28 object-cover opacity-40 absolute inset-0" />}
+        <div className={cn("relative p-5", image && "bg-gradient-to-t from-black/20 to-transparent min-h-[140px] flex flex-col justify-end")}>
+          <div className={cn("w-10 h-10 rounded-xl bg-cream/60 flex items-center justify-center mb-3", image && "bg-cream/80")}>
+            <Icon className={cn("w-5 h-5", color)} />
+          </div>
+          <div className="font-serif text-lg text-moss-deep">{title}</div>
+          <div className="text-xs text-foreground/60 mt-1">{desc}</div>
         </div>
-        <div className="font-serif text-lg text-moss-deep">{title}</div>
-        <div className="text-xs text-foreground/60 mt-1">{desc}</div>
       </Card>
     </button>
   );
