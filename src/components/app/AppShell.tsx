@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Home, Calendar, BookHeart, MessageCircleHeart, User, Leaf, Flower2, Grid3X3, Users, Camera } from "lucide-react";
+import { Home, Calendar, BookHeart, MessageCircleHeart, User, Leaf, Flower2, Grid3X3, Users, Camera, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -73,8 +73,18 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
             </div>
             <div className="font-serif text-lg text-moss-deep leading-none">Tender Trimesters</div>
           </div>
-          <div className="text-xs text-muted-foreground">
-            {userName ? `Hi, ${userName.split(" ")[0]}` : ""}
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground">
+              {userName ? `Hi, ${userName.split(" ")[0]}` : ""}
+            </div>
+            <button
+              onClick={onSignOut}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors"
+              title="Sign out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
           </div>
         </div>
       </header>
