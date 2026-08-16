@@ -248,6 +248,15 @@
     background-size: 200% 100%;
     animation: shimmer 2.5s infinite;
   }
+  @keyframes shimmer-border {
+    0% { border-color: rgba(190, 80, 104, 0.15); box-shadow: 0 0 12px rgba(190, 80, 104, 0.08); }
+    50% { border-color: rgba(240, 160, 172, 0.45); box-shadow: 0 0 20px rgba(190, 80, 104, 0.18); }
+    100% { border-color: rgba(190, 80, 104, 0.15); box-shadow: 0 0 12px rgba(190, 80, 104, 0.08); }
+  }
+  .animate-shimmer-border {
+    animation: shimmer-border 3s ease-in-out infinite;
+    border: 1px solid rgba(190, 80, 104, 0.15);
+  }
   @keyframes pulse-soft {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }

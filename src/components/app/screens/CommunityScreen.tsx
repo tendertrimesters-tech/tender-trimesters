@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import { Heart } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -37,6 +39,34 @@ const QUICK_MOODS: { emoji: string; label: string }[] = [
   { emoji: "🌿", label: "calm" },
   { emoji: "💭", label: "anxious" },
 ];
+
+// ── Mood visual config ────────────────────────────────────────────────
+
+const MOOD_STYLES: Record<
+  string,
+  { border: string; circle: string; text: string }
+> = {
+  glowing: {
+    border: "border-l-rose-gold/60",
+    circle: "bg-rose-gold/15",
+    text: "text-rose-gold",
+  },
+  calm: {
+    border: "border-l-moss/60",
+    circle: "bg-moss/10",
+    text: "text-moss",
+  },
+  neutral: {
+    border: "border-l-blush/60",
+    circle: "bg-blush/20",
+    text: "text-blush",
+  },
+  anxious: {
+    border: "border-l-lavender/60",
+    circle: "bg-lavender/15",
+    text: "text-lavender",
+  },
+};
 
 // ── Animation ──────────────────────────────────────────────────────────
 
@@ -128,7 +158,10 @@ export default function CommunityScreen() {
         body: JSON.stringify({ id, action: "hug" }),
       });
     } catch {
-      setLocalHugs((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 1) - 1) }));
+      setLocalHugs((prev) => ({
+        ...prev,
+        [id]: Math.max(0, (prev[id] ?? 1) - 1),
+      }));
     }
   };
 
@@ -176,17 +209,39 @@ export default function CommunityScreen() {
 
   return (
     <div className="space-y-6 pb-24">
-      {/* Header */}
-      <motion.div {...fadeUp}>
-        <h1 className="font-serif text-2xl text-moss-deep">The Village</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          You&apos;re not alone in this, mama
-        </p>
+      {/* ─── Header with background image ─── */}
+      <motion.div {...fadeUp} className="relative">
+        {/* Background image at 12% opacity */}
+        <div className="absolute inset-0 -mx-6 -mt-4 overflow-hidden rounded-3xl">
+          <Image
+            src="/images/community-women.jpg"
+            alt="Community of women"
+            fill
+            className="object-cover opacity-[0.12]"
+            priority
+          />
+          {/* Cream gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-cream/40 via-cream/70 to-cream" />
+        </div>
+
+        {/* Header content */}
+        <div className="relative flex items-center gap-3 py-2">
+          {/* Decorative heart icon in colored circle */}
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-blush shadow-soft">
+            <Heart className="h-5 w-5 text-rose-gold" fill="currentColor" />
+          </div>
+          <div>
+            <h1 className="font-serif text-2xl text-moss-deep">The Village</h1>
+            <p className="font-script text-sm text-rose-gold/80 mt-0.5">
+              You&apos;re not alone in this, mama
+            </p>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Post Composer */}
+      {/* ─── Post Composer ─── */}
       <motion.div {...fadeUp} transition={{ delay: 0.05 }}>
-        <Card className="rounded-3xl bg-card border-moss/15 shadow-soft p-5">
+        <Card className="rounded-3xl bg-blush/5 border border-blush/20 border-t-2 border-t-rose-gold/30 shadow-soft p-5">
           <textarea
             rows={4}
             value={newPostText}
@@ -198,8 +253,8 @@ export default function CommunityScreen() {
             )}
           />
 
-          {/* Quick mood row */}
-          <div className="flex items-center gap-2 mt-3 mb-4">
+          {/* Quick mood row — larger pills with hover scale */}
+          <div className="flex items-center gap-2.5 mt-3 mb-4">
             {QUICK_MOODS.map((m) => {
               const active = selectedMood === m.label;
               return (
@@ -208,13 +263,14 @@ export default function CommunityScreen() {
                   type="button"
                   onClick={() => setSelectedMood(active ? null : m.label)}
                   className={cn(
-                    "flex items-center gap-1 rounded-full px-3 py-1 text-xs transition-all",
+                    "flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs transition-all duration-200",
+                    "hover:scale-105 active:scale-95",
                     active
-                      ? "bg-blush/30 ring-1 ring-rose-gold/30"
-                      : "bg-sage/30 hover:bg-sage/50"
+                      ? "bg-blush/30 ring-1 ring-rose-gold/30 shadow-soft"
+                      : "bg-sage/20 hover:bg-sage/40"
                   )}
                 >
-                  <span className="text-sm">{m.emoji}</span>
+                  <span className="text-base leading-none">{m.emoji}</span>
                   <span className="text-muted-foreground">{m.label}</span>
                 </button>
               );
@@ -231,7 +287,7 @@ export default function CommunityScreen() {
         </Card>
       </motion.div>
 
-      {/* Feed */}
+      {/* ─── Feed ─── */}
       <div className="space-y-4">
         {loading ? (
           <div className="flex justify-center py-12">
@@ -245,20 +301,34 @@ export default function CommunityScreen() {
         ) : (
           posts.map((post, idx) => {
             const extraHugs = localHugs[post.id] ?? 0;
+            const moodStyle = post.mood ? MOOD_STYLES[post.mood] : null;
+            const moodData = post.mood
+              ? QUICK_MOODS.find((m) => m.label === post.mood)
+              : null;
+
             return (
               <motion.div
                 key={post.id}
                 {...fadeUp}
                 transition={{ delay: 0.03 * idx }}
               >
-                <Card className="rounded-2xl bg-card border-moss/15 shadow-soft p-5">
+                <Card
+                  className={cn(
+                    "rounded-2xl bg-card border border-moss/15 shadow-soft p-5",
+                    "border-l-4 transition-shadow duration-300 hover:shadow-premium",
+                    moodStyle?.border
+                  )}
+                >
                   {/* Post header */}
                   <div className="flex items-center flex-wrap gap-1 mb-1">
                     <span className="font-medium text-moss-deep text-sm">
                       {post.user.name}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      · {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
+                      ·{" "}
+                      {formatDistanceToNow(new Date(post.createdAt), {
+                        addSuffix: true,
+                      })}
                     </span>
                     {post.week && (
                       <span className="text-[10px] bg-sage/30 text-moss-deep rounded-full px-2 py-0.5">
@@ -267,10 +337,17 @@ export default function CommunityScreen() {
                     )}
                   </div>
 
-                  {/* Mood emoji */}
+                  {/* Mood emoji in colored circle */}
                   {post.mood && (
-                    <div className="text-2xl mb-2">
-                      {QUICK_MOODS.find((m) => m.label === post.mood)?.emoji ?? post.mood}
+                    <div className="mb-2">
+                      <span
+                        className={cn(
+                          "inline-flex h-9 w-9 items-center justify-center rounded-full text-lg",
+                          moodStyle?.circle
+                        )}
+                      >
+                        {moodData?.emoji ?? post.mood}
+                      </span>
                     </div>
                   )}
 
@@ -279,26 +356,36 @@ export default function CommunityScreen() {
                     {post.body}
                   </p>
 
-                  {/* Hug action */}
+                  {/* Hug button with heart animation */}
                   <button
                     type="button"
                     onClick={() => handleHug(post.id)}
-                    className="text-xs text-muted-foreground hover:text-rose-gold transition-colors mt-3 flex items-center gap-1"
+                    className={cn(
+                      "group mt-3 flex items-center gap-1.5 text-xs text-muted-foreground transition-all duration-200",
+                      "hover:text-rose-gold",
+                      "[&_svg]:hug-heart"
+                    )}
                   >
-                    🤗 {post.hugs + extraHugs}
+                    <Heart className="h-4 w-4 transition-transform duration-200 group-active:animate-[hug-pulse_0.4s_ease-out] group-hover:scale-110" />
+                    <span>{post.hugs + extraHugs}</span>
                   </button>
 
                   {/* Comments */}
                   {post.comments.length > 0 && (
                     <div className="mt-3 space-y-2 border-t border-moss/10 pt-3">
-                      {post.comments.map((c) => (
-                        <div key={c.id} className="text-xs text-foreground/70">
-                          <span className="font-medium text-moss-deep">
-                            {c.user.name}
-                          </span>{" "}
-                          {c.body}
-                        </div>
-                      ))}
+                      <div className="rounded-2xl bg-sage/5 -mx-2 px-3 py-2 space-y-2">
+                        {post.comments.map((c) => (
+                          <div
+                            key={c.id}
+                            className="text-xs text-foreground/70"
+                          >
+                            <span className="font-medium text-moss-deep">
+                              {c.user.name}
+                            </span>{" "}
+                            {c.body}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -321,9 +408,10 @@ export default function CommunityScreen() {
                       }}
                       placeholder="Send love..."
                       className={cn(
-                        "w-full rounded-full bg-sage/20 px-4 py-2 text-xs",
+                        "w-full rounded-full bg-sage/10 px-4 py-2 text-xs",
                         "placeholder:text-muted-foreground focus:outline-none",
-                        "focus:ring-1 focus:ring-moss/30"
+                        "focus:ring-2 focus:ring-rose-gold/20 focus:bg-sage/15",
+                        "border border-sage/10 transition-all duration-200"
                       )}
                     />
                   </div>
@@ -333,6 +421,24 @@ export default function CommunityScreen() {
           })
         )}
       </div>
+
+      {/* ─── Inline keyframe for hug heart animation ─── */}
+      <style jsx global>{`
+        @keyframes hug-pulse {
+          0% {
+            transform: scale(1);
+          }
+          30% {
+            transform: scale(1.35);
+          }
+          60% {
+            transform: scale(0.9);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }

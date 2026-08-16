@@ -96,8 +96,9 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
     <div className="space-y-5">
       {/* Profile header */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft">
-        <div className="p-6">
+      <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-premium relative">
+        <img src="/images/flowers-rose.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15 mix-blend-overlay pointer-events-none" />
+        <div className="relative z-10 p-6">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-full bg-blush/30 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
               <User className="w-7 h-7 text-cream" />

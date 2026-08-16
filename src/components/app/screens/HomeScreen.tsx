@@ -4,10 +4,9 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { calcWeek, trimesterOf, useProfile } from "@/components/providers";
 import type { AppView } from "../AppShell";
-import { Baby, Heart, Sparkles, BookHeart, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2, Crown, Image as ImageIcon } from "lucide-react";
+import { Baby, Sparkles, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2 } from "lucide-react";
 import Image from "next/image";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -24,6 +23,40 @@ const MOODS: { value: Mood; emoji: string; label: string; bg: string }[] = [
   { value: "nauseous", emoji: "🍃", label: "Nauseous", bg: "bg-sage/30" },
   { value: "energized", emoji: "✨", label: "Energized", bg: "bg-blush/40" },
 ];
+
+/* ─── Decorative Botanical SVGs ─── */
+function BotanicalLeaf({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 0C20 0 2 20 2 38C2 50 10 58 20 58C30 58 38 50 38 38C38 20 20 0 20 0Z" fill="currentColor" />
+      <line x1="20" y1="10" x2="20" y2="56" stroke="currentColor" strokeWidth="0.8" opacity="0.5" />
+      <line x1="20" y1="22" x2="12" y2="30" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
+      <line x1="20" y1="32" x2="28" y2="40" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
+    </svg>
+  );
+}
+
+function BotanicalSprig({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="15" cy="20" rx="12" ry="16" fill="currentColor" />
+      <ellipse cx="35" cy="18" rx="10" ry="14" fill="currentColor" transform="rotate(15 35 18)" />
+      <ellipse cx="50" cy="22" rx="8" ry="12" fill="currentColor" transform="rotate(-10 50 22)" />
+      <line x1="15" y1="20" x2="50" y2="22" stroke="currentColor" strokeWidth="0.6" opacity="0.4" />
+    </svg>
+  );
+}
+
+function BotanicalDots({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 60 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="5" cy="10" r="3" fill="currentColor" />
+      <circle cx="20" cy="5" r="2" fill="currentColor" />
+      <circle cx="35" cy="12" r="2.5" fill="currentColor" />
+      <circle cx="50" cy="7" r="1.8" fill="currentColor" />
+    </svg>
+  );
+}
 
 export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigate: (v: AppView) => void; onNavigateToMore: (featureId?: string) => void }) {
   const { profile } = useProfile();
@@ -81,45 +114,55 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
 
   return (
     <div className="space-y-6">
-      {/* Week tracker hero */}
+      {/* ═══════ Week tracker hero ═══════ */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft relative">
-          <Image src="/images/hero.webp" alt="" fill className="absolute inset-0 object-cover opacity-20 mix-blend-overlay pointer-events-none" />
-          <div className="relative p-6 sm:p-7">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-blush mb-1">
-                  {trimester ? `Trimester ${trimester}` : "Welcome"}
+        <Card className="rounded-3xl overflow-hidden relative min-h-[220px] animate-shimmer-border shadow-premium">
+          {/* Background image at 35% opacity */}
+          <img
+            src="/images/hero-pregnant.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none"
+          />
+          {/* Gradient overlay from moss-deep to moss */}
+          <div className="absolute inset-0 bg-gradient-to-br from-moss-deep/90 via-moss-deep/75 to-moss/70" />
+          {/* Content */}
+          <div className="relative p-6 sm:p-7 flex flex-col justify-between min-h-[220px]">
+            <div>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-blush mb-1">
+                    {trimester ? `Trimester ${trimester}` : "Welcome"}
+                  </div>
+                  <div className="font-serif text-4xl">
+                    {week ? `Week ${week}` : "Welcome, mama"}
+                  </div>
+                  <div className="text-sm text-cream/70 mt-1">
+                    {week ? `${40 - week} weeks until your due date` : "Set your due date to begin"}
+                  </div>
                 </div>
-                <div className="font-serif text-4xl">
-                  {week ? `Week ${week}` : "Welcome, mama"}
-                </div>
-                <div className="text-sm text-cream/70 mt-1">
-                  {week ? `${40 - week} weeks until your due date` : "Set your due date to begin"}
-                </div>
+                {week && (
+                  <div className="w-16 h-16 rounded-full bg-cream/15 backdrop-blur-sm flex items-center justify-center">
+                    <Baby className="w-7 h-7 text-blush" />
+                  </div>
+                )}
               </div>
-              {week && (
-                <div className="w-16 h-16 rounded-full bg-cream/15 backdrop-blur-sm flex items-center justify-center">
-                  <Baby className="w-7 h-7 text-blush" />
+
+              {weekData && (
+                <div className="bg-cream/15 backdrop-blur-sm rounded-2xl p-4">
+                  <div className="text-[10px] uppercase tracking-widest text-blush mb-1">Baby this week</div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-serif text-2xl">{weekData.babySize}</span>
+                    <span className="text-xs text-cream/70">{weekData.babyLengthCm}cm · {weekData.babyWeightG}g</span>
+                  </div>
+                  <p className="text-xs text-cream/80 mt-2 leading-relaxed line-clamp-2">{weekData.babySizeDesc}</p>
                 </div>
               )}
             </div>
 
-            {weekData && (
-              <div className="bg-cream/15 backdrop-blur-sm rounded-2xl p-4">
-                <div className="text-[10px] uppercase tracking-widest text-blush mb-1">Baby this week</div>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-serif text-2xl">{weekData.babySize}</span>
-                  <span className="text-xs text-cream/70">{weekData.babyLengthCm}cm · {weekData.babyWeightG}g</span>
-                </div>
-                <p className="text-xs text-cream/80 mt-2 leading-relaxed line-clamp-2">{weekData.babySizeDesc}</p>
-              </div>
-            )}
-
             <Button
               onClick={() => onNavigate("calendar")}
               variant="secondary"
-              className="mt-4 bg-cream/15 hover:bg-cream/25 text-cream rounded-full h-9 text-xs"
+              className="mt-4 bg-cream/15 hover:bg-cream/25 text-cream rounded-full h-9 text-xs self-start"
             >
               View this week <ArrowRight className="ml-1.5 w-3 h-3" />
             </Button>
@@ -127,55 +170,105 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
         </Card>
       </motion.div>
 
-      {/* Today's affirmation */}
+      {/* ── Decorative botanical: leaf ── */}
+      <div className="relative h-0">
+        <BotanicalLeaf className="absolute -top-2 right-4 w-5 h-8 text-moss opacity-[0.12] -rotate-12" />
+        <BotanicalDots className="absolute -top-1 left-8 w-8 h-3 text-rose-gold opacity-[0.12]" />
+      </div>
+
+      {/* ═══════ Today's affirmation ═══════ */}
       {weekData && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-          <Card className="bg-gradient-blush border-rose-gold/20 rounded-3xl p-6 shadow-soft">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-rose-gold" />
-              <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold">Today's Affirmation</div>
+          <Card className="rounded-3xl p-6 shadow-soft border-rose-gold/20 overflow-hidden relative">
+            {/* Subtle flowers background */}
+            <img
+              src="/images/flowers-rose.jpg"
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-[0.15] pointer-events-none"
+            />
+            {/* Gradient blush overlay */}
+            <div className="absolute inset-0 bg-gradient-blush" />
+            {/* Content */}
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-rose-gold" />
+                <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold">Today's Affirmation</div>
+              </div>
+              <p className="font-script text-2xl text-moss-deep leading-snug">
+                {weekData.affirmation}
+              </p>
+              {/* Decorative SVG flower accent */}
+              <svg className="absolute -right-2 -top-1 w-12 h-12 text-rose-gold/20" viewBox="0 0 48 48" fill="none">
+                <circle cx="24" cy="24" r="5" fill="currentColor" />
+                <ellipse cx="24" cy="12" rx="5" ry="10" fill="currentColor" />
+                <ellipse cx="24" cy="36" rx="5" ry="10" fill="currentColor" />
+                <ellipse cx="12" cy="24" rx="10" ry="5" fill="currentColor" />
+                <ellipse cx="36" cy="24" rx="10" ry="5" fill="currentColor" />
+                <ellipse cx="15" cy="15" rx="5" ry="10" fill="currentColor" transform="rotate(45 15 15)" />
+                <ellipse cx="33" cy="15" rx="5" ry="10" fill="currentColor" transform="rotate(-45 33 15)" />
+                <ellipse cx="15" cy="33" rx="5" ry="10" fill="currentColor" transform="rotate(-45 15 33)" />
+                <ellipse cx="33" cy="33" rx="5" ry="10" fill="currentColor" transform="rotate(45 33 33)" />
+              </svg>
             </div>
-            <p className="font-script text-2xl text-moss-deep leading-snug">
-              {weekData.affirmation}
-            </p>
           </Card>
         </motion.div>
       )}
 
-      {/* Mood check-in */}
+      {/* ── Decorative botanical: sprig ── */}
+      <div className="relative h-0">
+        <BotanicalSprig className="absolute -top-1 left-2 w-10 h-7 text-rose-gold opacity-[0.12] rotate-6" />
+      </div>
+
+      {/* ═══════ Mood check-in ═══════ */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-        <Card className="bg-card border-moss/15 rounded-3xl p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground">How are you today?</div>
-              <div className="font-serif text-xl text-moss-deep">{todayMood ? "Checked in" : "Mood check-in"}</div>
+        <Card className="bg-card border-moss/15 rounded-3xl p-6 overflow-hidden relative">
+          {/* Subtle warm background */}
+          <img
+            src="/images/warm-hands.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.10] pointer-events-none"
+          />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">How are you today?</div>
+                <div className="font-serif text-xl text-moss-deep">{todayMood ? "Checked in" : "Mood check-in"}</div>
+              </div>
+              {todayMood && (
+                <Button variant="ghost" size="sm" onClick={() => onNavigate("journal")} className="text-moss text-xs">
+                  History <ArrowRight className="ml-1 w-3 h-3" />
+                </Button>
+              )}
             </div>
-            {todayMood && (
-              <Button variant="ghost" size="sm" onClick={() => onNavigate("journal")} className="text-moss text-xs">
-                History <ArrowRight className="ml-1 w-3 h-3" />
-              </Button>
-            )}
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {MOODS.map((m) => (
-              <button
-                key={m.value}
-                onClick={() => saveMood(m.value)}
-                className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 rounded-2xl transition-all",
-                  m.bg,
-                  todayMood === m.value ? "ring-2 ring-moss ring-offset-2 ring-offset-card scale-105" : "hover:scale-105"
-                )}
-              >
-                <span className="text-2xl">{m.emoji}</span>
-                <span className="text-[10px] font-medium text-moss-deep">{m.label}</span>
-              </button>
-            ))}
+            <div className="grid grid-cols-4 gap-2">
+              {MOODS.map((m) => (
+                <button
+                  key={m.value}
+                  onClick={() => saveMood(m.value)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 py-3 rounded-2xl transition-all duration-200",
+                    m.bg,
+                    todayMood === m.value
+                      ? "ring-2 ring-moss ring-offset-2 ring-offset-card scale-105 shadow-soft"
+                      : "hover:scale-110 hover:shadow-soft"
+                  )}
+                >
+                  <span className="text-[28px] leading-none">{m.emoji}</span>
+                  <span className="text-[10px] font-medium text-moss-deep">{m.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </Card>
       </motion.div>
 
-      {/* Quick actions grid */}
+      {/* ── Decorative botanical: dots ── */}
+      <div className="relative h-0">
+        <BotanicalDots className="absolute -top-1 right-6 w-10 h-4 text-moss opacity-[0.12]" />
+        <BotanicalLeaf className="absolute -top-3 left-12 w-4 h-6 text-moss opacity-[0.12] rotate-[20deg]" />
+      </div>
+
+      {/* ═══════ Quick actions grid ═══════ */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <QuickAction
           icon={CalIcon}
@@ -184,6 +277,9 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           accent="bg-sage/30"
           color="text-moss-deep"
           onClick={() => onNavigate("calendar")}
+          bgImage="/images/calendar-nature.jpg"
+          gradientFrom="from-moss-deep/80"
+          gradientTo="to-sage/60"
         />
         <QuickAction
           icon={MessageCircleHeart}
@@ -193,7 +289,9 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           color="text-rose-gold"
           onClick={() => onNavigate("tempie")}
           highlight
-          image="/images/letters.webp"
+          bgImage="/images/soft-pink.jpg"
+          gradientFrom="from-rose-gold/70"
+          gradientTo="to-blush/50"
         />
         <QuickAction
           icon={Users}
@@ -202,6 +300,9 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           accent="bg-sage/30"
           color="text-moss-deep"
           onClick={() => onNavigate("community")}
+          bgImage="/images/community-women.jpg"
+          gradientFrom="from-moss-deep/75"
+          gradientTo="to-sage/50"
         />
         <QuickAction
           icon={Flower2}
@@ -210,11 +311,18 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           accent="bg-lavender/20"
           color="text-moss-deep"
           onClick={() => onNavigate("meditation")}
-          image="/images/meditation.webp"
+          bgImage="/images/meditation-calm.jpg"
+          gradientFrom="from-lavender/70"
+          gradientTo="to-sage/40"
         />
       </div>
 
-      {/* Signature keepsakes grid */}
+      {/* ── Decorative botanical: sprig ── */}
+      <div className="relative h-0">
+        <BotanicalSprig className="absolute -top-2 right-3 w-9 h-6 text-moss opacity-[0.12] -rotate-3" />
+      </div>
+
+      {/* ═══════ Signature keepsakes grid ═══════ */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
         <div className="flex items-center justify-between mb-3">
           <div className="font-serif text-lg text-moss-deep">Your keepsakes</div>
@@ -235,7 +343,13 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
         </div>
       </motion.div>
 
-      {/* Upcoming appointments */}
+      {/* ── Decorative botanical: leaf + dots ── */}
+      <div className="relative h-0">
+        <BotanicalLeaf className="absolute -top-2 right-10 w-5 h-7 text-rose-gold opacity-[0.12] rotate-6" />
+        <BotanicalDots className="absolute -top-1 left-4 w-7 h-3 text-moss opacity-[0.12]" />
+      </div>
+
+      {/* ═══════ Upcoming appointments ═══════ */}
       {upcomingAppts.length > 0 && (
         <Card className="bg-card border-moss/15 rounded-3xl p-6">
           <div className="flex items-center justify-between mb-4">
@@ -264,7 +378,7 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
         </Card>
       )}
 
-      {/* Recent journal entries */}
+      {/* ═══════ Recent journal entries ═══════ */}
       <Card className="bg-card border-moss/15 rounded-3xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="font-serif text-lg text-moss-deep">Recent journal</div>
@@ -313,6 +427,12 @@ export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigat
           </div>
         )}
       </Card>
+
+      {/* ── Final decorative botanical: sprig ── */}
+      <div className="relative h-0 mb-2">
+        <BotanicalSprig className="absolute -top-1 left-6 w-8 h-5 text-rose-gold opacity-[0.12] -rotate-6" />
+        <BotanicalLeaf className="absolute -top-2 right-8 w-4 h-6 text-moss opacity-[0.12] rotate-12" />
+      </div>
     </div>
   );
 }
@@ -321,9 +441,17 @@ function KeepsakeCard({ emoji, title, accent, image, onClick }: { emoji: string;
   return (
     <button onClick={onClick} className="text-left">
       <div className={cn("rounded-2xl h-full transition-all hover:shadow-soft border border-transparent hover:border-moss/10 overflow-hidden relative", accent)}>
-        {image && <Image src={image} alt={title} width={160} height={100} className="w-full h-20 object-cover opacity-60" />}
+        {image && (
+          <div className="relative h-24">
+            <Image src={image} alt={title} width={200} height={120} className="w-full h-full object-cover opacity-70" />
+            {/* Gradient from bottom for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+            {/* Emoji floats over image */}
+            <span className="absolute bottom-2 left-3 text-2xl drop-shadow-md">{emoji}</span>
+          </div>
+        )}
         <div className="p-3 pt-2">
-          <div className="text-lg mb-0.5">{emoji}</div>
+          {!image && <div className="text-lg mb-0.5">{emoji}</div>}
           <div className="text-[11px] font-medium text-moss-deep leading-tight">{title}</div>
         </div>
       </div>
@@ -331,17 +459,49 @@ function KeepsakeCard({ emoji, title, accent, image, onClick }: { emoji: string;
   );
 }
 
-function QuickAction({ icon: Icon, title, desc, accent, color, onClick, highlight, image }: { icon: any; title: string; desc: string; accent: string; color: string; onClick: () => void; highlight?: boolean; image?: string }) {
+function QuickAction({ icon: Icon, title, desc, accent, color, onClick, highlight, bgImage, gradientFrom, gradientTo }: {
+  icon: any;
+  title: string;
+  desc: string;
+  accent: string;
+  color: string;
+  onClick: () => void;
+  highlight?: boolean;
+  bgImage?: string;
+  gradientFrom?: string;
+  gradientTo?: string;
+}) {
   return (
     <button onClick={onClick} className="text-left">
-      <Card className={cn("rounded-3xl h-full border-transparent hover:shadow-soft transition-shadow overflow-hidden relative", accent, highlight && "ring-1 ring-rose-gold/30")}>
-        {image && <Image src={image} alt={title} width={300} height={150} className="w-full h-28 object-cover opacity-40 absolute inset-0" />}
-        <div className={cn("relative p-5", image && "bg-gradient-to-t from-black/20 to-transparent min-h-[140px] flex flex-col justify-end")}>
-          <div className={cn("w-10 h-10 rounded-xl bg-cream/60 flex items-center justify-center mb-3", image && "bg-cream/80")}>
-            <Icon className={cn("w-5 h-5", color)} />
+      <Card className={cn(
+        "rounded-3xl h-full border-transparent hover:shadow-premium transition-all duration-300 overflow-hidden relative min-h-[160px] group",
+        highlight && "ring-1 ring-rose-gold/40"
+      )}>
+        {/* Background image at ~30% opacity */}
+        {bgImage && (
+          <img
+            src={bgImage}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover opacity-[0.30] transition-transform duration-500 group-hover:scale-105"
+          />
+        )}
+        {/* Colored gradient overlay */}
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-br",
+          gradientFrom || "from-card/90",
+          gradientTo || "to-card/70"
+        )} />
+        {/* Content at bottom */}
+        <div className="relative p-5 min-h-[160px] flex flex-col justify-between">
+          {/* Glassmorphic icon circle */}
+          <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg">
+            <Icon className={cn("w-5 h-5", highlight ? "text-cream" : "text-cream")} />
           </div>
-          <div className="font-serif text-lg text-moss-deep">{title}</div>
-          <div className="text-xs text-foreground/60 mt-1">{desc}</div>
+          {/* Text at bottom */}
+          <div>
+            <div className="font-serif text-lg text-cream drop-shadow-sm">{title}</div>
+            <div className="text-xs text-cream/70 mt-0.5">{desc}</div>
+          </div>
         </div>
       </Card>
     </button>

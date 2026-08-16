@@ -116,9 +116,15 @@ export default function MoreScreen({ onNavigate, initialFeature }: { onNavigate:
   return (
     <div className="space-y-8">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-        <div className="font-serif text-2xl text-moss-deep">More</div>
-        <div className="text-xs text-muted-foreground mt-1">Everything in one place, mama</div>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blush/20 via-cream to-sage/20 p-6 border border-rose-gold/10">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-gold/5 rounded-full blur-2xl" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-lavender/10 rounded-full blur-2xl" />
+          <div className="relative">
+            <div className="font-serif text-3xl text-moss-deep">More</div>
+            <div className="font-script text-lg text-rose-gold mt-1">Everything in one place, mama</div>
+          </div>
+        </div>
       </motion.div>
 
       {/* Collections */}
@@ -130,9 +136,10 @@ export default function MoreScreen({ onNavigate, initialFeature }: { onNavigate:
           transition={{ delay: 0.05 * ci }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">{collection.emoji}</span>
-            <div className="font-serif text-lg text-moss-deep">{collection.title}</div>
-            <div className="text-xs text-muted-foreground">{collection.description}</div>
+            <span className="text-xl">{collection.emoji}</span>
+            <div className="font-serif text-xl text-moss-deep">{collection.title}</div>
+            <div className="w-px h-4 bg-border/40" />
+            <div className="text-xs text-muted-foreground italic">{collection.description}</div>
           </div>
           <div className="space-y-2">
             {collection.items.map((item) => (
@@ -142,19 +149,19 @@ export default function MoreScreen({ onNavigate, initialFeature }: { onNavigate:
                 className="w-full text-left"
               >
                 <Card className={cn(
-                  "rounded-2xl p-4 flex items-center gap-4 transition-all hover:shadow-soft",
-                  "bg-card border-moss/10",
+                  "rounded-2xl p-4 flex items-center gap-4 transition-all hover:shadow-soft hover:-translate-y-0.5 duration-200",
+                  "bg-card border border-moss/8 hover:border-moss/20",
                   item.premium && !isPremium && "opacity-70"
                 )}>
                   <div className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                    "w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm",
                     item.accent
                   )}>
                     <item.icon className="w-5 h-5 text-moss-deep" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-moss-deep">{item.title}</span>
+                      <span className="text-sm font-semibold text-moss-deep">{item.title}</span>
                       {item.badge && (
                         <span className="text-[9px] bg-rose-gold/15 text-rose-gold rounded-full px-1.5 py-0.5 font-semibold">{item.badge}</span>
                       )}
@@ -164,7 +171,7 @@ export default function MoreScreen({ onNavigate, initialFeature }: { onNavigate:
                     </div>
                     <div className="text-xs text-muted-foreground mt-0.5 truncate">{item.description}</div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
                 </Card>
               </button>
             ))}

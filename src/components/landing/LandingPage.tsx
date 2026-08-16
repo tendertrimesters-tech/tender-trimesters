@@ -156,6 +156,8 @@ function Hero({ onJoinWaitlist, onOpenApp }: { onJoinWaitlist: () => void; onOpe
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blush/40 rounded-full blur-3xl opacity-60" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sage/40 rounded-full blur-3xl opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cream via-cream/95 to-blush/20" />
+        <img src="/images/belly-love.jpg" alt="" className="absolute right-0 top-0 w-3/5 h-full object-cover opacity-[0.18] hidden md:block" />
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
@@ -227,17 +229,22 @@ function HeroCard() {
   return (
     <div className="relative">
       {/* Main phone-card */}
-      <Card className="relative z-10 bg-card border-moss/15 shadow-soft rounded-[28px] overflow-hidden">
-        <div className="bg-gradient-moss p-5 text-cream">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-widest opacity-80">
-            <span>Week 16</span>
-            <span>Second Trimester</span>
-          </div>
-          <div className="mt-2 flex items-center gap-3">
-            <Baby className="w-8 h-8 text-blush" />
-            <div>
-              <div className="font-serif text-2xl leading-none">Avocado</div>
-              <div className="text-xs opacity-70">About 4.6 inches long</div>
+      <Card className="relative z-10 bg-card border-moss/15 shadow-premium rounded-[28px] overflow-hidden">
+        <div className="bg-gradient-moss p-5 text-cream relative">
+          <img src="/images/baby-hands.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay" />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-widest opacity-80">
+              <span>Week 16</span>
+              <span>Second Trimester</span>
+            </div>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-blush/20 backdrop-blur-sm flex items-center justify-center">
+                <Baby className="w-7 h-7 text-blush" />
+              </div>
+              <div>
+                <div className="font-serif text-2xl leading-none">Avocado</div>
+                <div className="text-xs opacity-70">About 4.6 inches long</div>
+              </div>
             </div>
           </div>
         </div>
@@ -404,12 +411,12 @@ function PremiumCard({ onUpgrade }: { onUpgrade: () => void }) {
 
 function VisualShowcase() {
   const items = [
-    { icon: Calendar, label: "Weekly Milestones", desc: "40 weeks of baby's growth, your body, your emotions.", bg: "bg-sage/40", color: "text-moss-deep" },
-    { icon: BookHeart, label: "Private Journal", desc: "Notes, moods, cravings, baby names — all in one place.", bg: "bg-blush/40", color: "text-rose-gold" },
-    { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", bg: "bg-butter", color: "text-moss-deep" },
-    { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", bg: "bg-lavender/40", color: "text-moss-deep" },
-    { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", bg: "bg-sage/40", color: "text-moss-deep" },
-    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", bg: "bg-blush/40", color: "text-rose-gold" },
+    { icon: Calendar, label: "Weekly Milestones", desc: "40 weeks of baby's growth, your body, your emotions.", bg: "from-sage/40 to-sage/20", color: "text-moss-deep", image: "/images/calendar-nature.jpg" },
+    { icon: BookHeart, label: "Private Journal", desc: "Notes, moods, cravings, baby names — all in one place.", bg: "from-blush/40 to-butter/20", color: "text-rose-gold", image: "/images/journal-writing.jpg" },
+    { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", bg: "from-butter to-blush/20", color: "text-moss-deep", image: "/images/soft-pink.jpg" },
+    { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", bg: "from-lavender/40 to-lavender/10", color: "text-moss-deep", image: "/images/belly-love.jpg" },
+    { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", bg: "from-sage/40 to-butter/10", color: "text-moss-deep", image: "/images/botanical-soft.jpg" },
+    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", bg: "from-blush/40 to-lavender/20", color: "text-rose-gold", image: "/images/community-women.jpg" },
   ];
   return (
     <section id="features" className="py-20 md:py-28 bg-gradient-to-b from-cream to-butter/30">
@@ -431,12 +438,20 @@ function VisualShowcase() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
             >
-              <Card className={`${item.bg} border-transparent rounded-3xl p-6 h-full hover:shadow-soft transition-shadow`}>
-                <div className="w-12 h-12 rounded-2xl bg-cream/60 flex items-center justify-center mb-4">
-                  <item.icon className={`w-5 h-5 ${item.color}`} />
+              <Card className="rounded-3xl h-full hover:shadow-soft transition-all hover:-translate-y-1 duration-300 overflow-hidden border border-moss/10">
+                <div className={`relative h-36 bg-gradient-to-br ${item.bg} overflow-hidden`}>
+                  <img src={item.image} alt={item.label} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+                  <div className="relative z-10 p-5">
+                    <div className="w-12 h-12 rounded-2xl bg-cream/70 backdrop-blur-sm flex items-center justify-center mb-3 shadow-sm">
+                      <item.icon className={`w-5 h-5 ${item.color}`} />
+                    </div>
+                  </div>
                 </div>
-                <h3 className={`font-serif text-xl mb-2 ${item.color}`}>{item.label}</h3>
-                <p className="text-sm text-foreground/70 leading-relaxed">{item.desc}</p>
+                <div className="p-5 pt-3">
+                  <h3 className={`font-serif text-xl mb-2 ${item.color}`}>{item.label}</h3>
+                  <p className="text-sm text-foreground/70 leading-relaxed">{item.desc}</p>
+                </div>
               </Card>
             </motion.div>
           ))}
@@ -536,10 +551,15 @@ function Testimonials() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="bg-card border-moss/10 rounded-3xl p-6 h-full">
-                <div className="font-script text-3xl text-rose-gold/40 mb-2 leading-none">"</div>
+              <Card className="bg-card border-moss/10 rounded-3xl p-6 h-full hover:shadow-soft transition-all hover:-translate-y-1 duration-300">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-blush flex items-center justify-center">
+                    <Heart className="w-4 h-4 text-rose-gold" />
+                  </div>
+                  <div className="font-script text-2xl text-rose-gold leading-none">"</div>
+                </div>
                 <p className="text-foreground/80 leading-relaxed text-[15px] italic">{q.text}</p>
-                <div className="mt-5 pt-5 border-t border-border/40 text-xs text-muted-foreground">
+                <div className="mt-5 pt-5 border-t border-border/30 text-xs text-muted-foreground">
                   — {q.name}
                 </div>
               </Card>

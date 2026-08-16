@@ -20,10 +20,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calcWeek, useProfile } from "@/components/providers";
-import { Plus, BookHeart, Trash2, Camera, X } from "lucide-react";
+import { Plus, BookHeart, Trash2, Camera, X, Feather } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import Image from "next/image";
 
 type Mood = "glowing" | "calm" | "tired" | "anxious" | "teary" | "grateful" | "nauseous" | "energized";
 
@@ -49,6 +50,17 @@ const MOODS: { value: Mood; emoji: string; label: string }[] = [
   { value: "nauseous", emoji: "🍃", label: "Nauseous" },
   { value: "energized", emoji: "✨", label: "Energized" },
 ];
+
+const MOOD_BORDER: Record<Mood, string> = {
+  glowing: "border-l-rose-gold",
+  calm: "border-l-sage",
+  tired: "border-l-lavender",
+  anxious: "border-l-blush",
+  teary: "border-l-ink/20",
+  grateful: "border-l-butter",
+  nauseous: "border-l-terracotta",
+  energized: "border-l-moss",
+};
 
 const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -80,36 +92,81 @@ export default function JournalScreen() {
 
   return (
     <div className="space-y-4">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
-        <div>
-          <div className="font-serif text-2xl text-moss-deep">Journal</div>
-          {!loading && (
-            <div className="text-xs text-muted-foreground">{entries.length} {entries.length === 1 ? "entry" : "entries"} · private to you</div>
-          )}
+      {/* ── Header with decorative image banner ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl"
+      >
+        {/* Background image at 15% opacity */}
+        <div className="absolute inset-0 pointer-events-none">
+          <Image
+            src="/images/journal-writing.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-[0.15]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-cream/70 via-cream/85 to-cream/95" />
         </div>
-        <Button onClick={() => setAddOpen(true)} className="bg-moss hover:bg-moss-deep rounded-full h-9">
-          <Plus className="w-4 h-4 mr-1" /> New
-        </Button>
+
+        <div className="relative flex items-center justify-between p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center justify-center w-10 h-10 rounded-full bg-gradient-blush shadow-soft">
+              <Feather className="w-5 h-5 text-rose-gold" />
+            </div>
+            <div>
+              <div className="font-serif text-2xl text-moss-deep tracking-tight">Journal</div>
+              {!loading && (
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {entries.length} {entries.length === 1 ? "entry" : "entries"}{" "}
+                  <span className="text-rose-gold">·</span> private to you
+                </div>
+              )}
+            </div>
+          </div>
+          <Button
+            onClick={() => setAddOpen(true)}
+            className="bg-moss hover:bg-moss-deep rounded-full h-9 shadow-soft hover:shadow-premium transition-shadow"
+          >
+            <Plus className="w-4 h-4 mr-1" /> New
+          </Button>
+        </div>
       </motion.div>
 
       {loading ? (
         <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}</div>
       ) : error ? (
-        <Card className="bg-card border-dashed border-destructive/30 rounded-3xl p-8 text-center">
+        <Card className="bg-card border-dashed border-destructive/30 rounded-2xl p-8 text-center">
           <BookHeart className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
           <div className="font-serif text-lg text-moss-deep">Couldn't load your journal</div>
           <Button onClick={load} variant="outline" className="mt-4 rounded-full">Retry</Button>
         </Card>
       ) : entries.length === 0 ? (
-        <Card className="bg-card border-dashed border-border rounded-3xl p-10 text-center">
-          <BookHeart className="w-12 h-12 text-rose-gold/40 mx-auto mb-3" />
-          <div className="font-serif text-xl text-moss-deep">Your journal is empty</div>
-          <div className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-            This is your space. Letters to baby, midnight thoughts, cravings, fears, joys. Whatever you need to put down.
+        /* ── Beautiful empty state ── */
+        <Card className="relative overflow-hidden rounded-2xl border-dashed border-border">
+          <div className="absolute inset-0 pointer-events-none">
+            <Image
+              src="/images/watercolor-wash.jpg"
+              alt=""
+              fill
+              className="object-cover opacity-[0.12]"
+            />
           </div>
-          <Button onClick={() => setAddOpen(true)} className="mt-5 bg-moss hover:bg-moss-deep rounded-full">
-            Write your first entry
-          </Button>
+          <div className="relative p-10 text-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-blush shadow-soft flex items-center justify-center mx-auto mb-5">
+              <BookHeart className="w-10 h-10 text-rose-gold" />
+            </div>
+            <div className="font-script text-2xl text-moss-deep">Your journal is empty</div>
+            <div className="font-serif text-sm text-muted-foreground mt-3 max-w-sm mx-auto leading-relaxed">
+              This is your space. Letters to baby, midnight thoughts, cravings, fears, joys. Whatever you need to put down.
+            </div>
+            <Button
+              onClick={() => setAddOpen(true)}
+              className="mt-6 bg-moss hover:bg-moss-deep rounded-full shadow-soft hover:shadow-premium transition-shadow"
+            >
+              Write your first entry
+            </Button>
+          </div>
         </Card>
       ) : (
         <div className="space-y-3">
@@ -149,9 +206,19 @@ function JournalCard({ entry, onChange }: { entry: JournalEntry; onChange: () =>
   return (
     <>
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <Card className="bg-card border-moss/15 rounded-3xl p-5">
+        <Card
+          className={cn(
+            "rounded-2xl p-5 bg-card border-moss/15 border-l-4",
+            "hover:shadow-soft transition-shadow duration-300",
+            entry.mood && MOOD_BORDER[entry.mood],
+          )}
+        >
           <div className="flex items-start gap-3">
-            {mood && <div className="text-2xl">{mood.emoji}</div>}
+            {mood && (
+              <div className="flex-shrink-0 text-3xl mt-0.5 drop-shadow-sm" role="img" aria-label={mood.label}>
+                {mood.emoji}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-2">
                 {entry.title && <div className="font-serif text-lg text-moss-deep">{entry.title}</div>}
@@ -205,7 +272,7 @@ function JournalCard({ entry, onChange }: { entry: JournalEntry; onChange: () =>
       </motion.div>
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent className="bg-card rounded-3xl">
+        <AlertDialogContent className="bg-card rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif text-xl text-moss-deep">Delete this entry?</AlertDialogTitle>
             <AlertDialogDescription>This can't be undone. Your words will be gone forever.</AlertDialogDescription>
@@ -317,12 +384,25 @@ function NewEntryDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setTimeout(reset, 300); }}>
-      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[90vh] overflow-y-auto scroll-soft">
-        <DialogHeader>
-          <DialogTitle className="font-serif text-2xl text-moss-deep">New journal entry</DialogTitle>
-          <DialogDescription>Whatever's on your heart, mama.</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 mt-2">
+      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[90vh] overflow-y-auto scroll-soft p-0">
+        {/* Dialog header with subtle botanical background */}
+        <div className="relative overflow-hidden rounded-t-3xl">
+          <div className="absolute inset-0 pointer-events-none">
+            <Image
+              src="/images/botanical-soft.jpg"
+              alt=""
+              fill
+              className="object-cover opacity-[0.08]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-cream/60 to-transparent" />
+          </div>
+          <DialogHeader className="relative p-6 pb-0">
+            <DialogTitle className="font-serif text-2xl text-moss-deep">New journal entry</DialogTitle>
+            <DialogDescription className="mt-1">Whatever's on your heart, mama.</DialogDescription>
+          </DialogHeader>
+        </div>
+
+        <div className="space-y-4 p-6 pt-4">
           <div>
             <Label>How are you feeling?</Label>
             <div className="mt-2 grid grid-cols-4 gap-2">
@@ -331,12 +411,14 @@ function NewEntryDialog({
                   key={m.value}
                   onClick={() => setMood(mood === m.value ? "" : m.value)}
                   className={cn(
-                    "flex flex-col items-center gap-1 py-2 rounded-xl transition-all",
-                    mood === m.value ? "bg-blush/40 ring-2 ring-rose-gold" : "bg-muted/40 hover:bg-muted"
+                    "flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all duration-200",
+                    mood === m.value
+                      ? "bg-blush/50 ring-2 ring-rose-gold shadow-soft scale-[1.04]"
+                      : "bg-muted/40 hover:bg-muted hover:scale-[1.02] hover:shadow-soft",
                   )}
                 >
-                  <span className="text-xl">{m.emoji}</span>
-                  <span className="text-[10px] text-moss-deep">{m.label}</span>
+                  <span className="text-3xl leading-none drop-shadow-sm">{m.emoji}</span>
+                  <span className="text-[10px] text-moss-deep font-medium">{m.label}</span>
                 </button>
               ))}
             </div>
@@ -384,7 +466,7 @@ function NewEntryDialog({
               </button>
             )}
           </div>
-          <Button onClick={submit} disabled={saving} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11">
+          <Button onClick={submit} disabled={saving} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11 shadow-soft hover:shadow-premium transition-shadow">
             {saving ? "Saving..." : "Save entry"}
           </Button>
         </div>

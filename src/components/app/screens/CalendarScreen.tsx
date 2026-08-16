@@ -22,11 +22,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { calcWeek, useProfile } from "@/components/providers";
-import { Baby, Leaf, Heart, Sparkles, Calendar as CalIcon, Plus, Check, Clock, MapPin } from "lucide-react";
+import { Baby, Heart, Sparkles, Calendar as CalIcon, Plus, Check, Clock, MapPin, Lightbulb } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import type { LucideIcon } from "lucide-react";
+import Image from "next/image";
 
 interface WeekContent {
   week: number;
@@ -133,8 +133,8 @@ function WeeksView() {
 
   return (
     <div className="space-y-4">
-      {/* Trimester pills */}
-      <div className="flex gap-2">
+      {/* Trimester pills — glassmorphic effect */}
+      <div className="flex gap-2 p-[3px] rounded-full bg-gradient-to-r from-moss/10 via-blush/20 to-lavender/20 backdrop-blur-sm border border-white/20">
         {[1, 2, 3].map((t) => {
           const tWeeks = weeks.filter((w) => w.trimester === t);
           return (
@@ -145,10 +145,10 @@ function WeeksView() {
                 if (first) setSelectedWeek(first.week);
               }}
               className={cn(
-                "flex-1 text-xs py-2 rounded-full transition-colors",
+                "flex-1 text-xs py-2 rounded-full transition-all",
                 activeTrimester === t
                   ? "bg-moss text-cream shadow-soft font-semibold"
-                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
+                  : "hover:bg-white/40 text-muted-foreground"
               )}
             >
               T{t}
@@ -171,7 +171,13 @@ function WeeksView() {
                 onClick={() => setSelectedWeek(w.week)}
                 className={cn(
                   "flex-shrink-0 w-14 h-16 rounded-2xl flex flex-col items-center justify-center transition-all",
-                  isSelected ? "bg-moss text-cream shadow-soft" : isCurrent ? "bg-blush text-moss-deep ring-2 ring-rose-gold" : isPast ? "bg-muted/40 text-muted-foreground" : "bg-card border border-border/40 text-foreground/70 hover:border-moss/30"
+                  isSelected
+                    ? "bg-moss text-cream shadow-soft"
+                    : isCurrent
+                      ? "bg-blush text-moss-deep ring-2 ring-rose-gold shadow-soft"
+                      : isPast
+                        ? "bg-blush/20 text-muted-foreground/80"
+                        : "bg-card border border-border/40 text-foreground/70 hover:border-moss/30"
                 )}
               >
                 <span className="text-[9px] uppercase tracking-wider opacity-70">Wk</span>
@@ -197,9 +203,47 @@ function WeekDetail({ week, isCurrent }: { week: WeekContent; isCurrent: boolean
       transition={{ duration: 0.4 }}
       className="space-y-4"
     >
-      {/* Header card */}
-      <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft">
-        <div className="p-6">
+      {/* Header card — nature background + botanical accent + golden milestone */}
+      <Card className="bg-gradient-moss text-cream rounded-3xl overflow-hidden shadow-soft relative">
+        {/* Calendar-nature.jpg at 12% opacity */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/calendar-nature.jpg"
+            alt=""
+            fill
+            className="object-cover opacity-[0.12]"
+            aria-hidden="true"
+          />
+        </div>
+        {/* Decorative botanical SVG accent */}
+        <svg
+          className="absolute top-3 right-3 w-20 h-20 text-cream/10 z-[1] pointer-events-none"
+          viewBox="0 0 100 100"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M80 10 C65 20, 55 35, 50 50 C45 65, 48 80, 55 90 C58 82, 60 70, 65 58 C70 46, 78 32, 85 20 C82 16, 80 12, 80 10Z"
+            className="fill-current"
+          />
+          <path
+            d="M70 15 C60 25, 50 42, 45 55 C40 68, 42 78, 48 85"
+            className="stroke-current stroke-[0.8]"
+          />
+          <path
+            d="M60 25 C50 35, 42 50, 38 62 C34 74, 36 82, 40 88"
+            className="stroke-current stroke-[0.5]"
+          />
+          <circle cx="50" cy="50" r="2" className="fill-cream/20" />
+          <circle cx="42" cy="60" r="1.5" className="fill-cream/15" />
+          <circle cx="58" cy="40" r="1.8" className="fill-cream/18" />
+          {/* Small leaf branch bottom-right */}
+          <path
+            d="M90 85 C78 78, 68 72, 55 68 C62 75, 72 80, 85 88Z"
+            className="fill-cream/[0.07]"
+          />
+        </svg>
+        <div className="relative z-10 p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="text-[10px] uppercase tracking-widest text-blush mb-1">
@@ -216,26 +260,57 @@ function WeekDetail({ week, isCurrent }: { week: WeekContent; isCurrent: boolean
             </div>
           </div>
           {week.milestone && (
-            <div className="bg-blush/20 backdrop-blur-sm rounded-full px-3 py-1.5 inline-flex items-center gap-1.5 text-xs">
-              <Sparkles className="w-3 h-3 text-blush" />
-              <span className="font-medium text-blush">{week.milestone}</span>
+            <div className="relative inline-flex rounded-full px-4 py-1.5 items-center gap-2 text-xs overflow-hidden">
+              {/* Golden shimmer animation */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-gold/30 to-transparent animate-[shimmer_2.5s_ease-in-out_infinite]" />
+              <span className="relative bg-rose-gold/25 backdrop-blur-sm rounded-full px-3 py-1.5 inline-flex items-center gap-1.5 text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-rose-gold" />
+                <span className="font-semibold text-rose-gold drop-shadow-[0_0_4px_rgba(236,180,136,0.6)]">{week.milestone}</span>
+              </span>
             </div>
           )}
           <p className="text-sm text-cream/80 mt-4 leading-relaxed">{week.babySizeDesc}</p>
         </div>
+        {/* Shimmer keyframe injected via style */}
+        <style>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}</style>
       </Card>
 
-      {/* Body changes */}
-      <DetailCard icon={Heart} title="Your body this week" body={week.bodyChanges} accent="bg-blush/30" iconColor="text-rose-gold" />
+      {/* Body changes — warm blush tint + left rose-gold border + Heart icon */}
+      {week.bodyChanges && (
+        <Card className="bg-blush/10 border-l-4 border-l-rose-gold rounded-3xl p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-rose-gold/15 flex items-center justify-center">
+              <Heart className="w-4 h-4 text-rose-gold" />
+            </div>
+            <div className="text-[10px] uppercase tracking-widest font-semibold text-moss-deep">Your body this week</div>
+          </div>
+          <p className="text-sm text-moss-deep/80 leading-relaxed">{week.bodyChanges}</p>
+        </Card>
+      )}
 
-      {/* Emotional changes */}
-      <DetailCard icon={Sparkles} title="What you might feel" body={week.emotionalChanges} accent="bg-lavender/40" iconColor="text-moss-deep" />
+      {/* Emotional changes — lavender tint + left lavender border */}
+      {week.emotionalChanges && (
+        <Card className="bg-lavender/15 border-l-4 border-l-lavender rounded-3xl p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-cream/60 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-moss-deep" />
+            </div>
+            <div className="text-[10px] uppercase tracking-widest font-semibold text-moss-deep">What you might feel</div>
+          </div>
+          <p className="text-sm text-moss-deep/80 leading-relaxed">{week.emotionalChanges}</p>
+        </Card>
+      )}
 
-      {/* Best friend tip */}
-      <Card className="bg-butter border-terracotta/20 rounded-3xl p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-terracotta/15 flex items-center justify-center">
-            <Leaf className="w-4 h-4 text-terracotta" />
+      {/* Best friend tip — butter bg + left terracotta border + large Lightbulb in colored circle */}
+      <Card className="bg-butter/40 border-l-4 border-l-terracotta rounded-3xl p-5">
+        <div className="flex items-center gap-2.5 mb-2">
+          <div className="w-10 h-10 rounded-full bg-terracotta/20 flex items-center justify-center">
+            <Lightbulb className="w-5 h-5 text-terracotta" />
           </div>
           <div className="text-[10px] uppercase tracking-widest text-terracotta font-semibold">Best friend tip</div>
         </div>
@@ -254,32 +329,28 @@ function WeekDetail({ week, isCurrent }: { week: WeekContent; isCurrent: boolean
         </Card>
       )}
 
-      {/* Affirmation */}
+      {/* Affirmation — golden-hour.jpg at 10% opacity behind gradient-blush */}
       {week.affirmation && (
-        <Card className="bg-gradient-blush border-rose-gold/20 rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-rose-gold" />
-            <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold">Affirmation</div>
+        <Card className="bg-gradient-blush border-rose-gold/20 rounded-3xl p-6 relative overflow-hidden">
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/images/golden-hour.jpg"
+              alt=""
+              fill
+              className="object-cover opacity-[0.10]"
+              aria-hidden="true"
+            />
           </div>
-          <p className="font-script text-2xl text-moss-deep leading-snug">{week.affirmation}</p>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-rose-gold" />
+              <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold">Affirmation</div>
+            </div>
+            <p className="font-script text-2xl text-moss-deep leading-snug">{week.affirmation}</p>
+          </div>
         </Card>
       )}
     </motion.div>
-  );
-}
-
-function DetailCard({ icon: Icon, title, body, accent, iconColor }: { icon: LucideIcon; title: string; body: string; accent: string; iconColor: string }) {
-  if (!body) return null;
-  return (
-    <Card className={cn("border-transparent rounded-3xl p-5", accent)}>
-      <div className="flex items-center gap-2 mb-2">
-        <div className="w-8 h-8 rounded-full bg-cream/60 flex items-center justify-center">
-          <Icon className={cn("w-4 h-4", iconColor)} />
-        </div>
-        <div className="text-[10px] uppercase tracking-widest font-semibold text-moss-deep">{title}</div>
-      </div>
-      <p className="text-sm text-moss-deep/80 leading-relaxed">{body}</p>
-    </Card>
   );
 }
 

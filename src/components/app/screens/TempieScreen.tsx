@@ -154,11 +154,11 @@ export default function TempieScreen() {
   }
 
   return (
-    <div className="space-y-4 flex flex-col h-[calc(100vh-220px)] md:h-[calc(100vh-180px)]">
+    <div className="space-y-4 flex flex-col h-[calc(100vh-220px)] md:h-[calc(100vh-180px)] relative">
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-gradient-premium flex items-center justify-center shadow-premium">
+          <div className="w-11 h-11 rounded-full bg-gradient-premium flex items-center justify-center shadow-premium animate-shimmer-border">
             <Leaf className="w-5 h-5 text-cream" />
           </div>
           <div>
@@ -166,7 +166,7 @@ export default function TempieScreen() {
             <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-moss animate-pulse-soft" />
               {meta.isPremium
-                ? "Online · Premium · Unlimited"
+                ? <span className="font-medium text-rose-gold">Premium · Unlimited</span>
                 : `Online · ${meta.remaining} of ${meta.limit} free messages today`}
             </div>
           </div>
@@ -334,13 +334,13 @@ function MessageBubble({ msg, isLast }: { msg: Msg; isLast: boolean }) {
 function WelcomeState({ onSuggest, week, userName }: { onSuggest: (text: string) => void; week: number | null; userName?: string | null }) {
   const firstName = userName?.split(" ")[0] || "mama";
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 items-end">
         <div className="w-7 h-7 rounded-full bg-gradient-premium flex items-center justify-center flex-shrink-0">
           <Leaf className="w-3 h-3 text-cream" />
         </div>
-        <div className="bg-card border border-border/40 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%]">
-          <p className="text-sm text-foreground leading-relaxed">
+        <div className="bg-gradient-to-br from-card to-blush/10 border border-rose-gold/15 rounded-2xl rounded-bl-md px-4 py-3 max-w-[85%] shadow-soft">
+          <p className="text-sm font-medium text-moss-deep leading-relaxed">
             Hi {firstName}. I'm Tempie.
           </p>
           <p className="text-sm text-foreground/80 mt-2 leading-relaxed">
@@ -350,17 +350,20 @@ function WelcomeState({ onSuggest, week, userName }: { onSuggest: (text: string)
         </div>
       </motion.div>
 
-      <div className="space-y-2">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold pl-9">Try asking</div>
+      <div className="space-y-2.5 pl-9">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Try asking</div>
         <div className="flex flex-wrap gap-2">
-          {SUGGESTED.map((s) => (
-            <button
+          {SUGGESTED.map((s, i) => (
+            <motion.button
               key={s}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.05 }}
               onClick={() => onSuggest(s)}
-              className="text-xs text-moss-deep bg-blush/30 hover:bg-blush/50 border border-rose-gold/20 px-3 py-1.5 rounded-full transition-colors"
+              className="text-xs text-moss-deep bg-blush/25 hover:bg-blush/40 border border-rose-gold/15 hover:border-rose-gold/30 px-3 py-2 rounded-full transition-all hover:shadow-soft hover:-translate-y-0.5"
             >
               {s}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
