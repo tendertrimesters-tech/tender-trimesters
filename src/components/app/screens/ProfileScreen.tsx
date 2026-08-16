@@ -163,7 +163,10 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
         Edit profile
       </Button>
 
-      {/* Partner access */}
+      <Button onClick={onSignOut} variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 rounded-full">
+        <LogOut className="w-4 h-4 mr-2" /> Sign out
+      </Button>
+
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
       <Card className="bg-card border-moss/15 rounded-3xl p-5">
         <div className="flex items-center gap-3 mb-3">
@@ -243,20 +246,14 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
       </Card>
       </motion.div>
 
-      {/* Sign out */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
-        <Button onClick={onSignOut} variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/5 rounded-full">
-          <LogOut className="w-4 h-4 mr-2" /> Sign out
-        </Button>
-        <div className="text-center text-[10px] text-muted-foreground pt-2">
-          Tender Trimesters · by Mommies Matter<br />
-          Made with love by Helena-Ann Baker
-        </div>
-      </motion.div>
-
       <EditProfileDialog open={editOpen} onOpenChange={setEditOpen} onSaved={refresh} profile={profile} />
       <UpgradeDialog open={upgradeOpen} onOpenChange={setUpgradeOpen} onUpgraded={refresh} />
       {partnerLink && <PartnerPreviewDialog open={partnerOpen} onOpenChange={setPartnerOpen} profile={profile} />}
+
+      <div className="text-center text-[10px] text-muted-foreground pt-4 pb-2">
+        Tender Trimesters · by Mommies Matter<br />
+        Made with love by Helena-Ann Baker
+      </div>
     </div>
   );
 }
