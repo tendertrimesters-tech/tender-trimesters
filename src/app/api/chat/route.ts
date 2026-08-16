@@ -4,6 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/db";
 import OpenAI from "openai";
 
+const FREE_DAILY_LIMIT = 5;
+
 const TEMPIE_SYSTEM = `You are Tempie, the 24/7 AI companion inside the Tender Trimesters pregnancy app. You were created by Helena-Ann Baker, author of "Mommies Matter," as part of her vision to support new and expecting mothers.
 
 YOUR PERSONALITY:
@@ -43,12 +45,58 @@ export async function GET() {
     orderBy: { createdAt: "asc" },
     take: 100,
   });
-  return NextResponse.json({ messages });
+
+  // Count today's user messages for rate limiting
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayCount = await db.chatMessage.count({
+    where: {
+      userId: session.user.id,
+      role: "user",
+      createdAt: { gte: todayStart },
+    },
+  });
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { isPremium: true },
+  });
+  const isPremium = user?.isPremium ?? false;
+  const remaining = isPremium ? Infinity : Math.max(0, FREE_DAILY_LIMIT - todayCount);
+
+  return NextResponse.json({ messages, isPremium, remaining, limit: FREE_DAILY_LIMIT });
 }
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Rate limit check for free users
+  const userProfile = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { isPremium: true, name: true, dueDate: true, babyName: true, partnerName: true },
+  });
+  const isPremium = userProfile?.isPremium ?? false;
+
+  if (!isPremium) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayCount = await db.chatMessage.count({
+      where: {
+        userId: session.user.id,
+        role: "user",
+        createdAt: { gte: todayStart },
+      },
+    });
+    if (todayCount >= FREE_DAILY_LIMIT) {
+      return NextResponse.json({
+        error: "limit_reached",
+        message: "You've used all your free Tempie messages for today. Upgrade to Premium for unlimited access!",
+        remaining: 0,
+        limit: FREE_DAILY_LIMIT,
+      }, { status: 429 });
+    }
+  }
 
   const body = await req.json();
   const { message } = body;
@@ -68,18 +116,12 @@ export async function POST(req: NextRequest) {
     take: 20,
   });
 
-  // Load user profile for context
-  const user = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, dueDate: true, babyName: true, partnerName: true },
-  });
-
   // Build context-aware system message
   const today = new Date();
   let weekNum: number | null = null;
-  if (user?.dueDate) {
+  if (userProfile?.dueDate) {
     // Pregnancy is counted from last menstrual period (~280 days before due date)
-    const conceptionStart = new Date(user.dueDate);
+    const conceptionStart = new Date(userProfile.dueDate);
     conceptionStart.setDate(conceptionStart.getDate() - 280);
     const diffMs = today.getTime() - conceptionStart.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -87,11 +129,11 @@ export async function POST(req: NextRequest) {
   }
 
   const contextParts: string[] = [TEMPIE_SYSTEM];
-  if (user?.name) contextParts.push(`\nUSER CONTEXT:\n- Name: ${user.name}`);
+  if (userProfile?.name) contextParts.push(`\nUSER CONTEXT:\n- Name: ${userProfile.name}`);
   if (weekNum) contextParts.push(`- Currently: ~week ${weekNum} of pregnancy`);
-  if (user?.dueDate) contextParts.push(`- Due date: ${user.dueDate.toLocaleDateString()}`);
-  if (user?.babyName) contextParts.push(`- Baby name (if chosen): ${user.babyName}`);
-  if (user?.partnerName) contextParts.push(`- Partner name: ${user.partnerName}`);
+  if (userProfile?.dueDate) contextParts.push(`- Due date: ${userProfile.dueDate.toLocaleDateString()}`);
+  if (userProfile?.babyName) contextParts.push(`- Baby name (if chosen): ${userProfile.babyName}`);
+  if (userProfile?.partnerName) contextParts.push(`- Partner name: ${userProfile.partnerName}`);
   contextParts.push(`- Today: ${today.toLocaleDateString()}`);
 
   const systemMessage = contextParts.join("\n");

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Trash2, Leaf } from "lucide-react";
+import { Send, Trash2, Leaf, Crown, Lock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +24,8 @@ import {
 
 type Msg = { id: string; role: "user" | "assistant"; content: string; createdAt: string };
 
+type ChatMeta = { isPremium: boolean; remaining: number; limit: number };
+
 const SUGGESTED = [
   "I'm anxious about my first ultrasound",
   "What should I pack in my hospital bag?",
@@ -41,6 +43,7 @@ export default function TempieScreen() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
+  const [meta, setMeta] = useState<ChatMeta>({ isPremium: false, remaining: 5, limit: 5 });
   const scrollRef = useRef<HTMLDivElement>(null);
   const isNearBottom = useRef(true);
 
@@ -52,6 +55,7 @@ export default function TempieScreen() {
       })
       .then((d) => {
         setMessages(d.messages || []);
+        setMeta({ isPremium: d.isPremium ?? false, remaining: d.remaining ?? 5, limit: d.limit ?? 5 });
         setLoading(false);
       })
       .catch(() => {
@@ -102,8 +106,19 @@ export default function TempieScreen() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed }),
       });
-      if (!res.ok) throw new Error();
       const data = await res.json();
+
+      // Handle rate limit
+      if (res.status === 429 && data.error === "limit_reached") {
+        setMeta((prev) => ({ ...prev, remaining: 0 }));
+        toast.error(data.message || "Daily message limit reached");
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+        setInput(trimmed);
+        return;
+      }
+
+      if (!res.ok) throw new Error();
+
       const aiMsg: Msg = {
         id: `temp-ai-${Date.now()}`,
         role: "assistant",
@@ -117,6 +132,11 @@ export default function TempieScreen() {
       setInput(trimmed);
     } finally {
       setSending(false);
+      // Refresh remaining count after each message
+      fetch("/api/chat")
+        .then((r) => r.json())
+        .then((d) => setMeta({ isPremium: d.isPremium ?? false, remaining: d.remaining ?? 5, limit: d.limit ?? 5 }))
+        .catch(() => {});
     }
   }
 
@@ -145,15 +165,24 @@ export default function TempieScreen() {
             <div className="font-serif text-xl text-moss-deep leading-none">Tempie</div>
             <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-moss animate-pulse-soft" />
-              Online · Your 24/7 companion
+              {meta.isPremium
+                ? "Online · Premium · Unlimited"
+                : `Online · ${meta.remaining} of ${meta.limit} free messages today`}
             </div>
           </div>
         </div>
-        {messages.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={() => setClearOpen(true)} className="text-xs text-muted-foreground hover:text-destructive">
-            <Trash2 className="w-3.5 h-3.5 mr-1" /> Clear
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {!meta.isPremium && (
+            <span className="text-[9px] bg-blush/40 text-rose-gold px-2 py-0.5 rounded-full">
+              <Crown className="w-2.5 h-2.5 inline mr-0.5" />Premium
+            </span>
+          )}
+          {messages.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={() => setClearOpen(true)} className="text-xs text-muted-foreground hover:text-destructive">
+              <Trash2 className="w-3.5 h-3.5 mr-1" /> Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -198,6 +227,23 @@ export default function TempieScreen() {
 
       {/* Input */}
       <div className="flex-shrink-0">
+        {!meta.isPremium && meta.remaining <= 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-3 bg-gradient-premium text-cream rounded-2xl p-4 text-center"
+          >
+            <Crown className="w-6 h-6 mx-auto mb-2" />
+            <div className="font-serif text-lg">You've used all 5 free messages today</div>
+            <div className="text-xs text-cream/80 mt-1">Upgrade to Premium for unlimited Tempie access — plus all 11 signature features</div>
+            <Button
+              onClick={() => { window.location.hash = "profile"; window.location.reload(); }}
+              className="mt-3 bg-cream text-rose-gold hover:bg-cream/90 rounded-full text-sm"
+            >
+              <Crown className="w-3.5 h-3.5 mr-1.5" /> Upgrade to Premium
+            </Button>
+          </motion.div>
+        )}
         <Card className="bg-card border-moss/15 rounded-3xl p-2 flex gap-2 items-end">
           <Textarea
             id="tempie-input"
@@ -220,7 +266,7 @@ export default function TempieScreen() {
           />
           <Button
             onClick={() => send(input)}
-            disabled={!input.trim() || sending}
+            disabled={!input.trim() || sending || (!meta.isPremium && meta.remaining <= 0)}
             size="icon"
             className="bg-gradient-premium hover:opacity-90 rounded-full h-9 w-9 flex-shrink-0"
           >
@@ -228,7 +274,9 @@ export default function TempieScreen() {
           </Button>
         </Card>
         <div className="text-[10px] text-muted-foreground text-center mt-2">
-          Tempie is AI support, not a doctor. For medical concerns, always call your OB.
+          {!meta.isPremium
+            ? `${meta.remaining} free messages remaining today · Tempie is AI support, not a doctor.`
+            : "Tempie is AI support, not a doctor. For medical concerns, always call your OB."}
         </div>
       </div>
 
