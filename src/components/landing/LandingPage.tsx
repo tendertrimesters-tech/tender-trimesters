@@ -416,7 +416,7 @@ function VisualShowcase() {
     { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", bg: "from-butter to-blush/20", color: "text-moss-deep", image: "/images/soft-pink.jpg" },
     { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", bg: "from-lavender/40 to-lavender/10", color: "text-moss-deep", image: "/images/belly-love.jpg" },
     { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", bg: "from-sage/40 to-butter/10", color: "text-moss-deep", image: "/images/botanical-soft.jpg" },
-    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", bg: "from-blush/40 to-lavender/20", color: "text-rose-gold", image: "/images/community-women.jpg" },
+    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", bg: "from-blush/40 to-lavender/20", color: "text-rose-gold", image: "/images/partner-couple.jpg" },
   ];
   return (
     <section id="features" className="py-20 md:py-28 bg-gradient-to-b from-cream to-butter/30">
