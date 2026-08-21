@@ -1,0 +1,1057 @@
+     1→"use client";
+     2→
+     3→import { useState, useEffect, useRef, useCallback } from "react";
+     4→import { motion, AnimatePresence } from "framer-motion";
+     5→import { Card } from "@/components/ui/card";
+     6→import { Button } from "@/components/ui/button";
+     7→import { cn } from "@/lib/utils";
+     8→import { useProfile, calcWeek, trimesterOf } from "@/components/providers";
+     9→import { toast } from "sonner";
+    10→import {
+    11→  Flower2, Play, Pause, X, ChevronLeft, Lock, Clock, Heart, Wind,
+    12→  Sparkles, BookOpen, Crown, SkipForward, SkipBack, Volume2,
+    13→  Mic, Trash2, Upload,
+    14→} from "lucide-react";
+    15→import {
+    16→  MEDITATIONS, MEDITATION_CATEGORIES,
+    17→  type Meditation, type MeditationBeat,
+    18→} from "@/data/meditations";
+    19→import {
+    20→  saveMeditationAudio, getMeditationAudio, deleteMeditationAudio,
+    21→  hasMeditationAudio, getMeditationAudioMeta, formatAudioSize,
+    22→} from "@/lib/audio-store";
+    23→
+    24→type SubView = "library" | "player" | "journal";
+    25→
+    26→// ─── Helpers ────────────────────────────────────────────────────────
+    27→
+    28→/** Calculate total seconds of a meditation from its beats */
+    29→function totalSeconds(m: Meditation): number {
+    30→  let t = 0;
+    31→  for (const b of m.beats) {
+    32→    if (b.type === "pause" && b.pauseSeconds) t += b.pauseSeconds;
+    33→    if (b.type === "speak" && b.text) t += Math.ceil((b.text.split(/\s+/).length * 60) / 130);
+    34→    if (b.type === "breath" && b.text) t += Math.ceil((b.text.split(/\s+/).length * 60) / 130);
+    35→    if (b.type === "affirmation" && b.text) t += Math.ceil((b.text.split(/\s+/).length * 60) / 100) + 3;
+    36→  }
+    37→  return t;
+    38→}
+    39→
+    40→/** Approximate seconds for a single beat */
+    41→function beatDuration(b: MeditationBeat): number {
+    42→  if (b.type === "pause" && b.pauseSeconds) return b.pauseSeconds;
+    43→  if (b.type === "speak" && b.text) return Math.ceil((b.text.split(/\s+/).length * 60) / 130);
+    44→  if (b.type === "breath" && b.text) return Math.ceil((b.text.split(/\s+/).length * 60) / 130);
+    45→  if (b.type === "affirmation" && b.text) return Math.ceil((b.text.split(/\s+/).length * 60) / 100) + 3;
+    46→  return 0;
+    47→}
+    48→
+    49→/** Given elapsed seconds, find which beat we're on */
+    50→function beatIndexAtTime(meditation: Meditation, elapsedSec: number): number {
+    51→  let cumTime = 0;
+    52→  for (let i = 0; i < meditation.beats.length; i++) {
+    53→    cumTime += beatDuration(meditation.beats[i]);
+    54→    if (elapsedSec < cumTime) return i;
+    55→  }
+    56→  return meditation.beats.length - 1;
+    57→}
+    58→
+    59→/** Format seconds as m:ss */
+    60→function fmtTime(s: number): string {
+    61→  const m = Math.floor(s / 60);
+    62→  const sec = Math.floor(s % 60);
+    63→  return `${m}:${sec.toString().padStart(2, "0")}`;
+    64→}
+    65→
+    66→/** Category icon + gradient */
+    67→function categoryStyle(cat: string) {
+    68→  const map: Record<string, { icon: typeof Flower2; gradient: string; bg: string }> = {
+    69→    "first-trimester": { icon: Sparkles, gradient: "from-pink-200/80 to-rose-100/80", bg: "bg-pink-50" },
+    70→    "second-trimester": { icon: Heart, gradient: "from-emerald-200/80 to-green-100/80", bg: "bg-emerald-50" },
+    71→    "third-trimester": { icon: Wind, gradient: "from-amber-200/80 to-orange-100/80", bg: "bg-amber-50" },
+    72→    "birth-prep": { icon: Flower2, gradient: "from-purple-200/80 to-violet-100/80", bg: "bg-purple-50" },
+    73→    postpartum: { icon: BookOpen, gradient: "from-blue-200/80 to-indigo-100/80", bg: "bg-blue-50" },
+    74→  };
+    75→  return map[cat] || map["first-trimester"];
+    76→}
+    77→
+    78→// ─── Main Screen ────────────────────────────────────────────────────
+    79→
+    80→export default function MeditationScreen() {
+    81→  const { profile } = useProfile();
+    82→  const isPremium = !!profile?.isPremium;
+    83→  const week = calcWeek(profile?.dueDate);
+    84→  const trimester = trimesterOf(week);
+    85→
+    86→  const [subView, setSubView] = useState<SubView>("library");
+    87→  const [activeMeditation, setActiveMeditation] = useState<Meditation | null>(null);
+    88→  const [sessionHistory, setSessionHistory] = useState<Record<string, boolean>>({});
+    89→  const [favIds, setFavIds] = useState<Set<string>>(new Set());
+    90→  const [recordedIds, setRecordedIds] = useState<Set<string>>(new Set());
+    91→
+    92→  // Load session history from API
+    93→  useEffect(() => {
+    94→    fetch("/api/meditation")
+    95→      .then((r) => r.json())
+    96→      .then((d) => {
+    97→        const completed: Record<string, boolean> = {};
+    98→        (d.sessions || []).forEach((s: any) => { completed[s.meditationId] = true; });
+    99→        setSessionHistory(completed);
+   100→      })
+   101→      .catch(() => {});
+   102→  }, []);
+   103→
+   104→  // Load favorites from localStorage
+   105→  useEffect(() => {
+   106→    try {
+   107→      const saved = localStorage.getItem("meditation-favorites");
+   108→      if (saved) setFavIds(new Set(JSON.parse(saved)));
+   109→    } catch {}
+   110→  }, []);
+   111→
+   112→  // Check which meditations have uploaded recordings
+   113→  useEffect(() => {
+   114→    async function check() {
+   115→      const ids = new Set<string>();
+   116→      for (const m of MEDITATIONS) {
+   117→        if (await hasMeditationAudio(m.id)) ids.add(m.id);
+   118→      }
+   119→      setRecordedIds(ids);
+   120→    }
+   121→    check();
+   122→  }, []);
+   123→
+   124→  const toggleFavorite = useCallback((id: string) => {
+   125→    setFavIds((prev) => {
+   126→      const next = new Set(prev);
+   127→      if (next.has(id)) next.delete(id); else next.add(id);
+   128→      localStorage.setItem("meditation-favorites", JSON.stringify([...next]));
+   129→      return next;
+   130→    });
+   131→  }, []);
+   132→
+   133→  // Suggest meditations based on current trimester
+   134→  const suggested = MEDITATIONS.filter((m) => {
+   135→    if (trimester === 1) return m.category === "first-trimester" || m.category === "second-trimester";
+   136→    if (trimester === 2) return m.category === "second-trimester" || m.category === "third-trimester";
+   137→    if (trimester === 3) return m.category === "third-trimester" || m.category === "birth-prep";
+   138→    return true;
+   139→  });
+   140→
+   141→  function openMeditation(m: Meditation) {
+   142→    if (!isPremium) {
+   143→      toast("Unlock all 8 meditations with Premium 💛", {
+   144→        description: "Head to your Profile to upgrade.",
+   145→        action: { label: "Later", onClick: () => {} },
+   146→      });
+   147→      return;
+   148→    }
+   149→    setActiveMeditation(m);
+   150→    setSubView("player");
+   151→  }
+   152→
+   153→  /** Refresh recording status after upload/delete */
+   154→  async function refreshRecordings() {
+   155→    const ids = new Set<string>();
+   156→    for (const m of MEDITATIONS) {
+   157→      if (await hasMeditationAudio(m.id)) ids.add(m.id);
+   158→    }
+   159→    setRecordedIds(ids);
+   160→  }
+   161→
+   162→  // ─── LIBRARY VIEW ─────────────────────────────────────────────────
+   163→
+   164→  if (subView === "library") {
+   165→    return (
+   166→      <div className="space-y-6">
+   167→        {/* Header */}
+   168→        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+   169→          <div className="flex items-center gap-3">
+   170→            <div className="w-11 h-11 rounded-full bg-gradient-premium flex items-center justify-center shadow-premium">
+   171→              <Flower2 className="w-5 h-5 text-cream" />
+   172→            </div>
+   173→            <div>
+   174→              <div className="font-serif text-xl text-moss-deep leading-none">
+   175→                Audio Meditations
+   176→              </div>
+   177→              <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
+   178→                <Crown className="w-3 h-3 text-rose-gold" />
+   179→                {isPremium ? "Premium · 8 guided practices" : "Premium feature · Unlock to access"}
+   180→              </div>
+   181→            </div>
+   182→          </div>
+   183→        </motion.div>
+   184→
+   185→        {/* Upload banner */}
+   186→        {isPremium && (
+   187→          <motion.div
+   188→            initial={{ opacity: 0, y: 12 }}
+   189→            animate={{ opacity: 1, y: 0 }}
+   190→            transition={{ delay: 0.05 }}
+   191→          >
+   192→            <Card className="bg-sage/15 border-moss/15 rounded-2xl p-4 flex items-center gap-3">
+   193→              <div className="w-9 h-9 rounded-full bg-moss/15 flex items-center justify-center flex-shrink-0">
+   194→                <Mic className="w-4 h-4 text-moss-deep" />
+   195→              </div>
+   196→              <div className="flex-1 min-w-0">
+   197→                <div className="text-xs font-medium text-moss-deep">Use your own voice</div>
+   198→                <div className="text-[10px] text-muted-foreground mt-0.5">
+   199→                  Upload recordings for each meditation. Plays your audio instead of the default voice.
+   200→                </div>
+   201→              </div>
+   202→              <div className="text-[10px] text-muted-foreground">
+   203→                {recordedIds.size} / {MEDITATIONS.length} recorded
+   204→              </div>
+   205→            </Card>
+   206→          </motion.div>
+   207→        )}
+   208→
+   209→        {/* Featured / suggested based on trimester */}
+   210→        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-3">
+   211→          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+   212→            {week ? `Recommended for week ${week}` : "All practices"}
+   213→          </div>
+   214→          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+   215→            {suggested.map((m, i) => (
+   216→              <MeditationCard
+   217→                key={m.id}
+   218→                meditation={m}
+   219→                index={i}
+   220→                isPremium={isPremium}
+   221→                isCompleted={!!sessionHistory[m.id]}
+   222→                isFavorite={favIds.has(m.id)}
+   223→                hasRecording={recordedIds.has(m.id)}
+   224→                onPlay={() => openMeditation(m)}
+   225→                onToggleFavorite={() => toggleFavorite(m.id)}
+   226→                onRefreshRecordings={refreshRecordings}
+   227→              />
+   228→            ))}
+   229→          </div>
+   230→        </motion.div>
+   231→
+   232→        {/* All meditations by category */}
+   233→        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-5">
+   234→          <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
+   235→            All meditations
+   236→          </div>
+   237→          {Object.entries(MEDITATION_CATEGORIES).map(([catKey, catValue]) => {
+   238→            const cat = catValue as { label: string; description: string; accent: string };
+   239→            const meds = MEDITATIONS.filter((m) => m.category === catKey);
+   240→            const style = categoryStyle(catKey);
+   241→            const Icon = style.icon;
+   242→            return (
+   243→              <div key={catKey} className="space-y-2.5">
+   244→                <div className="flex items-center gap-2">
+   245→                  <div className={cn("w-6 h-6 rounded-full bg-gradient-to-br flex items-center justify-center", style.gradient)}>
+   246→                    <Icon className="w-3 h-3 text-foreground/70" />
+   247→                  </div>
+   248→                  <span className="text-sm font-medium text-moss-deep">{cat.label}</span>
+   249→                  <span className="text-[10px] text-muted-foreground ml-1">{meds.length} practices</span>
+   250→                </div>
+   251→                <div className="space-y-2 pl-2">
+   252→                  {meds.map((m, i) => (
+   253→                    <MeditationCard
+   254→                      key={m.id}
+   255→                      meditation={m}
+   256→                      index={i}
+   257→                      isPremium={isPremium}
+   258→                      isCompleted={!!sessionHistory[m.id]}
+   259→                      isFavorite={favIds.has(m.id)}
+   260→                      hasRecording={recordedIds.has(m.id)}
+   261→                      onPlay={() => openMeditation(m)}
+   262→                      onToggleFavorite={() => toggleFavorite(m.id)}
+   263→                      onRefreshRecordings={refreshRecordings}
+   264→                      compact
+   265→                    />
+   266→                  ))}
+   267→                </div>
+   268→              </div>
+   269→            );
+   270→          })}
+   271→        </motion.div>
+   272→      </div>
+   273→    );
+   274→  }
+   275→
+   276→  // ─── PLAYER VIEW ─────────────────────────────────────────────────
+   277→
+   278→  if (subView === "player" && activeMeditation) {
+   279→    return (
+   280→      <MeditationPlayer
+   281→        meditation={activeMeditation}
+   282→        hasRecording={recordedIds.has(activeMeditation.id)}
+   283→        onClose={() => setSubView("library")}
+   284→        onJournal={() => setSubView("journal")}
+   285→        onCompleted={(medId, durSec) => {
+   286→          setSessionHistory((prev) => ({ ...prev, [medId]: true }));
+   287→          fetch("/api/meditation", {
+   288→            method: "POST",
+   289→            headers: { "Content-Type": "application/json" },
+   290→            body: JSON.stringify({ meditationId: medId, durationSec: durSec, completed: true }),
+   291→          }).catch(() => {});
+   292→        }}
+   293→        onRecordingChange={refreshRecordings}
+   294→      />
+   295→    );
+   296→  }
+   297→
+   298→  // ─── JOURNAL VIEW ───────────────────────────────────────────────
+   299→
+   300→  if (subView === "journal" && activeMeditation) {
+   301→    return <JournalView meditation={activeMeditation} onClose={() => setSubView("library")} />;
+   302→  }
+   303→
+   304→  return null;
+   305→}
+   306→
+   307→// ─── Meditation Card ────────────────────────────────────────────────
+   308→
+   309→function MeditationCard({
+   310→  meditation, index, isPremium, isCompleted, isFavorite, hasRecording,
+   311→  onPlay, onToggleFavorite, onRefreshRecordings, compact = false,
+   312→}: {
+   313→  meditation: Meditation;
+   314→  index: number;
+   315→  isPremium: boolean;
+   316→  isCompleted: boolean;
+   317→  isFavorite: boolean;
+   318→  hasRecording: boolean;
+   319→  onPlay: () => void;
+   320→  onToggleFavorite: () => void;
+   321→  onRefreshRecordings: () => void;
+   322→  compact?: boolean;
+   323→}) {
+   324→  const style = categoryStyle(meditation.category);
+   325→  const fileInputRef = useRef<HTMLInputElement>(null);
+   326→  const [uploading, setUploading] = useState(false);
+   327→
+   328→  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+   329→    const file = e.target.files?.[0];
+   330→    if (!file) return;
+   331→    setUploading(true);
+   332→    try {
+   333→      await saveMeditationAudio(meditation.id, file, file.name);
+   334→      toast.success(`Recording added for "${meditation.title}" 🎙️`);
+   335→      onRefreshRecordings();
+   336→    } catch {
+   337→      toast.error("Failed to save recording");
+   338→    } finally {
+   339→      setUploading(false);
+   340→      if (fileInputRef.current) fileInputRef.current.value = "";
+   341→    }
+   342→  }
+   343→
+   344→  async function handleDeleteRecording(e: React.MouseEvent) {
+   345→    e.stopPropagation();
+   346→    try {
+   347→      await deleteMeditationAudio(meditation.id);
+   348→      toast.success("Recording removed");
+   349→      onRefreshRecordings();
+   350→    } catch {
+   351→      toast.error("Failed to remove recording");
+   352→    }
+   353→  }
+   354→
+   355→  const recordingBadge = hasRecording ? (
+   356→    <span className="flex items-center gap-0.5 text-moss text-[10px] font-medium">
+   357→      <Mic className="w-2.5 h-2.5" /> Your voice
+   358→    </span>
+   359→  ) : null;
+   360→
+   361→  if (compact) {
+   362→    return (
+   363→      <Card
+   364→        className={cn(
+   365→          "bg-card border-border/40 rounded-2xl p-3 cursor-pointer transition-all hover:shadow-soft group",
+   366→          !isPremium && "opacity-60"
+   367→        )}
+   368→        onClick={onPlay}
+   369→      >
+   370→        <div className="flex items-center gap-3">
+   371→          <div className={cn("w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0", style.gradient)}>
+   372→            {isPremium ? (
+   373→              <Play className="w-4 h-4 text-foreground/70 ml-0.5" />
+   374→            ) : (
+   375→              <Lock className="w-3.5 h-3.5 text-foreground/50" />
+   376→            )}
+   377→          </div>
+   378→          <div className="flex-1 min-w-0">
+   379→            <div className="text-sm font-medium text-moss-deep truncate">{meditation.title}</div>
+   380→            <div className="text-[10px] text-muted-foreground flex items-center gap-2 mt-0.5">
+   381→              <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{meditation.durationMinutes} min</span>
+   382→              {isCompleted && <span className="text-moss">✓ Done</span>}
+   383→              {recordingBadge}
+   384→            </div>
+   385→          </div>
+   386→          <div className="flex items-center gap-1">
+   387→            {isPremium && (
+   388→              <>
+   389→                <button
+   390→                  onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+   391→                  className={cn("p-1.5 rounded-full hover:bg-sage/30 transition-colors", uploading && "opacity-50")}
+   392→                  title={hasRecording ? "Replace recording" : "Upload recording"}
+   393→                >
+   394→                  <Upload className="w-3.5 h-3.5 text-muted-foreground/60" />
+   395→                </button>
+   396→                {hasRecording && (
+   397→                  <button
+   398→                    onClick={handleDeleteRecording}
+   399→                    className="p-1.5 rounded-full hover:bg-blush/30 transition-colors"
+   400→                    title="Remove recording"
+   401→                  >
+   402→                    <Trash2 className="w-3 h-3 text-muted-foreground/40" />
+   403→                  </button>
+   404→                )}
+   405→              </>
+   406→            )}
+   407→            <button
+   408→              onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+   409→              className="p-1.5 rounded-full hover:bg-blush/40 transition-colors"
+   410→            >
+   411→              <Heart className={cn("w-3.5 h-3.5", isFavorite ? "fill-rose-gold text-rose-gold" : "text-muted-foreground/40")} />
+   412→            </button>
+   413→          </div>
+   414→          <input
+   415→            ref={fileInputRef}
+   416→            type="file"
+   417→            accept="audio/*"
+   418→            className="hidden"
+   419→            onChange={handleUpload}
+   420→          />
+   421→        </div>
+   422→      </Card>
+   423→    );
+   424→  }
+   425→
+   426→  return (
+   427→    <motion.div
+   428→      initial={{ opacity: 0, y: 12 }}
+   429→      animate={{ opacity: 1, y: 0 }}
+   430→      transition={{ delay: index * 0.05 }}
+   431→    >
+   432→      <Card
+   433→        className={cn(
+   434→          "relative overflow-hidden border-border/40 rounded-3xl cursor-pointer transition-all hover:shadow-soft group",
+   435→          !isPremium && "opacity-60"
+   436→        )}
+   437→        onClick={onPlay}
+   438→      >
+   439→        <div className={cn("h-24 bg-gradient-to-br relative", style.gradient)}>
+   440→          <div className="absolute inset-0 bg-gradient-to-t from-card/60 to-transparent" />
+   441→          <div className="absolute inset-0 flex items-center justify-center">
+   442→            <div className="w-14 h-14 rounded-full bg-cream/90 backdrop-blur-sm flex items-center justify-center shadow-lg transition-transform group-hover:scale-105">
+   443→              {isPremium ? (
+   444→                <Play className="w-6 h-6 text-moss-deep ml-1" />
+   445→              ) : (
+   446→                <Lock className="w-5 h-5 text-muted-foreground/60" />
+   447→              )}
+   448→            </div>
+   449→          </div>
+   450→          {/* Favorite */}
+   451→          <button
+   452→            onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+   453→            className="absolute top-3 right-3 p-2 rounded-full bg-cream/50 backdrop-blur-sm hover:bg-cream/80 transition-colors"
+   454→          >
+   455→            <Heart className={cn("w-4 h-4", isFavorite ? "fill-rose-gold text-rose-gold" : "text-foreground/40")} />
+   456→          </button>
+   457→          {/* Recording badge on card */}
+   458→          {hasRecording && (
+   459→            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full bg-cream/80 backdrop-blur-sm text-[10px] font-medium text-moss-deep">
+   460→              <Mic className="w-3 h-3" /> Your voice
+   461→            </div>
+   462→          )}
+   463→        </div>
+   464→
+   465→        <div className="p-4 pt-3">
+   466→          <div className="text-sm font-serif font-medium text-moss-deep">{meditation.title}</div>
+   467→          <div className="text-xs text-muted-foreground mt-0.5 italic">{meditation.subtitle}</div>
+   468→          <div className="flex items-center gap-3 mt-2.5 text-[10px] text-muted-foreground">
+   469→            <span className="flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{meditation.durationMinutes} min</span>
+   470→            <span className={cn("px-2 py-0.5 rounded-full", style.bg)}>{meditation.category.replace("-", " ")}</span>
+   471→            {isCompleted && <span className="text-moss font-medium">✓ Completed</span>}
+   472→          </div>
+   473→          {/* Upload row */}
+   474→          {isPremium && (
+   475→            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">
+   476→              <button
+   477→                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+   478→                className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-moss-deep transition-colors"
+   479→              >
+   480→                <Upload className="w-3 h-3" />
+   481→                {hasRecording ? "Replace recording" : "Upload your voice"}
+   482→              </button>
+   483→              {hasRecording && (
+   484→                <button
+   485→                  onClick={handleDeleteRecording}
+   486→                  className="flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-rose-gold transition-colors"
+   487→                >
+   488→                  <Trash2 className="w-3 h-3" /> Remove
+   489→                </button>
+   490→              )}
+   491→            </div>
+   492→          )}
+   493→        </div>
+   494→        <input
+   495→          ref={fileInputRef}
+   496→          type="file"
+   497→          accept="audio/*"
+   498→          className="hidden"
+   499→          onChange={handleUpload}
+   500→        />
+   501→      </Card>
+   502→    </motion.div>
+   503→  );
+   504→}
+   505→
+   506→// ─── Immersive Player (Audio-first, TTS fallback) ──────────────────
+   507→
+   508→/** Pick a warm female voice from available system voices */
+   509→function pickVoice(): SpeechSynthesisVoice | null {
+   510→  const voices = window.speechSynthesis?.getVoices() || [];
+   511→  const preferred = [
+   512→    "Samantha", "Karen", "Moira", "Tessa", "Fiona",
+   513→    "Google UK English Female", "Microsoft Zira",
+   514→    "Google US English", "Amazon Polly Joanna",
+   515→  ];
+   516→  for (const name of preferred) {
+   517→    const v = voices.find((v) => v.name.includes(name) && v.lang.startsWith("en"));
+   518→    if (v) return v;
+   519→  }
+   520→  return (
+   521→    voices.find((v) => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+   522→    voices.find((v) => v.lang.startsWith("en")) ||
+   523→    null
+   524→  );
+   525→}
+   526→
+   527→function MeditationPlayer({
+   528→  meditation, hasRecording, onClose, onJournal, onCompleted, onRecordingChange,
+   529→}: {
+   530→  meditation: Meditation;
+   531→  hasRecording: boolean;
+   532→  onClose: () => void;
+   533→  onJournal: () => void;
+   534→  onCompleted: (medId: string, durSec: number) => void;
+   535→  onRecordingChange: () => void;
+   536→}) {
+   537→  const estimatedTotal = totalSeconds(meditation);
+   538→  const spokenBeats = meditation.beats.filter((b) => b.type !== "journal").length;
+   539→
+   540→  // ── Audio mode state ─────────────────────────────────────────────
+   541→  const [useAudio, setUseAudio] = useState(hasRecording);
+   542→  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+   543→  const [audioDuration, setAudioDuration] = useState(0);
+   544→  const audioRef = useRef<HTMLAudioElement | null>(null);
+   545→  const objectUrlRef = useRef<string | null>(null);
+   546→
+   547→  // ── Shared playback state ─────────────────────────────────────────
+   548→  const [playing, setPlaying] = useState(false);
+   549→  const [finished, setFinished] = useState(false);
+   550→  const [breathPhase, setBreathPhase] = useState<"idle" | "in" | "hold" | "out">("idle");
+   551→
+   552→  // Audio mode tracking
+   553→  const [audioElapsed, setAudioElapsed] = useState(0);
+   554→
+   555→  // TTS mode tracking
+   556→  const [ttsBeatIndex, setTtsBeatIndex] = useState(0);
+   557→  const [ttsReady, setTtsReady] = useState(false);
+   558→  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+   559→  const pauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+   560→  const playingRef = useRef(false);
+   561→  const ttsBeatIndexRef = useRef(0);
+   562→
+   563→  const uploadInputRef = useRef<HTMLInputElement>(null);
+   564→  const [uploading, setUploading] = useState(false);
+   565→
+   566→  // Keep playingRef in sync
+   567→  playingRef.current = playing;
+   568→  ttsBeatIndexRef.current = ttsBeatIndex;
+   569→
+   570→  // Determine current beat and elapsed based on mode
+   571→  const currentBeat = useAudio
+   572→    ? meditation.beats[beatIndexAtTime(meditation, audioElapsed)]
+   573→    : meditation.beats[ttsBeatIndex];
+   574→
+   575→  const currentBeatIndex = useAudio
+   576→    ? beatIndexAtTime(meditation, audioElapsed)
+   577→    : ttsBeatIndex;
+   578→
+   579→  const elapsed = useAudio ? audioElapsed : ((): number => {
+   580→    let t = 0;
+   581→    for (let i = 0; i < ttsBeatIndex; i++) t += beatDuration(meditation.beats[i]);
+   582→    return t;
+   583→  })();
+   584→
+   585→  const total = useAudio && audioDuration > 0 ? audioDuration : estimatedTotal;
+   586→  const progress = total > 0 ? Math.min(elapsed / total, 1) : 0;
+   587→
+   588→  // ── Load audio file from IndexedDB ───────────────────────────────
+   589→  useEffect(() => {
+   590→    if (!hasRecording) return;
+   591→    let cancelled = false;
+   592→    (async () => {
+   593→      const blob = await getMeditationAudio(meditation.id);
+   594→      if (cancelled || !blob) return;
+   595→      const url = URL.createObjectURL(blob);
+   596→      objectUrlRef.current = url;
+   597→      setAudioUrl(url);
+   598→      const audio = new Audio(url);
+   599→      audio.preload = "metadata";
+   600→      audioRef.current = audio;
+   601→      audio.addEventListener("loadedmetadata", () => {
+   602→        if (!cancelled) setAudioDuration(audio.duration);
+   603→      });
+   604→      audio.addEventListener("ended", () => {
+   605→        if (!cancelled) {
+   606→          setPlaying(false);
+   607→          setFinished(true);
+   608→          playingRef.current = false;
+   609→          onCompleted(meditation.id, audio.duration);
+   610→          toast.success("Beautiful practice, mama. 🌿");
+   611→        }
+   612→      });
+   613→      audio.addEventListener("timeupdate", () => {
+   614→        if (!cancelled) setAudioElapsed(audio.currentTime);
+   615→      });
+   616→    })();
+   617→    return () => {
+   618→      cancelled = true;
+   619→      audioRef.current?.pause();
+   620→      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+   621→    };
+   622→  }, [hasRecording, meditation.id, onCompleted]);
+   623→
+   624→  // Load TTS voices
+   625→  useEffect(() => {
+   626→    const synth = window.speechSynthesis;
+   627→    if (!synth) return;
+   628→    const load = () => { if (synth.getVoices().length > 0) setTtsReady(true); };
+   629→    load();
+   630→    synth.addEventListener("voiceschanged", load);
+   631→    return () => synth.removeEventListener("voiceschanged", load);
+   632→  }, []);
+   633→
+   634→  // Breathing animation synced to breath beats
+   635→  useEffect(() => {
+   636→    if (currentBeat?.type === "breath" && playing) {
+   637→      if (currentBeat.breath === "in") setBreathPhase("in");
+   638→      else if (currentBeat.breath === "hold") setBreathPhase("hold");
+   639→      else if (currentBeat.breath === "out") setBreathPhase("out");
+   640→    } else if (currentBeat?.type !== "breath") {
+   641→      setBreathPhase("idle");
+   642→    }
+   643→  }, [currentBeatIndex, currentBeat, playing]);
+   644→
+   645→  // Cleanup on unmount
+   646→  useEffect(() => {
+   647→    return () => {
+   648→      window.speechSynthesis?.cancel();
+   649→      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+   650→      audioRef.current?.pause();
+   651→    };
+   652→  }, []);
+   653→
+   654→  // ── TTS beat engine ───────────────────────────────────────────────
+   655→  const speakBeat = useCallback(
+   656→    (index: number) => {
+   657→      const synth = window.speechSynthesis;
+   658→      if (!synth || !playingRef.current) return;
+   659→
+   660→      const beat = meditation.beats[index];
+   661→      if (!beat) {
+   662→        setPlaying(false);
+   663→        setFinished(true);
+   664→        playingRef.current = false;
+   665→        onCompleted(meditation.id, estimatedTotal);
+   666→        toast.success("Beautiful practice, mama. 🌿");
+   667→        return;
+   668→      }
+   669→
+   670→      setTtsBeatIndex(index);
+   671→      ttsBeatIndexRef.current = index;
+   672→
+   673→      if (beat.type === "pause") {
+   674→        const dur = beat.pauseSeconds || 5;
+   675→        pauseTimerRef.current = setTimeout(() => {
+   676→          if (playingRef.current) speakBeat(index + 1);
+   677→        }, dur * 1000);
+   678→        return;
+   679→      }
+   680→      if (beat.type === "journal") { speakBeat(index + 1); return; }
+   681→
+   682→      const text = beat.text || "";
+   683→      if (!text) {
+   684→        const dur = beatDuration(beat);
+   685→        pauseTimerRef.current = setTimeout(() => {
+   686→          if (playingRef.current) speakBeat(index + 1);
+   687→        }, dur * 1000);
+   688→        return;
+   689→      }
+   690→
+   691→      synth.cancel();
+   692→      const utterance = new SpeechSynthesisUtterance(text);
+   693→      utteranceRef.current = utterance;
+   694→      const voice = pickVoice();
+   695→      if (voice) utterance.voice = voice;
+   696→      utterance.rate = beat.type === "affirmation" ? 0.78 : 0.82;
+   697→      utterance.pitch = 1.05;
+   698→      utterance.volume = 0.95;
+   699→
+   700→      utterance.onend = () => {
+   701→        utteranceRef.current = null;
+   702→        pauseTimerRef.current = setTimeout(() => {
+   703→          if (playingRef.current) speakBeat(index + 1);
+   704→        }, beat.type === "affirmation" ? 2500 : 800);
+   705→      };
+   706→      utterance.onerror = (e) => {
+   707→        if (e.error !== "canceled") console.warn("TTS error:", e.error);
+   708→        utteranceRef.current = null;
+   709→      };
+   710→      synth.speak(utterance);
+   711→    },
+   712→    [meditation, onCompleted, estimatedTotal]
+   713→  );
+   714→
+   715→  // ── Play / Pause / Skip ───────────────────────────────────────────
+   716→  function togglePlay() {
+   717→    if (useAudio && audioRef.current) {
+   718→      // ── Audio mode ──
+   719→      if (finished) {
+   720→        audioRef.current.currentTime = 0;
+   721→        setAudioElapsed(0);
+   722→        setFinished(false);
+   723→      }
+   724→      if (playing) {
+   725→        audioRef.current.pause();
+   726→        setPlaying(false);
+   727→      } else {
+   728→        audioRef.current.play();
+   729→        setPlaying(true);
+   730→      }
+   731→    } else {
+   732→      // ── TTS mode ──
+   733→      const synth = window.speechSynthesis;
+   734→      if (!synth) return;
+   735→      if (finished) {
+   736→        setTtsBeatIndex(0);
+   737→        setFinished(false);
+   738→        setPlaying(true);
+   739→        playingRef.current = true;
+   740→        synth.cancel();
+   741→        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+   742→        setTimeout(() => speakBeat(0), 300);
+   743→        return;
+   744→      }
+   745→      if (playing) {
+   746→        synth.cancel();
+   747→        if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+   748→        setPlaying(false);
+   749→        playingRef.current = false;
+   750→      } else {
+   751→        setPlaying(true);
+   752→        playingRef.current = true;
+   753→        speakBeat(ttsBeatIndex);
+   754→      }
+   755→    }
+   756→  }
+   757→
+   758→  function skipTo(direction: "prev" | "next") {
+   759→    if (useAudio && audioRef.current) {
+   760→      const currentIdx = beatIndexAtTime(meditation, audioElapsed);
+   761→      let targetIdx = direction === "next" ? currentIdx + 1 : currentIdx - 1;
+   762→      targetIdx = Math.max(0, Math.min(targetIdx, meditation.beats.length - 1));
+   763→      // Calculate the start time of the target beat
+   764→      let t = 0;
+   765→      for (let i = 0; i < targetIdx; i++) t += beatDuration(meditation.beats[i]);
+   766→      audioRef.current.currentTime = t;
+   767→      setAudioElapsed(t);
+   768→      setFinished(false);
+   769→    } else {
+   770→      window.speechSynthesis?.cancel();
+   771→      if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+   772→      let next = direction === "next" ? ttsBeatIndex + 1 : ttsBeatIndex - 1;
+   773→      next = Math.max(0, Math.min(next, meditation.beats.length - 1));
+   774→      setTtsBeatIndex(next);
+   775→      setFinished(false);
+   776→      if (playingRef.current) speakBeat(next);
+   777→    }
+   778→  }
+   779→
+   780→  function handleClose() {
+   781→    window.speechSynthesis?.cancel();
+   782→    if (pauseTimerRef.current) clearTimeout(pauseTimerRef.current);
+   783→    audioRef.current?.pause();
+   784→    playingRef.current = false;
+   785→    onClose();
+   786→  }
+   787→
+   788→  // ── Upload handler (inside player) ────────────────────────────────
+   789→  async function handlePlayerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+   790→    const file = e.target.files?.[0];
+   791→    if (!file) return;
+   792→    setUploading(true);
+   793→    try {
+   794→      await saveMeditationAudio(meditation.id, file, file.name);
+   795→      toast.success("Recording saved — it will play next time you open this meditation 🎙️");
+   796→      onRecordingChange();
+   797→    } catch {
+   798→      toast.error("Failed to save recording");
+   799→    } finally {
+   800→      setUploading(false);
+   801→      if (uploadInputRef.current) uploadInputRef.current.value = "";
+   802→    }
+   803→  }
+   804→
+   805→  const style = categoryStyle(meditation.category);
+   806→
+   807→  return (
+   808→    <div className="fixed inset-0 z-50 bg-gradient-cream flex flex-col">
+   809→      {/* Top bar */}
+   810→      <div className="flex items-center justify-between px-4 py-3">
+   811→        <button onClick={handleClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
+   812→          <ChevronLeft className="w-5 h-5 text-moss-deep" />
+   813→        </button>
+   814→        <div className="text-center">
+   815→          <div className="text-xs text-muted-foreground font-medium">{meditation.title}</div>
+   816→          <div className="text-[10px] text-muted-foreground/60 mt-0.5">
+   817→            Beat {currentBeatIndex + 1} of {spokenBeats}
+   818→          </div>
+   819→        </div>
+   820→        <button onClick={handleClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
+   821→          <X className="w-5 h-5 text-moss-deep" />
+   822→        </button>
+   823→      </div>
+   824→
+   825→      {/* Mode indicator + upload */}
+   826→      <div className="flex justify-center -mt-1 mb-2 gap-2">
+   827→        {useAudio && audioUrl ? (
+   828→          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-moss/10 text-[10px] text-moss-deep font-medium">
+   829→            <Mic className="w-3 h-3" /> Your recording
+   830→          </div>
+   831→        ) : ttsReady ? (
+   832→          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cream-deep/40 text-[10px] text-muted-foreground">
+   833→            <Volume2 className="w-3 h-3" /> Default voice
+   834→          </div>
+   835→        ) : null}
+   836→        <button
+   837→          onClick={() => uploadInputRef.current?.click()}
+   838→          disabled={uploading}
+   839→          className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-cream-deep/40 hover:bg-cream-deep/60 text-[10px] text-muted-foreground transition-colors disabled:opacity-50"
+   840→          title="Upload your voice recording"
+   841→        >
+   842→          <Upload className="w-3 h-3" />
+   843→          {uploading ? "Saving..." : (useAudio ? "Replace" : "Upload voice")}
+   844→        </button>
+   845→        <input ref={uploadInputRef} type="file" accept="audio/*" className="hidden" onChange={handlePlayerUpload} />
+   846→      </div>
+   847→
+   848→      {/* Main content — same visual for both modes */}
+   849→      <div className="flex-1 flex flex-col items-center justify-center px-6 -mt-4">
+   850→        <AnimatePresence mode="wait">
+   851→          <motion.div
+   852→            key={currentBeatIndex}
+   853→            initial={{ opacity: 0, y: 8 }}
+   854→            animate={{ opacity: 1, y: 0 }}
+   855→            exit={{ opacity: 0, y: -8 }}
+   856→            transition={{ duration: 0.6 }}
+   857→            className="text-center max-w-sm mx-auto"
+   858→          >
+   859→            {currentBeat?.type === "breath" ? (
+   860→              <div className="flex flex-col items-center gap-4 mb-8">
+   861→                <motion.div
+   862→                  className={cn("w-40 h-40 rounded-full bg-gradient-to-br flex items-center justify-center", style.gradient)}
+   863→                  animate={
+   864→                    breathPhase === "in" ? { scale: [0.75, 1.15], opacity: [0.6, 1] }
+   865→                    : breathPhase === "out" ? { scale: [1.15, 0.75], opacity: [1, 0.6] }
+   866→                    : breathPhase === "hold" ? { scale: 1.15, opacity: 1 }
+   867→                    : { scale: 0.9, opacity: 0.7 }
+   868→                  }
+   869→                  transition={{ duration: breathPhase === "in" || breathPhase === "out" ? 4 : 2, ease: "easeInOut" }}
+   870→                >
+   871→                  <div className="text-center">
+   872→                    <Wind className="w-6 h-6 text-foreground/60 mx-auto mb-1" />
+   873→                    <div className="text-sm font-medium text-foreground/70">
+   874→                      {currentBeat.breath === "in" && "Breathe in"}
+   875→                      {currentBeat.breath === "hold" && "Hold"}
+   876→                      {currentBeat.breath === "out" && "Breathe out"}
+   877→                    </div>
+   878→                  </div>
+   879→                </motion.div>
+   880→                {currentBeat.text && (
+   881→                  <p className="text-sm text-muted-foreground italic leading-relaxed">{currentBeat.text}</p>
+   882→                )}
+   883→              </div>
+   884→            ) : currentBeat?.type === "affirmation" ? (
+   885→              <div className="flex flex-col items-center gap-4 mb-8">
+   886→                <motion.div
+   887→                  className="w-32 h-32 rounded-full bg-gradient-to-br from-blush/80 to-rose-100/80 flex items-center justify-center"
+   888→                  animate={{ scale: [1, 1.05, 1] }}
+   889→                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+   890→                >
+   891→                  <Sparkles className="w-6 h-6 text-rose-gold" />
+   892→                </motion.div>
+   893→                <p className="font-script text-xl text-rose-gold leading-relaxed">
+   894→                    &ldquo;{currentBeat.text}&rdquo;
+   895→                </p>
+   896→              </div>
+   897→            ) : currentBeat?.type === "pause" ? (
+   898→              <div className="flex flex-col items-center gap-4 mb-8">
+   899→                <motion.div
+   900→                  className="w-28 h-28 rounded-full bg-cream-deep/40 flex items-center justify-center"
+   901→                  animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.8, 0.4] }}
+   902→                  transition={{ duration: (currentBeat.pauseSeconds || 5) * 0.8, repeat: Infinity, ease: "easeInOut" }}
+   903→                >
+   904→                  <div className="w-3 h-3 rounded-full bg-moss/30 animate-pulse-soft" />
+   905→                </motion.div>
+   906→                <p className="text-xs text-muted-foreground/60 tracking-wider">{currentBeat.pauseSeconds}s pause</p>
+   907→              </div>
+   908→            ) : (
+   909→              <div className="flex flex-col items-center gap-4 mb-8">
+   910→                <motion.div
+   911→                  className={cn("w-32 h-32 rounded-full bg-gradient-to-br flex items-center justify-center opacity-60", style.gradient)}
+   912→                  animate={playing ? { scale: [1, 1.04, 1], opacity: [0.5, 0.7, 0.5] } : {}}
+   913→                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+   914→                >
+   915→                  <Flower2 className="w-8 h-8 text-foreground/40" />
+   916→                </motion.div>
+   917→              </div>
+   918→            )}
+   919→
+   920→            {currentBeat?.type === "speak" && currentBeat.text && (
+   921→              <motion.p
+   922→                key={`text-${currentBeatIndex}`}
+   923→                initial={{ opacity: 0 }}
+   924→                animate={{ opacity: 1 }}
+   925→                transition={{ duration: 0.8 }}
+   926→                className="font-serif text-lg text-moss-deep leading-relaxed"
+   927→              >
+   928→                {currentBeat.text}
+   929→              </motion.p>
+   930→            )}
+   931→          </motion.div>
+   932→        </AnimatePresence>
+   933→      </div>
+   934→
+   935→      {/* Bottom controls */}
+   936→      <div className="px-6 pb-8 pt-4 space-y-4">
+   937→        <div className="space-y-1.5">
+   938→          <div className="h-1.5 bg-cream-deep rounded-full overflow-hidden">
+   939→            <motion.div
+   940→              className={cn("h-full rounded-full bg-gradient-to-r", style.gradient)}
+   941→              initial={{ width: 0 }}
+   942→              animate={{ width: `${progress * 100}%` }}
+   943→              transition={{ duration: 0.3 }}
+   944→            />
+   945→          </div>
+   946→          <div className="flex justify-between text-[10px] text-muted-foreground">
+   947→            <span>{fmtTime(elapsed)}</span>
+   948→            <span>{fmtTime(total)}</span>
+   949→          </div>
+   950→        </div>
+   951→
+   952→        <div className="flex items-center justify-center gap-4">
+   953→          <button
+   954→            onClick={() => skipTo("prev")}
+   955→            className="p-2.5 rounded-full hover:bg-cream-deep/50 transition-colors text-muted-foreground"
+   956→          >
+   957→            <SkipBack className="w-5 h-5" />
+   958→          </button>
+   959→
+   960→          <button
+   961→            onClick={togglePlay}
+   962→            className={cn(
+   963→              "w-16 h-16 rounded-full bg-gradient-to-br flex items-center justify-center shadow-lg transition-all active:scale-95",
+   964→              style.gradient
+   965→            )}
+   966→          >
+   967→            {playing ? (
+   968→              <Pause className="w-7 h-7 text-moss-deep" />
+   969→            ) : (
+   970→              <Play className="w-7 h-7 text-moss-deep ml-1" />
+   971→            )}
+   972→          </button>
+   973→
+   974→          <button
+   975→            onClick={() => skipTo("next")}
+   976→            className="p-2.5 rounded-full hover:bg-cream-deep/50 transition-colors text-muted-foreground"
+   977→          >
+   978→            <SkipForward className="w-5 h-5" />
+   979→          </button>
+   980→
+   981→          {finished ? (
+   982→            <Button
+   983→              onClick={onJournal}
+   984→              className="rounded-full bg-gradient-blush text-moss-deep hover:opacity-90 px-4"
+   985→            >
+   986→              <BookOpen className="w-4 h-4" />
+   987→            </Button>
+   988→          ) : (
+   989→            <button
+   990→              onClick={handleClose}
+   991→              className="p-2.5 rounded-full hover:bg-cream-deep/50 transition-colors text-muted-foreground"
+   992→            >
+   993→              <X className="w-[18px] h-[18px]" />
+   994→            </button>
+   995→          )}
+   996→        </div>
+   997→      </div>
+   998→    </div>
+   999→  );
+  1000→}
+  1001→
+  1002→// ─── Journal View ────────────────────────────────────────────────────
+  1003→
+  1004→function JournalView({ meditation, onClose }: { meditation: Meditation; onClose: () => void }) {
+  1005→  const [note, setNote] = useState("");
+  1006→
+  1007→  return (
+  1008→    <div className="space-y-6">
+  1009→      <div className="flex items-center gap-2">
+  1010→        <button onClick={onClose} className="p-2 rounded-full hover:bg-cream-deep/50 transition-colors">
+  1011→          <ChevronLeft className="w-5 h-5 text-moss-deep" />
+  1012→        </button>
+  1013→        <div>
+  1014→          <div className="font-serif text-xl text-moss-deep">After Practice</div>
+  1015→          <div className="text-[10px] text-muted-foreground">{meditation.title}</div>
+  1016→        </div>
+  1017→      </div>
+  1018→
+  1019→      <Card className="bg-gradient-blush border-rose-gold/15 rounded-3xl p-6">
+  1020→        <div className="text-[10px] uppercase tracking-widest text-rose-gold font-semibold mb-2">
+  1021→          Journal Prompt
+  1022→        </div>
+  1023→        <p className="font-serif text-base text-moss-deep leading-relaxed italic">
+  1024→          {meditation.journalPrompt}
+  1025→        </p>
+  1026→      </Card>
+  1027→
+  1028→      <div className="space-y-2">
+  1029→        <textarea
+  1030→          value={note}
+  1031→          onChange={(e) => setNote(e.target.value)}
+  1032→          placeholder="Write your reflection here... this is just for you, mama."
+  1033→          className="w-full min-h-[200px] bg-card border-border/40 rounded-3xl p-5 text-sm text-foreground leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-rose-gold/30 placeholder:text-muted-foreground/40"
+  1034→        />
+  1035→        <div className="text-[10px] text-muted-foreground text-center">
+  1036→          Your reflections are saved locally on your device.
+  1037→        </div>
+  1038→      </div>
+  1039→
+  1040→      <Button
+  1041→        onClick={() => {
+  1042→          const key = `meditation-journal-${meditation.id}`;
+  1043→          const existing = JSON.parse(localStorage.getItem(key) || "[]");
+  1044→          existing.push({ text: note, date: new Date().toISOString() });
+  1045→          localStorage.setItem(key, JSON.stringify(existing));
+  1046→          toast.success("Journal entry saved 💛");
+  1047→          onClose();
+  1048→        }}
+  1049→        className="w-full rounded-full bg-gradient-premium hover:opacity-90 text-cream"
+  1050→        disabled={!note.trim()}
+  1051→      >
+  1052→        Save Reflection
+  1053→      </Button>
+  1054→    </div>
+  1055→  );
+  1056→}
+  1057→
