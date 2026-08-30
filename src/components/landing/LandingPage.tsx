@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,19 @@ export default function LandingPage({ onOpenApp }: LandingPageProps) {
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+
+  // Show toast for ebook purchase success
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("ebook") === "success") {
+        toast.success("Your ebook is on the way! Check your email for the download link. 📚💛");
+        const url = new URL(window.location.href);
+        url.searchParams.delete("ebook");
+        window.history.replaceState({}, "", url.toString());
+      }
+    } catch {}
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-cream relative">
@@ -622,14 +635,70 @@ function PremiumBundle({ onUpgrade }: { onUpgrade: () => void }) {
                   Get the Bundle <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
-              <div className="mt-4 text-xs text-cream/60">
+              <div className="mt-6 text-xs text-cream/60">
                 Or included free with Premium monthly ($4.99/mo)
+              </div>
+              <div className="mt-6 pt-6 border-t border-cream/15">
+                <EbookStandalone />
               </div>
             </div>
           </div>
         </Card>
       </div>
     </section>
+  );
+}
+
+/* ─────────────────────────── EBOOK STANDALONE ─────────────────────────── */
+
+function EbookStandalone() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleBuy() {
+    if (!email || !email.includes("@")) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ebook-purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "Something went wrong");
+        setLoading(false);
+      }
+    } catch {
+      toast.error("Something went wrong. Try again?");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="text-center">
+      <p className="text-xs text-cream/50 mb-3 uppercase tracking-widest">Or get just the ebook</p>
+      <div className="flex items-center justify-center gap-2 max-w-sm mx-auto">
+        <input
+          type="email"
+          placeholder="your@email.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleBuy()}
+          className="bg-cream/10 border border-cream/20 rounded-full px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:ring-2 focus:ring-blush/40 flex-1 min-w-0"
+        />
+        <Button
+          onClick={handleBuy}
+          disabled={loading || !email.includes("@")}
+          size="sm"
+          className="bg-blush/20 hover:bg-blush/30 text-cream rounded-full px-5 h-10 text-sm whitespace-nowrap"
+        >
+          {loading ? "..." : "Buy Ebook"}
+        </Button>
+      </div>
+    </div>
   );
 }
 

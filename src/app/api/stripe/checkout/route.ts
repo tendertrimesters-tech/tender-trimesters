@@ -5,18 +5,14 @@ import { getStripe, STRIPE_PRICES, getSuccessUrl, getCancelUrl, isStripeConfigur
 import { db } from "@/lib/db";
 
 // POST /api/stripe/checkout
-// Body: { tier: "one_time" | "monthly" }
-// Creates a Stripe Checkout Session and returns its URL so the client can redirect.
+// Body: { tier: "one_time" | "monthly" } — requires auth
+// Body: { tier: "ebook", email: string, name: string } — no auth needed
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const body = await req.json();
-  const tier = body?.tier as "one_time" | "monthly";
-  if (!tier || !["one_time", "monthly"].includes(tier)) {
-    return NextResponse.json({ error: "Valid tier required (one_time or monthly)" }, { status: 400 });
+  const tier = body?.tier as string;
+
+  if (!tier || !STRIPE_PRICES[tier as keyof typeof STRIPE_PRICES]) {
+    return NextResponse.json({ error: `Valid tier required: ${Object.keys(STRIPE_PRICES).join(", ")}` }, { status: 400 });
   }
 
   const stripe = getStripe();
@@ -27,16 +23,44 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const priceId = STRIPE_PRICES[tier];
+  const priceId = STRIPE_PRICES[tier as keyof typeof STRIPE_PRICES];
   if (!priceId) {
     return NextResponse.json(
-      { error: `Missing price ID for tier "${tier}". Set STRIPE_${tier.toUpperCase()}_PRICE_ID.` },
+      { error: `Missing price ID for tier "${tier}". Set the corresponding STRIPE_*_PRICE_ID.` },
       { status: 503 }
     );
   }
 
-  // Look up the user so we can pass their email to Stripe (makes the receipt nicer
-  // and lets us match customers later).
+  // ── Ebook-only: no auth required ──
+  if (tier === "ebook") {
+    const email = body?.email as string;
+    const name = body?.name as string || "Mama";
+    if (!email || !email.includes("@")) {
+      return NextResponse.json({ error: "Email is required for ebook purchase" }, { status: 400 });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{ price: priceId, quantity: 1 }],
+      customer_email: email,
+      metadata: {
+        tier: "ebook_only",
+        name,
+      },
+      success_url: getSuccessUrl(),
+      cancel_url: getCancelUrl(),
+      allow_promotion_codes: true,
+    });
+
+    return NextResponse.json({ url: session.url });
+  }
+
+  // ── Premium tiers: auth required ──
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const user = await db.user.findUnique({
     where: { id: session.user.id },
     select: { id: true, email: true, name: true, stripeCustomerId: true },
@@ -46,7 +70,7 @@ export async function POST(req: NextRequest) {
   }
 
   const checkoutSession = await stripe.checkout.sessions.create({
-    mode: tier === "one_time" ? "payment" : "subscription",
+    mode: tier === "monthly" ? "subscription" : "payment",
     line_items: [{ price: priceId, quantity: 1 }],
     customer_email: user.email,
     client_reference_id: user.id,

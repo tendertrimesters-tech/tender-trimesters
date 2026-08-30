@@ -28,7 +28,10 @@ export function isStripeConfigured(): boolean {
 export const STRIPE_PRICES = {
   one_time: process.env.STRIPE_ONE_TIME_PRICE_ID, // $9.99 one-time
   monthly: process.env.STRIPE_MONTHLY_PRICE_ID, // $4.99/month
+  ebook: process.env.STRIPE_EBOOK_PRICE_ID, // ebook standalone
 } as const;
+
+export type StripeTier = keyof typeof STRIPE_PRICES;
 
 // The URL the user is sent to after successful payment.
 // In production this should be your live domain.
