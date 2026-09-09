@@ -1,0 +1,2464 @@
+name: Apply Warm Modernist Redesign v2
+
+# TENDER TRIMESTERS — Warm Modernist Redesign Applier (One-Click)
+# HOW TO USE:
+# STEP 1: Upload this file to .github/workflows/apply-redesign.yml in your repo
+# STEP 2: Go to Actions tab → click "Apply Warm Modernist Redesign v2" → "Run workflow"
+# STEP 3: Wait ~60s, then check Vercel Deployments for the redesign/v2 preview URL
+# STEP 4: When happy, merge the auto-created Pull Request to deploy to production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-redesign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create redesign/v2 branch from main
+        run: |
+          git checkout main
+          git pull origin main --no-edit || true
+          git branch -D redesign/v2 2>/dev/null || true
+          git push origin :redesign/v2 2>/dev/null || true
+          git checkout -b redesign/v2
+          mkdir -p src/app
+          mkdir -p src/components/app/screens
+          mkdir -p src/components/landing
+
+      - name: Write src/app/globals.css
+        run: |
+          cat > src/app/globals.css << 'TENDERTRIMESTERS_FILE_EOF'
+          @import "tailwindcss";
+          @import "tw-animate-css";
+          
+          @custom-variant dark (&:is(.dark *));
+          
+          @theme inline {
+            --color-background: var(--background);
+            --color-foreground: var(--foreground);
+            --font-sans: var(--font-montserrat);
+            --font-serif: var(--font-cormorant);
+            --font-script: var(--font-dancing);
+            --font-mono: var(--font-geist-mono);
+            --color-cream: var(--cream);
+            --color-cream-deep: var(--cream-deep);
+            --color-moss: var(--moss);
+            --color-moss-deep: var(--moss-deep);
+            --color-terracotta: var(--terracotta);
+            --color-blush: var(--blush);
+            --color-blush-deep: var(--blush-deep);
+            --color-rose-gold: var(--rose-gold);
+            --color-sage: var(--sage);
+            --color-lavender: var(--lavender);
+            --color-butter: var(--butter);
+            --color-ink: var(--ink);
+            --color-oxblood: var(--oxblood);
+            --color-sidebar-ring: var(--sidebar-ring);
+            --color-sidebar-border: var(--sidebar-border);
+            --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+            --color-sidebar-accent: var(--sidebar-accent);
+            --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+            --color-sidebar-primary: var(--sidebar-primary);
+            --color-sidebar-foreground: var(--sidebar-foreground);
+            --color-sidebar: var(--sidebar);
+            --color-chart-5: var(--chart-5);
+            --color-chart-4: var(--chart-4);
+            --color-chart-3: var(--chart-3);
+            --color-chart-2: var(--chart-2);
+            --color-chart-1: var(--chart-1);
+            --color-ring: var(--ring);
+            --color-input: var(--input);
+            --color-border: var(--border);
+            --color-destructive: var(--destructive);
+            --color-accent-foreground: var(--accent-foreground);
+            --color-accent: var(--accent);
+            --color-muted-foreground: var(--muted-foreground);
+            --color-muted: var(--muted);
+            --color-secondary-foreground: var(--secondary-foreground);
+            --color-secondary: var(--secondary);
+            --color-primary-foreground: var(--primary-foreground);
+            --color-primary: var(--primary);
+            --color-popover-foreground: var(--popover-foreground);
+            --color-popover: var(--popover);
+            --color-card-foreground: var(--card-foreground);
+            --color-card: var(--card);
+            --radius-sm: calc(var(--radius) - 4px);
+            --radius-md: calc(var(--radius) - 2px);
+            --radius-lg: var(--radius);
+            --radius-xl: calc(var(--radius) + 4px);
+            --radius-2xl: calc(var(--radius) + 10px);
+          }
+          
+          :root {
+            --radius: 0.75rem;
+            --cream: #F4EAD5;
+            --cream-deep: #E8D5A8;
+            --moss: #5A7A48;
+            --moss-deep: #2D3F23;
+            --terracotta: #B85A38;
+            --oxblood: #722F37;
+            --blush: #E89098;
+            --blush-deep: #C56A75;
+            --rose-gold: #A8455D;
+            --sage: #7CB374;
+            --lavender: #9F7BC4;
+            --butter: #FFD98C;
+            --ink: #1A1410;
+            --background: #F4EAD5;
+            --foreground: #1A1410;
+            --card: #FBF4E0;
+            --card-foreground: #1A1410;
+            --popover: #FDFAF0;
+            --popover-foreground: #1A1410;
+            --primary: #5A7A48;
+            --primary-foreground: #F4EAD5;
+            --secondary: #E8D5A8;
+            --secondary-foreground: #2D3F23;
+            --muted: #DDC9A0;
+            --muted-foreground: #5A4F38;
+            --accent: #E89098;
+            --accent-foreground: #2D3F23;
+            --destructive: #B83838;
+            --border: #C8B483;
+            --input: #C8B483;
+            --ring: #A8455D;
+            --chart-1: #5A7A48;
+            --chart-2: #B85A38;
+            --chart-3: #A8455D;
+            --chart-4: #7CB374;
+            --chart-5: #9F7BC4;
+            --sidebar: #FBF4E0;
+            --sidebar-foreground: #1A1410;
+            --sidebar-primary: #5A7A48;
+            --sidebar-primary-foreground: #F4EAD5;
+            --sidebar-accent: #E89098;
+            --sidebar-accent-foreground: #2D3F23;
+            --sidebar-border: #C8B483;
+            --sidebar-ring: #A8455D;
+          }
+          
+          .dark {
+            --background: #1F2218;
+            --foreground: #F4EAD5;
+            --card: #2A2D20;
+            --card-foreground: #F4EAD5;
+            --popover: #2A2D20;
+            --popover-foreground: #F4EAD5;
+            --primary: #7CB374;
+            --primary-foreground: #1F2218;
+            --secondary: #3A3D2D;
+            --secondary-foreground: #F4EAD5;
+            --muted: #3A3D2D;
+            --muted-foreground: #C8B483;
+            --accent: #E89098;
+            --accent-foreground: #1A1410;
+            --destructive: #D04040;
+            --border: #4A4D3A;
+            --input: #4A4D3A;
+            --ring: #C56A75;
+            --chart-1: #7CB374;
+            --chart-2: #D06848;
+            --chart-3: #C56A75;
+            --chart-4: #9F7BC4;
+            --chart-5: #FFD98C;
+            --sidebar: #2A2D20;
+            --sidebar-foreground: #F4EAD5;
+            --sidebar-primary: #7CB374;
+            --sidebar-primary-foreground: #1F2218;
+            --sidebar-accent: #E89098;
+            --sidebar-accent-foreground: #1A1410;
+            --sidebar-border: #4A4D3A;
+            --sidebar-ring: #C56A75;
+          }
+          
+          @layer base {
+            * { @apply border-border outline-ring/50; }
+            html, body {
+              @apply bg-background text-foreground;
+              font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+              -webkit-font-smoothing: antialiased;
+              -moz-osx-font-smoothing: grayscale;
+            }
+            body {
+              font-family: var(--font-montserrat), system-ui, sans-serif;
+              font-weight: 400;
+              letter-spacing: -0.005em;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              font-family: var(--font-cormorant), Georgia, serif;
+              letter-spacing: -0.02em;
+              font-weight: 500;
+            }
+            .font-serif { font-family: var(--font-cormorant), Georgia, serif; }
+            .font-script { font-family: var(--font-dancing), cursive; }
+            .display-xl {
+              font-family: var(--font-cormorant), Georgia, serif;
+              font-size: clamp(56px, 9vw, 140px);
+              line-height: 0.95;
+              letter-spacing: -0.03em;
+              font-weight: 500;
+            }
+            .display-lg {
+              font-family: var(--font-cormorant), Georgia, serif;
+              font-size: clamp(44px, 6vw, 88px);
+              line-height: 1;
+              letter-spacing: -0.025em;
+              font-weight: 500;
+            }
+            .display-md {
+              font-family: var(--font-cormorant), Georgia, serif;
+              font-size: clamp(32px, 4vw, 56px);
+              line-height: 1.05;
+              letter-spacing: -0.02em;
+              font-weight: 500;
+            }
+            .eyebrow {
+              font-family: var(--font-montserrat), sans-serif;
+              text-transform: uppercase;
+              font-size: 11px;
+              letter-spacing: 0.25em;
+              font-weight: 500;
+            }
+            .pull-quote {
+              font-family: var(--font-cormorant), Georgia, serif;
+              font-style: italic;
+              font-weight: 400;
+              line-height: 1.3;
+              letter-spacing: -0.015em;
+            }
+          }
+          
+          @layer utilities {
+            .text-balance { text-wrap: balance; }
+            .text-pretty { text-wrap: pretty; }
+            .bg-gradient-cream { background: linear-gradient(165deg, #F4EAD5 0%, #FBF4E0 50%, #F4EAD5 100%); }
+            .bg-gradient-moss { background: linear-gradient(165deg, #2D3F23 0%, #5A7A48 100%); }
+            .bg-gradient-moss-deep { background: linear-gradient(165deg, #1F2D18 0%, #2D3F23 50%, #3A5230 100%); }
+            .bg-gradient-blush { background: linear-gradient(165deg, #E89098 0%, #FFD98C 100%); }
+            .bg-gradient-premium { background: linear-gradient(165deg, #A8455D 0%, #B85A38 100%); }
+            .bg-gradient-terracotta { background: linear-gradient(165deg, #B85A38 0%, #722F37 100%); }
+            .bg-gradient-dawn { background: linear-gradient(165deg, #FFD98C 0%, #E89098 50%, #A8455D 100%); }
+            .text-gradient-moss {
+              background: linear-gradient(165deg, #5A7A48 0%, #2D3F23 100%);
+              -webkit-background-clip: text;
+              background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
+            .text-gradient-rose {
+              background: linear-gradient(165deg, #A8455D 0%, #B85A38 100%);
+              -webkit-background-clip: text;
+              background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
+            .text-gradient-cream {
+              background: linear-gradient(165deg, #FBF4E0 0%, #FFD98C 100%);
+              -webkit-background-clip: text;
+              background-clip: text;
+              -webkit-text-fill-color: transparent;
+            }
+            .accent-bar-left { border-left: 3px solid var(--terracotta); padding-left: 1.5rem; }
+            .accent-bar-moss { border-left: 3px solid var(--moss-deep); padding-left: 1.5rem; }
+            .accent-bar-rose { border-left: 3px solid var(--rose-gold); padding-left: 1.5rem; }
+            .paper-grain { position: relative; }
+            .paper-grain::before {
+              content: "";
+              position: absolute;
+              inset: 0;
+              pointer-events: none;
+              opacity: 0.4;
+              mix-blend-mode: multiply;
+              background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            }
+            .paper-laid { position: relative; }
+            .paper-laid::before {
+              content: "";
+              position: absolute;
+              inset: 0;
+              pointer-events: none;
+              opacity: 0.6;
+              mix-blend-mode: multiply;
+              background-image:
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.18 0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+                repeating-linear-gradient(0deg, transparent 0px, transparent 28px, rgba(45, 63, 35, 0.04) 28px, rgba(45, 63, 35, 0.04) 29px);
+            }
+            .card-pressed {
+              box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.6) inset,
+                0 -1px 0 rgba(0, 0, 0, 0.04) inset,
+                0 4px 24px -8px rgba(45, 63, 35, 0.12);
+            }
+            .card-floating {
+              box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.8) inset,
+                0 24px 60px -24px rgba(45, 63, 35, 0.25),
+                0 8px 20px -8px rgba(184, 90, 56, 0.08);
+            }
+            .letter-edge { position: relative; }
+            .letter-edge::before {
+              content: "";
+              position: absolute;
+              top: -1px;
+              left: 0;
+              right: 0;
+              height: 12px;
+              background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 12' preserveAspectRatio='none'%3E%3Cpath d='M0,12 L0,2 Q5,0 10,3 T20,2 T30,4 T40,1 T50,3 T60,2 T70,4 T80,1 T90,3 T100,2 L100,12 Z' fill='%23FBF4E0'/%3E%3C/svg%3E");
+              background-size: 100px 12px;
+              background-repeat: repeat-x;
+            }
+            .spine-moss {
+              background: linear-gradient(180deg, #2D3F23 0%, #1F2D18 100%);
+              box-shadow: 2px 0 8px -2px rgba(0, 0, 0, 0.2) inset;
+            }
+            .animate-breathe { animation: tt-breathe 6s ease-in-out infinite; }
+            .animate-breathe-slow { animation: tt-breathe 9s ease-in-out infinite; }
+            .animate-drift { animation: tt-drift 12s ease-in-out infinite; }
+            .animate-drift-slow { animation: tt-drift 18s ease-in-out infinite; }
+            .animate-glow { animation: tt-glow 4s ease-in-out infinite; }
+            .letterpress-char {
+              display: inline-block;
+              opacity: 0;
+              animation: tt-letterpress 0.6s ease-out forwards;
+            }
+            .animate-rise { animation: tt-rise 1.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
+            .animate-heartbeat { animation: tt-heartbeat 2s ease-in-out infinite; }
+            .animate-ticker { animation: tt-ticker 60s linear infinite; }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          }
+          
+          @keyframes tt-breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+          }
+          @keyframes tt-drift {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(8px, -12px) rotate(1.5deg); }
+            50% { transform: translate(-6px, 8px) rotate(-1deg); }
+            75% { transform: translate(-10px, -6px) rotate(0.5deg); }
+          }
+          @keyframes tt-glow {
+            0%, 100% { opacity: 0.5; transform: scale(1); filter: blur(8px); }
+            50% { opacity: 0.9; transform: scale(1.08); filter: blur(12px); }
+          }
+          @keyframes tt-letterpress {
+            0% { opacity: 0; transform: translateY(4px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes tt-rise {
+            0% { opacity: 0; transform: translateY(24px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes tt-heartbeat {
+            0%, 100% { transform: scale(1); }
+            10% { transform: scale(1.15); }
+            20% { transform: scale(1); }
+            30% { transform: scale(1.15); }
+            40% { transform: scale(1); }
+          }
+          @keyframes tt-ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: 0.01ms !important;
+            }
+            .animate-breathe, .animate-drift, .animate-glow, .animate-heartbeat { animation: none !important; }
+          }
+          .mode-3am {
+            --background: #1F2D18;
+            --foreground: #F4EAD5;
+            --card: #2A3D20;
+            --card-foreground: #F4EAD5;
+            --popover: #2A3D20;
+            --popover-foreground: #F4EAD5;
+            --primary: #FFD98C;
+            --primary-foreground: #1F2D18;
+            --muted: #3A4D30;
+            --muted-foreground: #C8B483;
+            --accent: #E89098;
+            --accent-foreground: #1F2D18;
+            --border: #4A5D3A;
+            --input: #4A5D3A;
+            --ring: #FFD98C;
+          }
+          .mode-3am body {
+            background: linear-gradient(180deg, #1F2D18 0%, #2A3D20 100%);
+            color: #F4EAD5;
+          }
+          .mode-3am .bg-gradient-cream {
+            background: linear-gradient(165deg, #1F2D18 0%, #2A3D20 50%, #1F2D18 100%);
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/app/globals.css"      - name: Write src/app/page.tsx
+        run: |
+          cat > src/app/page.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          import { useEffect, useState } from "react";
+          import { useSession, signOut } from "next-auth/react";
+          import { AuthProvider, ProfileProvider, useProfile } from "@/components/providers";
+          import LandingPage from "@/components/landing/LandingPage";
+          import Onboarding from "@/components/app/Onboarding";
+          import AppShell from "@/components/app/AppShell";
+          import PartnerView from "@/components/app/PartnerView";
+          import ErrorBoundary from "@/components/ErrorBoundary";
+          
+          export default function Home() {
+            return (
+              <ErrorBoundary>
+                <AuthProvider>
+                  <ProfileProvider>
+                    <RootRouter />
+                  </ProfileProvider>
+                </AuthProvider>
+              </ErrorBoundary>
+            );
+          }
+          
+          function RootRouter() {
+            const { status } = useSession();
+            const { profile, loading: profileLoading } = useProfile();
+            const [partnerToken, setPartnerToken] = useState<string | null>(null);
+          
+            useEffect(() => {
+              try {
+                const params = new URLSearchParams(window.location.search);
+                const p = params.get("partner");
+                if (p) setPartnerToken(p);
+              } catch (e) {}
+            }, []);
+          
+            if (partnerToken) {
+              return <PartnerView token={partnerToken} onExit={() => {
+                setPartnerToken(null);
+                try { window.history.replaceState({}, "/", "/"); } catch {}
+              }} />;
+            }
+          
+            if (status === "loading") return <LoadingScreen />;
+            if (status === "authenticated" && !profile && profileLoading) return <LoadingScreen />;
+            if (status === "authenticated" && !profile) return <LoadingScreen />;
+          
+            if (status === "unauthenticated") {
+              return <LandingPage onOpenApp={() => {
+                try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+              }} />;
+            }
+          
+            if (profile && !profile.onboarded) {
+              return <Onboarding onComplete={() => {
+                window.location.reload();
+              }} defaultName={profile.name || undefined} />;
+            }
+          
+            return <AppShell onSignOut={() => signOut({ callbackUrl: "/" })} />;
+          }
+          
+          function LoadingScreen() {
+            return (
+              <div className="min-h-screen bg-gradient-cream flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-14 h-14 mx-auto rounded-full bg-gradient-moss flex items-center justify-center mb-4 animate-breathe">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" stroke="#F5EFE0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" stroke="#F5EFE0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <div className="font-serif text-xl text-moss-deep">Tender Trimesters</div>
+                  <div className="text-xs text-muted-foreground mt-1">Loading your sanctuary...</div>
+                </div>
+              </div>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/app/page.tsx"
+
+      - name: Write src/components/app/AmbientBackground.tsx
+        run: |
+          cat > src/components/app/AmbientBackground.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          type Variant = "default" | "dawn" | "3am" | "editorial";
+          
+          export default function AmbientBackground({ variant = "default" }: { variant?: Variant }) {
+            return (
+              <div aria-hidden="true" className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+                <div className="absolute top-0 left-0 w-[40vw] h-[60vh] opacity-30 animate-drift-slow" style={{ background: "radial-gradient(ellipse at top left, #2D3F23 0%, transparent 60%)" }} />
+                <div className="absolute bottom-0 right-0 w-[50vw] h-[50vh] opacity-25 animate-drift" style={{ background: "radial-gradient(ellipse at bottom right, #2D3F23 0%, transparent 65%)" }} />
+                <div className="absolute top-[10%] right-[5%] w-[35vw] h-[35vw] opacity-40 animate-drift" style={{ background: "radial-gradient(circle, #E89098 0%, transparent 70%)", filter: "blur(60px)" }} />
+                <div className="absolute bottom-[15%] left-[10%] w-[40vw] h-[40vw] opacity-35 animate-drift-slow" style={{ background: "radial-gradient(circle, #FFD98C 0%, transparent 70%)", filter: "blur(70px)" }} />
+                <div className="absolute top-[40%] left-[40%] w-[30vw] h-[30vw] opacity-25 animate-drift" style={{ background: "radial-gradient(circle, #7CB374 0%, transparent 70%)", filter: "blur(80px)" }} />
+                {variant === "dawn" && (
+                  <div className="absolute inset-0 opacity-30" style={{ background: "linear-gradient(165deg, transparent 0%, #FFD98C 30%, #E89098 60%, transparent 100%)", filter: "blur(40px)" }} />
+                )}
+                {variant === "3am" && (
+                  <>
+                    <div className="absolute inset-0 bg-gradient-moss-deep opacity-90" />
+                    <div className="absolute top-1/4 left-1/3 w-[40vw] h-[40vw] opacity-30 animate-glow" style={{ background: "radial-gradient(circle, #FFD98C 0%, transparent 70%)", filter: "blur(100px)" }} />
+                  </>
+                )}
+                {variant === "editorial" && (
+                  <div className="absolute top-0 right-0 w-[60vw] h-[80vh] opacity-20" style={{ background: "linear-gradient(225deg, #B85A38 0%, #A8455D 30%, transparent 70%)", filter: "blur(30px)" }} />
+                )}
+                <div className="botanical-shape botanical-1 absolute bottom-[-8%] right-[-5%] w-[420px] h-[420px] animate-drift-slow">
+                  <svg viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M160 290C160 290 50 230 50 140C50 70 95 20 160 20C225 20 270 70 270 140C270 230 160 290 160 290Z" fill="#5A7A48" fillOpacity="0.4" />
+                    <path d="M160 280C160 280 70 220 70 145C70 80 105 40 160 40" fill="#7CB374" fillOpacity="0.3" />
+                    <path d="M160 290V20" stroke="#2D3F23" strokeWidth="2" strokeOpacity="0.6" />
+                    <path d="M160 100L90 55" stroke="#2D3F23" strokeWidth="1.2" strokeOpacity="0.4" />
+                    <path d="M160 75L220 35" stroke="#2D3F23" strokeWidth="1.2" strokeOpacity="0.4" />
+                    <path d="M160 140L80 105" stroke="#2D3F23" strokeWidth="1.2" strokeOpacity="0.3" />
+                    <path d="M160 120L240 85" stroke="#2D3F23" strokeWidth="1.2" strokeOpacity="0.3" />
+                    <path d="M160 40C130 60 100 100 95 150C90 200 130 260 160 280" stroke="#FFD98C" strokeWidth="1.5" strokeOpacity="0.3" fill="none" />
+                  </svg>
+                </div>
+                <div className="botanical-shape botanical-2 absolute top-[-5%] left-[-3%] w-[260px] h-[260px] animate-drift">
+                  <svg viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M130 240C130 240 30 180 30 100C30 40 70 10 130 10C190 10 230 40 230 100C230 180 130 240 130 240Z" fill="#A8455D" fillOpacity="0.3" />
+                    <path d="M130 240V10" stroke="#722F37" strokeWidth="1.5" strokeOpacity="0.5" />
+                    <path d="M130 30C100 55 75 90 72 135C69 180 105 225 130 240" stroke="#FFD98C" strokeWidth="1.5" strokeOpacity="0.35" fill="none" />
+                  </svg>
+                </div>
+                <div className="botanical-shape botanical-3 absolute top-[35%] right-[2%] w-[180px] h-[180px] animate-drift-slow">
+                  <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="90" cy="55" rx="16" ry="22" fill="#9F7BC4" fillOpacity="0.45" transform="rotate(-15 90 55)" />
+                    <ellipse cx="65" cy="75" rx="14" ry="20" fill="#E89098" fillOpacity="0.4" transform="rotate(25 65 75)" />
+                    <ellipse cx="115" cy="75" rx="14" ry="20" fill="#E89098" fillOpacity="0.4" transform="rotate(-25 115 75)" />
+                    <circle cx="90" cy="82" r="10" fill="#FFD98C" fillOpacity="0.6" />
+                    <path d="M90 105C88 130 85 155 88 175" stroke="#5A7A48" strokeWidth="2" strokeOpacity="0.5" fill="none" />
+                  </svg>
+                </div>
+                <div className="botanical-shape botanical-4 absolute bottom-[5%] left-[2%] w-[200px] h-[200px] animate-drift">
+                  <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 190C100 190 95 120 100 60C105 20 100 10 100 10" stroke="#5A7A48" strokeWidth="1.5" strokeOpacity="0.4" fill="none" />
+                    <ellipse cx="100" cy="25" rx="6" ry="10" fill="#9F7BC4" fillOpacity="0.5" />
+                    <ellipse cx="92" cy="35" rx="5" ry="9" fill="#9F7BC4" fillOpacity="0.45" />
+                    <ellipse cx="108" cy="35" rx="5" ry="9" fill="#9F7BC4" fillOpacity="0.45" />
+                  </svg>
+                </div>
+                <div className="botanical-shape botanical-5 absolute top-[2%] right-[8%] w-[140px] h-[140px] animate-drift-slow">
+                  <svg viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M70 130C70 130 65 90 70 50" stroke="#5A7A48" strokeWidth="1.5" strokeOpacity="0.5" fill="none" />
+                  </svg>
+                </div>
+                <div className="absolute inset-0 opacity-30 mix-blend-multiply pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0 0.2 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+              </div>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/components/app/AmbientBackground.tsx"
+
+      - name: Write src/components/app/TempieMascot.tsx
+        run: |
+          cat > src/components/app/TempieMascot.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          type MascotSize = "sm" | "md" | "lg" | "xl";
+          type MascotState = "idle" | "listening" | "thinking" | "sleeping";
+          
+          const SIZE_MAP: Record<MascotSize, { box: number; sprout: number; moon: number; glow: number }> = {
+            sm: { box: 32, sprout: 24, moon: 8, glow: 48 },
+            md: { box: 48, sprout: 36, moon: 12, glow: 72 },
+            lg: { box: 72, sprout: 54, moon: 18, glow: 108 },
+            xl: { box: 120, sprout: 90, moon: 30, glow: 180 },
+          };
+          
+          interface Props {
+            size?: MascotSize;
+            state?: MascotState;
+            className?: string;
+            showGlow?: boolean;
+          }
+          
+          export default function TempieMascot({
+            size = "md",
+            state = "idle",
+            className = "",
+            showGlow = true,
+          }: Props) {
+            const dims = SIZE_MAP[size];
+            const isThinking = state === "thinking";
+            const isSleeping = state === "sleeping";
+            const isListening = state === "listening";
+          
+            return (
+              <div className={`relative inline-flex items-center justify-center ${className}`} style={{ width: dims.box, height: dims.box }}>
+                {showGlow && (
+                  <div className={`absolute inset-0 rounded-full ${isThinking ? "animate-glow" : ""}`} style={{
+                    width: dims.glow, height: dims.glow,
+                    left: `-${(dims.glow - dims.box) / 2}px`, top: `-${(dims.glow - dims.box) / 2}px`,
+                    background: isSleeping
+                      ? "radial-gradient(circle, #FFD98C 0%, transparent 70%)"
+                      : isThinking
+                      ? "radial-gradient(circle, #E89098 0%, #FFD98C 40%, transparent 70%)"
+                      : "radial-gradient(circle, #FFD98C 0%, transparent 70%)",
+                    opacity: isThinking ? 0.85 : isSleeping ? 0.4 : 0.55,
+                    filter: "blur(12px)",
+                  }} />
+                )}
+                <div className="absolute animate-breathe-slow" style={{ width: dims.moon, height: dims.moon, top: 0, right: 0 }}>
+                  <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 15C22 18.866 18.866 22 15 22C11.134 22 8 18.866 8 15C8 11.134 11.134 8 15 8C16.5 8 17.5 8.5 18 9C15 9 13 11.5 13 15C13 18 15 21 18 21C19.5 21 21 20 22 19C22 17.5 22 16 22 15Z" fill="#FFD98C" fillOpacity="0.85" />
+                    <circle cx="15" cy="15" r="14" fill="#FFD98C" fillOpacity="0.15" />
+                  </svg>
+                </div>
+                <div className={`relative ${isListening || isThinking ? "animate-breathe" : "animate-breathe-slow"}`} style={{ width: dims.sprout, height: dims.sprout }}>
+                  <svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="45" cy="50" r="40" fill="#FFD98C" fillOpacity="0.15" />
+                    <circle cx="45" cy="50" r="28" fill="#FFD98C" fillOpacity="0.2" />
+                    <path d="M45 80C45 80 43 65 44 50C45 35 47 25 45 15" stroke="#2D3F23" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                    <path d="M44 55C30 52 22 45 22 38C22 32 28 30 36 36C42 40 44 47 44 55Z" fill="#5A7A48" fillOpacity="0.55" />
+                    <path d="M46 50C58 48 65 42 65 36C65 30 60 28 53 32C48 35 46 42 46 50Z" fill="#7CB374" fillOpacity="0.55" />
+                    <circle cx="45" cy="15" r="8" fill="#E89098" fillOpacity="0.6" />
+                    <circle cx="45" cy="15" r="6" fill="#A8455D" fillOpacity="0.5" />
+                    <circle cx="44" cy="13" r="2.5" fill="#FFD98C" fillOpacity="0.8" />
+                    <ellipse cx="45" cy="8" rx="4" ry="6" fill="#E89098" fillOpacity="0.5" />
+                    <ellipse cx="38" cy="13" rx="4" ry="5" fill="#E89098" fillOpacity="0.45" transform="rotate(-30 38 13)" />
+                    <ellipse cx="52" cy="13" rx="4" ry="5" fill="#E89098" fillOpacity="0.45" transform="rotate(30 52 13)" />
+                    <ellipse cx="45" cy="80" rx="14" ry="3" fill="#2D3F23" fillOpacity="0.4" />
+                  </svg>
+                </div>
+                {isThinking && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-1">
+                    <span className="w-1 h-1 rounded-full bg-rose-gold animate-breathe" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1 h-1 rounded-full bg-rose-gold animate-breathe" style={{ animationDelay: "200ms" }} />
+                    <span className="w-1 h-1 rounded-full bg-rose-gold animate-breathe" style={{ animationDelay: "400ms" }} />
+                  </div>
+                )}
+                {isSleeping && (
+                  <div className="absolute -top-2 -right-2 text-xs font-serif text-butter opacity-70">z</div>
+                )}
+              </div>
+            );
+          }
+          
+          export function TempieSignature({ className = "" }: { className?: string }) {
+            return (
+              <div className={`font-script text-rose-gold text-2xl mt-3 ${className}`}>
+                <svg viewBox="0 0 180 50" className="inline-block" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ height: "1em", width: "auto" }}>
+                  <path d="M5 35C5 35 15 15 25 20C35 25 25 40 35 35C45 30 50 15 60 20C70 25 65 35 75 32C85 29 90 18 95 22C100 26 95 35 105 33C115 31 120 20 125 24C130 28 128 36 138 34C148 32 155 22 162 28C168 32 170 38 175 35" stroke="#A8455D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                  <circle cx="178" cy="38" r="1.5" fill="#A8455D" />
+                </svg>
+              </div>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/components/app/TempieMascot.tsx"      - name: Write src/components/landing/LandingPage.tsx
+        run: |
+          cat > src/components/landing/LandingPage.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          import { useState, useEffect } from "react";
+          import { motion, AnimatePresence } from "framer-motion";
+          import { signIn } from "next-auth/react";
+          import { Button } from "@/components/ui/button";
+          import { Card } from "@/components/ui/card";
+          import { Input } from "@/components/ui/input";
+          import { Label } from "@/components/ui/label";
+          import { Textarea } from "@/components/ui/textarea";
+          import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+          import { toast } from "sonner";
+          import { Heart, Sparkles, Calendar, BookHeart, MessageCircleHeart, Camera, Bell, Users, Baby, Check, ArrowRight, Moon, Sun, Leaf, Star, ChevronRight } from "lucide-react";
+          import AmbientBackground from "../app/AmbientBackground";
+          import TempieMascot, { TempieSignature } from "../app/TempieMascot";
+          
+          type LandingPageProps = { onOpenApp: () => void };
+          
+          export default function LandingPage({ onOpenApp }: LandingPageProps) {
+            const [waitlistOpen, setWaitlistOpen] = useState(false);
+            const [authOpen, setAuthOpen] = useState(false);
+            const [authMode, setAuthMode] = useState<"signin" | "signup">("signup");
+            const [privacyOpen, setPrivacyOpen] = useState(false);
+            const [termsOpen, setTermsOpen] = useState(false);
+          
+            useEffect(() => {
+              try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get("ebook") === "success") {
+                  toast.success("Your ebook is on the way! Check your email for the download link.");
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete("ebook");
+                  window.history.replaceState({}, "", url.toString());
+                }
+              } catch {}
+            }, []);
+          
+            const openAuth = (mode: "signin" | "signup" = "signup") => {
+              setAuthMode(mode);
+              setAuthOpen(true);
+            };
+          
+            return (
+              <div className="min-h-screen bg-gradient-cream relative overflow-hidden">
+                <AmbientBackground variant="editorial" />
+                <MilestoneTicker />
+                <Nav onOpenAuth={() => openAuth("signin")} onOpenApp={() => openAuth("signup")} />
+                <Hero onJoinWaitlist={() => setWaitlistOpen(true)} onOpenApp={() => openAuth("signup")} />
+                <EditorialPricing onUpgrade={() => openAuth("signup")} />
+                <VisualShowcase />
+                <SignatureFeatures onUpgrade={() => openAuth("signup")} />
+                <FullBleedQuote />
+                <Testimonials />
+                <PremiumBundle onUpgrade={() => openAuth("signup")} />
+                <WaitlistCTA onJoin={() => setWaitlistOpen(true)} />
+                <Footer onPrivacy={() => setPrivacyOpen(true)} onTerms={() => setTermsOpen(true)} />
+          
+                <WaitlistDialog open={waitlistOpen} onOpenChange={setWaitlistOpen} />
+                <AuthDialog open={authOpen} onOpenChange={setAuthOpen} mode={authMode} setMode={setAuthMode} onSuccess={onOpenApp} />
+                <PrivacyDialog open={privacyOpen} onOpenChange={setPrivacyOpen} />
+                <TermsDialog open={termsOpen} onOpenChange={setTermsOpen} />
+              </div>
+            );
+          }
+          
+          function Nav({ onOpenAuth, onOpenApp }: { onOpenAuth: () => void; onOpenApp: () => void }) {
+            const [scrolled, setScrolled] = useState(false);
+            useEffect(() => {
+              const handler = () => setScrolled(window.scrollY > 40);
+              window.addEventListener("scroll", handler);
+              return () => window.removeEventListener("scroll", handler);
+            }, []);
+            return (
+              <header className={`sticky top-0 z-40 transition-all duration-500 ${scrolled ? "backdrop-blur-xl bg-cream/85 border-b border-moss-deep/10" : "bg-transparent"}`}>
+                <div className="max-w-7xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Logo />
+                    <div>
+                      <div className="font-serif text-xl leading-none text-moss-deep tracking-tight">Tender Trimesters</div>
+                      <div className="text-[10px] tracking-[0.22em] uppercase text-terracotta mt-1 font-medium">by Mommies Matter</div>
+                    </div>
+                  </div>
+                  <nav className="hidden md:flex items-center gap-10 text-sm">
+                    <a href="#features" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Features</a>
+                    <a href="#signature" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Keepsakes</a>
+                    <a href="#testimonials" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Stories</a>
+                    <a href="#bundle" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Bundle</a>
+                  </nav>
+                  <div className="flex items-center gap-3">
+                    <button onClick={onOpenAuth} className="hidden sm:inline-flex text-sm text-moss-deep hover:text-terracotta transition-colors tracking-wide font-medium">Sign in</button>
+                    <Button onClick={onOpenApp} className="bg-moss-deep hover:bg-moss text-cream rounded-full h-10 px-5 text-sm tracking-wide">Open the App<ArrowRight className="ml-2 w-3.5 h-3.5" /></Button>
+                  </div>
+                </div>
+              </header>
+            );
+          }
+          
+          function Logo() {
+            return (
+              <div className="w-10 h-10 rounded-full bg-gradient-moss flex items-center justify-center shadow-soft ring-2 ring-moss-deep/20">
+                <Leaf className="w-4 h-4 text-cream" />
+              </div>
+            );
+          }
+          
+          function MilestoneTicker() {
+            const items = [
+              { week: "Week 4", label: "Missed your period?", heartbeat: false },
+              { week: "Week 8", label: "First heartbeat", heartbeat: true },
+              { week: "Week 12", label: "End of trimester 1", heartbeat: false },
+              { week: "Week 16", label: "Bump makes its debut", heartbeat: false },
+              { week: "Week 20", label: "Halfway there", heartbeat: false },
+              { week: "Week 24", label: "Viability milestone", heartbeat: false },
+              { week: "Week 28", label: "Third trimester begins", heartbeat: false },
+              { week: "Week 36", label: "Early term approaching", heartbeat: false },
+              { week: "Week 40", label: "Due date", heartbeat: false },
+            ];
+            const doubled = [...items, ...items];
+            return (
+              <div className="bg-moss-deep text-cream py-2.5 overflow-hidden border-b border-cream/10">
+                <div className="flex gap-12 whitespace-nowrap animate-ticker">
+                  {doubled.map((item, i) => (
+                    <span key={i} className="text-xs tracking-[0.15em] font-medium flex items-center gap-2 uppercase">
+                      <Sparkles className={`w-3 h-3 ${item.heartbeat ? "text-blush animate-heartbeat" : "text-butter/70"}`} />
+                      <span className="text-butter">{item.week}</span>
+                      <span className="text-cream/60">·</span>
+                      <span className="text-cream/85">{item.label}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+          
+          function Hero({ onJoinWaitlist, onOpenApp }: { onJoinWaitlist: () => void; onOpenApp: () => void }) {
+            return (
+              <section className="relative overflow-hidden min-h-[88vh] flex items-center">
+                <div className="absolute inset-0 -z-10">
+                  <img src="/images/belly-love.jpg" alt="" className="absolute right-0 top-0 w-full md:w-3/5 h-full object-cover opacity-40" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(105deg, #F4EAD5 0%, #F4EAD5 30%, rgba(244,234,213,0.85) 50%, rgba(45,63,35,0.3) 80%, rgba(45,63,35,0.5) 100%)" }} />
+                </div>
+                <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 md:py-32 grid md:grid-cols-12 gap-8 items-center w-full">
+                  <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }} className="md:col-span-7 accent-bar-left">
+                    <div className="eyebrow text-terracotta mb-6 flex items-center gap-2">
+                      <span className="w-8 h-px bg-terracotta" />
+                      Your 24/7 pregnancy companion
+                    </div>
+                    <h1 className="display-xl text-moss-deep text-balance">
+                      Your pregnancy,<br />
+                      <span className="font-script text-terracotta" style={{ fontSize: "0.85em", fontWeight: 400 }}>one week</span>{" "}at a time.
+                    </h1>
+                    <p className="mt-8 text-lg md:text-xl text-foreground/75 leading-relaxed max-w-xl text-pretty">
+                      A nurturing weekly calendar, daily affirmations, a private journal, mood tracking, and{" "}
+                      <span className="font-serif italic text-moss-deep">Tempie</span> — your AI companion who's there at 3am when you need her most.
+                    </p>
+                    <div className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                      <Button onClick={onOpenApp} className="bg-moss-deep hover:bg-moss text-cream px-8 h-14 rounded-full text-base tracking-wide group">
+                        Begin your 40 weeks
+                        <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                      <button onClick={onJoinWaitlist} className="text-moss-deep hover:text-terracotta transition-colors text-base tracking-wide underline decoration-terracotta/40 underline-offset-4 decoration-2">or join the waitlist</button>
+                    </div>
+                    <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 text-xs text-muted-foreground tracking-wide">
+                      <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-moss" strokeWidth={3} /><span>Free forever tier</span></div>
+                      <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-moss" strokeWidth={3} /><span>Private &amp; secure</span></div>
+                      <div className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-moss" strokeWidth={3} /><span>40 weeks of content</span></div>
+                    </div>
+                  </motion.div>
+                  <motion.div initial={{ opacity: 0, scale: 0.96, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }} className="md:col-span-5 relative">
+                    <HeroCard />
+                  </motion.div>
+                </div>
+              </section>
+            );
+          }
+          
+          function HeroCard() {
+            return (
+              <div className="relative max-w-sm mx-auto">
+                <Card className="relative z-10 bg-card border-moss-deep/20 card-floating rounded-[32px] overflow-hidden">
+                  <div className="bg-gradient-moss-deep p-6 text-cream relative overflow-hidden">
+                    <img src="/images/baby-hands.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" />
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-butter/80">
+                        <span>Week 16</span><span>Second Trimester</span>
+                      </div>
+                      <div className="mt-4 flex items-center gap-4">
+                        <div className="w-16 h-16 relative"><WatercolorFruit fruit="avocado" /></div>
+                        <div>
+                          <div className="font-serif text-3xl leading-none">Avocado</div>
+                          <div className="text-xs opacity-80 mt-1">About 4.6 inches long</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-5 bg-card">
+                    <div className="bg-blush/20 rounded-2xl p-5 border border-blush/20">
+                      <div className="eyebrow text-rose-gold mb-2">Today's Affirmation</div>
+                      <p className="font-script text-2xl text-moss-deep leading-tight">My changing body is beautiful.</p>
+                    </div>
+                    <div className="accent-bar-moss">
+                      <div className="eyebrow text-moss-deep mb-2 flex items-center gap-2"><Leaf className="w-3.5 h-3.5" /> Best Friend Tip</div>
+                      <p className="text-sm text-foreground/80 leading-relaxed">Invest in 2-3 quality maternity basics. You'll live in them for months.</p>
+                    </div>
+                    <div className="flex items-center justify-between bg-moss-deep/5 rounded-2xl p-4 border border-moss-deep/10">
+                      <div className="flex items-center gap-3">
+                        <TempieMascot size="sm" state="listening" />
+                        <div>
+                          <div className="text-sm font-medium text-moss-deep">Tempie's here</div>
+                          <div className="text-[10px] text-muted-foreground uppercase tracking-widest">24/7 companion</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+                <motion.div initial={{ opacity: 0, y: 20, rotate: -8 }} animate={{ opacity: 1, y: 0, rotate: -8 }} transition={{ delay: 0.7, duration: 0.7 }} className="absolute -top-6 -right-6 z-20 bg-cream card-floating rounded-2xl px-5 py-3 border border-rose-gold/20">
+                  <div className="font-script text-rose-gold text-xl">you've got this, mama</div>
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.7 }} className="absolute -bottom-6 -left-6 z-20 bg-cream card-floating rounded-2xl px-4 py-3 border border-moss-deep/15">
+                  <div className="eyebrow text-muted-foreground mb-1.5">Today's mood</div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-blush/40" />
+                      <div className="w-2 h-2 rounded-full bg-butter/60" />
+                      <div className="w-4 h-4 rounded-full bg-blush ring-2 ring-blush/30" />
+                      <div className="w-2 h-2 rounded-full bg-lavender/50" />
+                      <div className="w-2 h-2 rounded-full bg-sage/50" />
+                    </div>
+                    <span className="text-sm font-medium text-moss-deep ml-1">Glowing</span>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          }
+          
+          function WatercolorFruit({ fruit, size = 64 }: { fruit: string; size?: number }) {
+            const fruitColors: Record<string, [string, string, string]> = {
+              avocado: ["#7CB374", "#5A7A48", "#2D3F23"],
+              lemon: ["#FFD98C", "#E8B860", "#A8821A"],
+              poppyseed: ["#722F37", "#4A1F25", "#2D1418"],
+              coconut: ["#DDC9A0", "#A88E5C", "#5A4A30"],
+              papaya: ["#E89098", "#C56A75", "#A8455D"],
+              watermelon: ["#E89098", "#7CB374", "#2D3F23"],
+            };
+            const [c1, c2, c3] = fruitColors[fruit] || fruitColors.avocado;
+            return (
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: size, height: size }}>
+                <defs>
+                  <radialGradient id={`grad-${fruit}`} cx="40%" cy="40%">
+                    <stop offset="0%" stopColor={c1} stopOpacity="0.9" />
+                    <stop offset="60%" stopColor={c2} stopOpacity="0.7" />
+                    <stop offset="100%" stopColor={c3} stopOpacity="0.5" />
+                  </radialGradient>
+                  <filter id={`blur-${fruit}`}><feGaussianBlur stdDeviation="1.5" /></filter>
+                </defs>
+                <ellipse cx="32" cy="34" rx="22" ry="26" fill={`url(#grad-${fruit})`} filter={`url(#blur-${fruit})`} />
+                <ellipse cx="26" cy="26" rx="6" ry="8" fill={c1} fillOpacity="0.5" />
+                <path d="M32 8 L32 14" stroke={c3} strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M32 10 Q36 6 40 8 Q38 12 32 12" fill={c1} fillOpacity="0.7" />
+              </svg>
+            );
+          }
+          
+          function EditorialPricing({ onUpgrade }: { onUpgrade: () => void }) {
+            return (
+              <section id="comparison" className="py-32 md:py-40 relative">
+                <div className="max-w-4xl mx-auto px-6 text-center">
+                  <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1 }}>
+                    <div className="eyebrow text-terracotta mb-6">Choose your journey</div>
+                    <p className="display-md text-moss-deep text-balance leading-tight">
+                      <span className="text-foreground/60">Free,</span>{" "}<span className="italic">forever.</span><br />
+                      <span className="text-foreground/60">And when you're ready to be fully held,</span><br />
+                      <span className="text-gradient-rose">$9.99 once.</span>
+                    </p>
+                    <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+                      <Button onClick={onUpgrade} className="bg-moss-deep hover:bg-moss text-cream px-10 h-14 rounded-full text-base tracking-wide group">
+                        Begin free, upgrade anytime
+                        <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                      <span className="text-sm text-muted-foreground tracking-wide">or $4.99/month if you prefer to spread it out</span>
+                    </div>
+                    <div className="mt-16 grid sm:grid-cols-3 gap-6 text-left max-w-2xl mx-auto">
+                      <div className="accent-bar-left">
+                        <div className="eyebrow text-moss-deep mb-2">Free</div>
+                        <p className="text-sm text-foreground/70 leading-relaxed">40-week calendar, affirmations, mood, journal, 5 Tempie messages a day. Forever.</p>
+                      </div>
+                      <div className="accent-bar-rose">
+                        <div className="eyebrow text-rose-gold mb-2">Premium</div>
+                        <p className="text-sm text-foreground/70 leading-relaxed">Unlimited Tempie, bump photos, partner access, audio meditations, all 9 keepsakes.</p>
+                      </div>
+                      <div className="accent-bar-moss">
+                        <div className="eyebrow text-terracotta mb-2">Bundle</div>
+                        <p className="text-sm text-foreground/70 leading-relaxed">Ebook + affirmation deck + first-trimester checklist + letter templates. $9.99.</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </section>
+            );
+          }
+          
+          function VisualShowcase() {
+            const items = [
+              { icon: Calendar, label: "Weekly Milestones", desc: "40 weeks of baby's growth, your body, your emotions.", image: "/images/calendar-nature.jpg", span: "lg:col-span-2 lg:row-span-2" },
+              { icon: BookHeart, label: "Private Journal", desc: "Notes, moods, cravings, baby names — all in one place.", image: "/images/journal-writing.jpg", span: "" },
+              { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", image: "/images/soft-pink.jpg", span: "" },
+              { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", image: "/images/belly-love.jpg", span: "lg:col-span-2" },
+              { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", image: "/images/botanical-soft.jpg", span: "" },
+              { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", image: "/images/partner-couple.jpg", span: "" },
+            ];
+            return (
+              <section id="features" className="py-24 md:py-32 bg-gradient-to-b from-transparent via-butter/10 to-transparent">
+                <div className="max-w-7xl mx-auto px-6 lg:px-10">
+                  <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-3xl mb-16">
+                    <div className="eyebrow text-terracotta mb-4">What's inside</div>
+                    <h2 className="display-md text-moss-deep text-balance leading-tight">A sanctuary for every week.</h2>
+                    <p className="mt-6 text-lg text-foreground/70 leading-relaxed max-w-xl">Every feature designed with one question: does this make a mama feel more held?</p>
+                  </motion.div>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 auto-rows-[220px]">
+                    {items.map((item, i) => (
+                      <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.6 }} className={item.span}>
+                        <Card className="relative h-full rounded-3xl overflow-hidden border-moss-deep/10 group hover:shadow-premium transition-all duration-500 hover:-translate-y-1">
+                          <img src={item.image} alt={item.label} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity duration-700" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-moss-deep/85 via-moss-deep/20 to-transparent" />
+                          <div className="relative z-10 h-full p-6 flex flex-col justify-end text-cream">
+                            <div className="w-12 h-12 rounded-2xl bg-cream/15 backdrop-blur-sm flex items-center justify-center mb-3 border border-cream/20">
+                              <item.icon className="w-5 h-5 text-butter" />
+                            </div>
+                            <h3 className="font-serif text-2xl mb-1.5 leading-tight">{item.label}</h3>
+                            <p className="text-sm text-cream/75 leading-relaxed">{item.desc}</p>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }
+          
+          function SignatureFeatures({ onUpgrade }: { onUpgrade: () => void }) {
+            const heroFeatures = [
+              { title: "Letters from Baby", desc: "Each week your baby writes you a tender letter in their own voice — a keepsake to hold forever.", quote: "Dear mama, today I grew fingernails. You grew brave.", accent: "bg-blush/15", textColor: "text-rose-gold", side: "left" },
+              { title: "Fear to Flame", desc: "Name a fear. Watch AI gently reframe it into courage. Track your growing bravery week by week.", quote: "What felt like a storm at week 12 became a steady rain by week 20.", accent: "bg-terracotta/15", textColor: "text-terracotta", side: "right" },
+              { title: "Memory Capsule", desc: "Seal letters, wishes, and promises now that unlock for your child on a future date you choose.", quote: "For your 18th birthday, from the mama I was at week 24.", accent: "bg-lavender/15", textColor: "text-lavender", side: "left" },
+            ];
+            const secondaryFeatures = [
+              { title: "My Mother's Mother", desc: "12 guided interview prompts that capture a generational keepsake." },
+              { title: "DreamKeeper", desc: "Log your vivid pregnancy dreams. AI surfaces the recurring symbols and themes." },
+              { title: "Hormone Horoscope", desc: "A poetic, science-backed forecast of what your hormones are doing." },
+              { title: "The Name Garden", desc: "Plant name ideas as seeds. Watch them grow. Track how your feelings shift." },
+              { title: "Birth Playlist Composer", desc: "Build the soundtrack for labor by phase — early, active, pushing, golden hour." },
+              { title: "Belly Bonding Rituals", desc: "A daily 60-second ritual — a phrase, a hand position, a breath." },
+            ];
+            return (
+              <section id="signature" className="relative">
+                {heroFeatures.map((f, i) => (
+                  <HeroFeatureBlock key={f.title} feature={f} index={i} />
+                ))}
+                <div className="py-20 md:py-28 bg-cream">
+                  <div className="max-w-6xl mx-auto px-6 lg:px-10">
+                    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl mb-12">
+                      <div className="eyebrow text-rose-gold mb-4">And six more keepsakes</div>
+                      <h3 className="display-md text-moss-deep leading-tight">The full sanctuary.</h3>
+                    </motion.div>
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {secondaryFeatures.map((f, i) => (
+                        <motion.div key={f.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+                          <Card className="rounded-2xl p-6 h-full border-moss-deep/10 hover:border-moss-deep/30 transition-all hover:-translate-y-0.5 duration-300 bg-card">
+                            <h4 className="font-serif text-xl text-moss-deep mb-2">{f.title}</h4>
+                            <p className="text-sm text-foreground/70 leading-relaxed">{f.desc}</p>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mt-12 text-center">
+                      <Button onClick={onUpgrade} className="bg-gradient-premium text-cream hover:opacity-90 px-10 h-14 rounded-full text-base tracking-wide group">
+                        Unlock all nine
+                        <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            );
+          }
+          
+          function HeroFeatureBlock({ feature, index }: { feature: { title: string; desc: string; quote: string; accent: string; textColor: string; side: string }; index: number }) {
+            const isLeft = feature.side === "left";
+            return (
+              <div className={`relative py-24 md:py-36 ${feature.accent} overflow-hidden`}>
+                <div className="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-2 gap-12 items-center">
+                  <motion.div initial={{ opacity: 0, x: isLeft ? -24 : 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className={isLeft ? "md:order-1" : "md:order-2"}>
+                    <div className="eyebrow text-terracotta mb-4">Keepsake {String(index + 1).padStart(2, "0")}</div>
+                    <h3 className={`display-md ${feature.textColor} mb-6 leading-tight`}>{feature.title}</h3>
+                    <p className="text-lg text-foreground/75 leading-relaxed mb-8 max-w-md">{feature.desc}</p>
+                    <div className="accent-bar-left">
+                      <p className="font-serif italic text-xl text-moss-deep leading-snug">&ldquo;{feature.quote}&rdquo;</p>
+                    </div>
+                  </motion.div>
+                  <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 1, delay: 0.2 }} className={`relative h-80 md:h-96 ${isLeft ? "md:order-2" : "md:order-1"}`}>
+                    <div className="absolute inset-0 rounded-3xl bg-card/40 backdrop-blur-sm border border-cream/30 overflow-hidden">
+                      <div className="absolute inset-0 opacity-60 animate-drift-slow" style={{ background: `radial-gradient(circle at ${isLeft ? "70% 30%" : "30% 70%"}, var(--cream-deep) 0%, transparent 70%)` }} />
+                      <div className="absolute bottom-0 right-0 w-2/3 h-2/3 opacity-50 animate-drift">
+                        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M100 200C100 200 40 160 40 100C40 50 70 20 100 20C130 20 160 50 160 100C160 160 100 200 100 200Z" fill={feature.textColor === "text-rose-gold" ? "#E89098" : feature.textColor === "text-terracotta" ? "#B85A38" : "#9F7BC4"} fillOpacity="0.3" />
+                          <path d="M100 200V20" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.4" className={feature.textColor} />
+                        </svg>
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center p-12">
+                        <p className="font-script text-3xl text-moss-deep/70 text-center leading-tight">{feature.title}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            );
+          }
+          
+          function FullBleedQuote() {
+            return (
+              <section className="relative py-32 md:py-48 bg-moss-deep text-cream overflow-hidden">
+                <div className="absolute inset-0 opacity-15">
+                  <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-butter rounded-full blur-3xl opacity-40 animate-drift-slow" />
+                  <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blush rounded-full blur-3xl opacity-30 animate-drift" />
+                </div>
+                <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+                  <motion.div initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1.2 }}>
+                    <Moon className="w-12 h-12 text-butter mx-auto mb-8 animate-breathe-slow" />
+                    <p className="display-lg text-cream text-balance leading-tight">
+                      <span className="italic">She is becoming a mother.</span><br />
+                      <span className="text-butter">We are keeping every week.</span>
+                    </p>
+                  </motion.div>
+                </div>
+              </section>
+            );
+          }
+          
+          function Testimonials() {
+            const quotes = [
+              { text: "It feels like a friend is checking in with me. The weekly tips feel personal — not clinical.", name: "First-time mom", detail: "Week 22" },
+              { text: "Tempie answered my 3am panic about whether my baby's kicks were normal. She didn't replace my OB, but she helped me breathe until morning.", name: "Mama of one", detail: "Week 28" },
+              { text: "I cried when I read the affirmation on week 16. 'My changing body is beautiful.' I needed that.", name: "Tender Trimesters mama", detail: "Week 16" },
+            ];
+            return (
+              <section id="testimonials" className="py-24 md:py-32">
+                <div className="max-w-6xl mx-auto px-6 lg:px-10">
+                  <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl mb-16">
+                    <div className="eyebrow text-terracotta mb-4">Mama stories</div>
+                    <h2 className="display-md text-moss-deep leading-tight">You are not alone in this.</h2>
+                  </motion.div>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {quotes.map((q, i) => (
+                      <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+                        <Card className="bg-card paper-grain rounded-3xl p-8 h-full border-moss-deep/10 card-pressed relative overflow-hidden">
+                          <div className="font-script text-7xl text-rose-gold/15 absolute top-2 left-4 leading-none">&ldquo;</div>
+                          <div className="relative z-10">
+                            <p className="font-serif italic text-lg text-moss-deep leading-relaxed mb-6">{q.text}</p>
+                            <div className="pt-4 border-t border-moss-deep/10">
+                              <div className="font-script text-2xl text-rose-gold leading-none">{q.name}</div>
+                              <div className="eyebrow text-muted-foreground mt-2">{q.detail}</div>
+                            </div>
+                          </div>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            );
+          }
+          
+          function PremiumBundle({ onUpgrade }: { onUpgrade: () => void }) {
+            const includes = [
+              { title: "Mommies Matter Ebook", desc: "Helena-Ann's full guide — 17 chapters covering epidural decisions, feeding, NICU, postpartum healing, and more.", icon: BookHeart },
+              { title: "Affirmation Card Deck", desc: "40 printable affirmation cards — one per week of pregnancy. Print, frame, or pin to your mirror.", icon: Sparkles },
+              { title: "First-Trimester Checklist", desc: "The survival guide for weeks 1-13: what to eat, what to ask your OB, what to skip.", icon: Check },
+              { title: "Letters to Baby Templates", desc: "Writing prompts for each trimester. Document the journey you'll want to remember forever.", icon: Heart },
+            ];
+            return (
+              <section id="bundle" className="py-24 md:py-32">
+                <div className="max-w-6xl mx-auto px-6 lg:px-10">
+                  <Card className="bg-gradient-moss-deep text-cream rounded-[36px] overflow-hidden card-floating border border-cream/10">
+                    <div className="p-8 md:p-14">
+                      <div className="max-w-2xl mb-12">
+                        <div className="eyebrow text-butter mb-4">Premium Bundle</div>
+                        <h2 className="display-md text-cream leading-tight">Everything mama needs, in one place.</h2>
+                        <p className="mt-6 text-cream/70 text-lg leading-relaxed">The full Mommies Matter digital library — bundled with the app for one price. No subscriptions required (though we offer one if you prefer).</p>
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4 mb-12">
+                        {includes.map((item) => (
+                          <div key={item.title} className="bg-cream/5 backdrop-blur-sm rounded-2xl p-6 flex gap-4 border border-cream/10 hover:bg-cream/10 transition-colors">
+                            <div className="w-12 h-12 rounded-xl bg-butter/15 flex items-center justify-center flex-shrink-0 border border-butter/20">
+                              <item.icon className="w-5 h-5 text-butter" />
+                            </div>
+                            <div>
+                              <div className="font-serif text-xl text-cream">{item.title}</div>
+                              <div className="text-sm text-cream/70 mt-1 leading-relaxed">{item.desc}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pt-8 border-t border-cream/10">
+                        <div>
+                          <div className="flex items-baseline gap-3">
+                            <span className="text-cream/40 line-through text-lg">$29.99</span>
+                            <span className="font-serif text-6xl text-butter">$9.99</span>
+                            <span className="text-cream/60 text-sm">one-time</span>
+                          </div>
+                          <div className="text-xs text-cream/50 mt-2">Or included free with Premium monthly ($4.99/mo)</div>
+                        </div>
+                        <Button onClick={onUpgrade} className="bg-butter text-moss-deep hover:bg-cream px-10 h-14 rounded-full text-base tracking-wide group">
+                          Get the Bundle
+                          <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                      </div>
+                      <div className="mt-8 pt-6 border-t border-cream/10">
+                        <EbookStandalone />
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </section>
+            );
+          }
+          
+          function EbookStandalone() {
+            const [email, setEmail] = useState("");
+            const [loading, setLoading] = useState(false);
+            async function handleBuy() {
+              if (!email || !email.includes("@")) return;
+              setLoading(true);
+              try {
+                const res = await fetch("/api/ebook-purchase", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+                const data = await res.json();
+                if (data.url) { window.location.href = data.url; } else { toast.error(data.error || "Something went wrong"); setLoading(false); }
+              } catch { toast.error("Something went wrong. Try again?"); setLoading(false); }
+            }
+            return (
+              <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4">
+                <div className="eyebrow text-cream/50">Or get just the ebook</div>
+                <div className="flex items-center gap-2 max-w-sm">
+                  <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleBuy()} className="bg-cream/10 border border-cream/20 rounded-full px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:ring-2 focus:ring-butter/40 flex-1 min-w-0" />
+                  <Button onClick={handleBuy} disabled={loading || !email.includes("@")} size="sm" className="bg-butter/20 hover:bg-butter/30 text-cream rounded-full px-5 h-10 text-sm whitespace-nowrap">{loading ? "..." : "Buy Ebook"}</Button>
+                </div>
+              </div>
+            );
+          }
+          
+          function WaitlistCTA({ onJoin }: { onJoin: () => void }) {
+            return (
+              <section className="py-32 md:py-40 bg-moss-deep text-cream relative overflow-hidden">
+                <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-butter rounded-full blur-3xl opacity-20 animate-glow" />
+                <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-blush rounded-full blur-3xl opacity-15 animate-drift" />
+                <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
+                  <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 1 }}>
+                    <Moon className="w-14 h-14 text-butter mx-auto mb-8 animate-breathe-slow" />
+                    <h2 className="display-md text-cream leading-tight mb-6">The waitlist is open.<br /><span className="italic text-butter">Be the first to hold this.</span></h2>
+                    <p className="text-cream/70 text-lg leading-relaxed max-w-xl mx-auto mb-10">Join 200+ mamas getting early access, free affirmation drops, and Helena-Ann's letters from the journey.</p>
+                    <Button onClick={onJoin} className="bg-butter text-moss-deep hover:bg-cream px-10 h-14 rounded-full text-base tracking-wide group">Join the Waitlist<ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" /></Button>
+                  </motion.div>
+                </div>
+              </section>
+            );
+          }
+          
+          function Footer({ onPrivacy, onTerms }: { onPrivacy: () => void; onTerms: () => void }) {
+            return (
+              <footer className="bg-cream border-t border-moss-deep/15 py-16">
+                <div className="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-4 gap-10">
+                  <div className="md:col-span-2">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Logo />
+                      <div>
+                        <div className="font-serif text-xl text-moss-deep">Tender Trimesters</div>
+                        <div className="text-[10px] tracking-[0.22em] uppercase text-terracotta mt-1">by Mommies Matter</div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-foreground/70 leading-relaxed max-w-md">A Mommies Matter product. Built with love by Helena-Ann Baker — mama, author, and your companion on this journey.</p>
+                  </div>
+                  <div>
+                    <div className="eyebrow text-moss-deep mb-4">The App</div>
+                    <ul className="space-y-2.5 text-sm text-foreground/70">
+                      <li><a href="#features" className="hover:text-terracotta transition-colors">Features</a></li>
+                      <li><a href="#comparison" className="hover:text-terracotta transition-colors">Pricing</a></li>
+                      <li><a href="#bundle" className="hover:text-terracotta transition-colors">Bundle</a></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="eyebrow text-moss-deep mb-4">About</div>
+                    <ul className="space-y-2.5 text-sm text-foreground/70">
+                      <li><a href="#testimonials" className="hover:text-terracotta transition-colors">Mama Stories</a></li>
+                      <li><a href="mailto:hello@mommiesmatter.com" className="hover:text-terracotta transition-colors">Contact</a></li>
+                      <li><button onClick={onPrivacy} className="hover:text-terracotta transition-colors">Privacy Policy</button></li>
+                      <li><button onClick={onTerms} className="hover:text-terracotta transition-colors">Terms of Service</button></li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="max-w-7xl mx-auto px-6 lg:px-10 mt-12 pt-6 border-t border-moss-deep/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
+                  <div>© {new Date().getFullYear()} Mommies Matter. All rights reserved.</div>
+                  <div className="font-script text-rose-gold text-lg">made with love, mama</div>
+                </div>
+              </footer>
+            );
+          }
+          
+          function WaitlistDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+            const [name, setName] = useState("");
+            const [email, setEmail] = useState("");
+            const [loading, setLoading] = useState(false);
+            const [done, setDone] = useState(false);
+            async function submit() {
+              if (!email || !email.includes("@")) { toast.error("Please enter a valid email"); return; }
+              setLoading(true);
+              try {
+                const res = await fetch("/api/waitlist", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, name, source: "landing_dialog" }) });
+                if (!res.ok) throw new Error();
+                setDone(true);
+                toast.success("You're on the list, mama");
+              } catch { toast.error("Something went wrong. Try again?"); } finally { setLoading(false); }
+            }
+            return (
+              <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setTimeout(() => { setDone(false); setName(""); setEmail(""); }, 300); }}>
+                <DialogContent className="bg-card rounded-3xl max-w-md border border-moss-deep/15">
+                  {done ? (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 rounded-full bg-blush/30 mx-auto flex items-center justify-center mb-4 animate-breathe">
+                        <Heart className="w-7 h-7 text-rose-gold fill-rose-gold" />
+                      </div>
+                      <h3 className="font-serif text-3xl text-moss-deep mb-3">Welcome, mama.</h3>
+                      <p className="text-sm text-foreground/70 leading-relaxed">You're on the list. Watch your inbox for a confirmation and Helena-Ann's first letter.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <DialogHeader>
+                        <DialogTitle className="font-serif text-2xl text-moss-deep">Join the waitlist</DialogTitle>
+                        <DialogDescription>Be first to know when premium drops, get free affirmation cards, and hear from Helena-Ann.</DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 mt-2">
+                        <div>
+                          <Label htmlFor="wl-name">Your name (optional)</Label>
+                          <Input id="wl-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mama" className="mt-1.5 rounded-xl" />
+                        </div>
+                        <div>
+                          <Label htmlFor="wl-email">Email</Label>
+                          <Input id="wl-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="mt-1.5 rounded-xl" />
+                        </div>
+                        <Button onClick={submit} disabled={loading} className="w-full bg-moss-deep hover:bg-moss rounded-full h-11">{loading ? "Adding you..." : "Join the waitlist"}</Button>
+                        <p className="text-xs text-muted-foreground text-center">No spam, ever. Just mama things.</p>
+                      </div>
+                    </>
+                  )}
+                </DialogContent>
+              </Dialog>
+            );
+          }
+          
+          function AuthDialog({ open, onOpenChange, mode, setMode, onSuccess }: { open: boolean; onOpenChange: (v: boolean) => void; mode: "signin" | "signup"; setMode: (m: "signin" | "signup") => void; onSuccess: () => void }) {
+            const [name, setName] = useState("");
+            const [email, setEmail] = useState("");
+            const [password, setPassword] = useState("");
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState("");
+            async function submit() {
+              setError("");
+              setLoading(true);
+              try {
+                const result = await signIn("credentials", { email, password, name, mode, redirect: false });
+                if (!result || result.error) { throw new Error(result?.error || "Authentication failed"); }
+                toast.success(mode === "signup" ? "Welcome to Tender Trimesters" : "Welcome back, mama");
+                onOpenChange(false);
+                setTimeout(() => window.location.reload(), 200);
+              } catch (e: unknown) { const err = e as Error; setError(err.message || "Something went wrong"); } finally { setLoading(false); }
+            }
+            return (
+              <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) { setError(""); setName(""); setEmail(""); setPassword(""); } }}>
+                <DialogContent className="bg-card rounded-3xl max-w-md border border-moss-deep/15">
+                  <DialogHeader>
+                    <DialogTitle className="font-serif text-2xl text-moss-deep">{mode === "signup" ? "Create your account" : "Welcome back, mama"}</DialogTitle>
+                    <DialogDescription>{mode === "signup" ? "Your private pregnancy journal starts here. Free forever." : "Sign in to continue your journey."}</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-2">
+                    {mode === "signup" && (
+                      <div>
+                        <Label htmlFor="au-name">Your name</Label>
+                        <Input id="au-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mama" className="mt-1.5 rounded-xl" />
+                      </div>
+                    )}
+                    <div>
+                      <Label htmlFor="au-email">Email</Label>
+                      <Input id="au-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="mt-1.5 rounded-xl" />
+                    </div>
+                    <div>
+                      <Label htmlFor="au-pw">Password</Label>
+                      <Input id="au-pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" className="mt-1.5 rounded-xl" />
+                    </div>
+                    {error && (<div className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">{error}</div>)}
+                    <Button onClick={submit} disabled={loading} className="w-full bg-moss-deep hover:bg-moss rounded-full h-11">{loading ? "One moment..." : mode === "signup" ? "Create account" : "Sign in"}</Button>
+                    <div className="text-center text-sm text-muted-foreground">
+                      {mode === "signup" ? (<>Already have an account?{" "}<button onClick={() => setMode("signin")} className="text-terracotta hover:underline font-medium">Sign in</button></>) : (<>New here?{" "}<button onClick={() => setMode("signup")} className="text-terracotta hover:underline font-medium">Create an account</button></>)}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            );
+          }
+          
+          function PrivacyDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+            return (
+              <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto border border-moss-deep/15">
+                  <DialogHeader><DialogTitle className="font-serif text-2xl text-moss-deep">Privacy Policy</DialogTitle></DialogHeader>
+                  <div className="prose prose-sm max-w-none text-foreground/80 space-y-3">
+                    <p><strong className="text-moss-deep">Last updated:</strong> {new Date().toLocaleDateString()}</p>
+                    <p>Tender Trimesters (operated under Mommies Matter) is committed to protecting your privacy.</p>
+                    <h4 className="font-serif text-lg text-moss-deep mt-4">What we collect</h4>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li>Account info: name, email, password (hashed).</li>
+                      <li>Pregnancy profile: due date, baby name, partner name.</li>
+                      <li>Your content: journal entries, moods, photos, Tempie chats.</li>
+                    </ul>
+                    <h4 className="font-serif text-lg text-moss-deep mt-4">Your rights</h4>
+                    <p>You can export or delete all your data at any time. Email hello@mommiesmatter.com for help.</p>
+                    <h4 className="font-serif text-lg text-moss-deep mt-4">Contact</h4>
+                    <p>Questions? Email hello@mommiesmatter.com.</p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            );
+          }
+          
+          function TermsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+            return (
+              <Dialog open={open} onOpenChange={onOpenChange}>
+                <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto border border-moss-deep/15">
+                  <DialogHeader><DialogTitle className="font-serif text-2xl text-moss-deep">Terms of Service</DialogTitle></DialogHeader>
+                  <div className="prose prose-sm max-w-none text-foreground/80 space-y-3">
+                    <p><strong className="text-moss-deep">Last updated:</strong> {new Date().toLocaleDateString()}</p>
+                    <h4 className="font-serif text-lg text-moss-deep mt-4">Not medical advice</h4>
+                    <p>Tender Trimesters and Tempie are educational and emotional support tools only. Always consult your OB-GYN.</p>
+                    <h4 className="font-serif text-lg text-moss-deep mt-4">Your account</h4>
+                    <p>You must be 18+ to create an account.</p>
+                    <h4 className="font-serif text-lg text-moss-deep mt-4">Premium purchases</h4>
+                    <p>One-time purchases ($9.99) are non-refundable after 14 days. Monthly subscriptions cancel anytime.</p>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/components/landing/LandingPage.tsx"      - name: Write src/components/app/screens/HomeScreen.tsx
+        run: |
+          cat > src/components/app/screens/HomeScreen.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          import { useEffect, useState, useRef } from "react";
+          import { motion, AnimatePresence } from "framer-motion";
+          import { Card } from "@/components/ui/card";
+          import { Button } from "@/components/ui/button";
+          import { calcWeek, trimesterOf, useProfile } from "@/components/providers";
+          import type { AppView } from "../AppShell";
+          import { Baby, Sparkles, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2, Leaf } from "lucide-react";
+          import { format, formatDistanceToNow } from "date-fns";
+          import { cn } from "@/lib/utils";
+          import TempieMascot from "../TempieMascot";
+          
+          type Mood = "glowing" | "calm" | "tired" | "anxious" | "teary" | "grateful" | "nauseous" | "energized";
+          
+          const MOODS: { value: Mood; color: string; label: string }[] = [
+            { value: "glowing", color: "#E89098", label: "Glowing" },
+            { value: "calm", color: "#7CB374", label: "Calm" },
+            { value: "tired", color: "#FFD98C", label: "Tired" },
+            { value: "anxious", color: "#9F7BC4", label: "Anxious" },
+            { value: "teary", color: "#C56A75", label: "Teary" },
+            { value: "grateful", color: "#B85A38", label: "Grateful" },
+            { value: "nauseous", color: "#A8821A", label: "Nauseous" },
+            { value: "energized", color: "#A8455D", label: "Energized" },
+          ];
+          
+          function WatercolorBaby({ week, size = 120 }: { week: number; size?: number }) {
+            const fruitMap: Record<number, { name: string; colors: [string, string, string]; shape: "round" | "oval" | "long" | "cluster" }> = {
+              4: { name: "Poppy Seed", colors: ["#722F37", "#4A1F25", "#2D1418"], shape: "round" },
+              8: { name: "Raspberry", colors: ["#E89098", "#C56A75", "#A8455D"], shape: "cluster" },
+              12: { name: "Lime", colors: ["#7CB374", "#5A7A48", "#2D3F23"], shape: "round" },
+              16: { name: "Avocado", colors: ["#7CB374", "#5A7A48", "#2D3F23"], shape: "oval" },
+              20: { name: "Banana", colors: ["#FFD98C", "#E8B860", "#A8821A"], shape: "long" },
+              24: { name: "Corn Cob", colors: ["#FFD98C", "#7CB374", "#5A7A48"], shape: "long" },
+              28: { name: "Eggplant", colors: ["#9F7BC4", "#7B5BA4", "#4A3070"], shape: "oval" },
+              32: { name: "Coconut", colors: ["#DDC9A0", "#A88E5C", "#5A4A30"], shape: "round" },
+              36: { name: "Papaya", colors: ["#E89098", "#B85A38", "#722F37"], shape: "long" },
+              40: { name: "Pumpkin", colors: ["#B85A38", "#A8455D", "#722F37"], shape: "round" },
+            };
+            const closestWeek = Object.keys(fruitMap).map(Number).reduce((prev, curr) =>
+              Math.abs(curr - week) < Math.abs(prev - week) ? curr : prev
+            );
+            const fruit = fruitMap[closestWeek] || fruitMap[16];
+            const [c1, c2, c3] = fruit.colors;
+            const gradId = `baby-grad-${week}`;
+          
+            return (
+              <div className="relative" style={{ width: size, height: size }}>
+                <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: size, height: size }}>
+                  <defs>
+                    <radialGradient id={gradId} cx="35%" cy="35%">
+                      <stop offset="0%" stopColor={c1} stopOpacity="0.85" />
+                      <stop offset="55%" stopColor={c2} stopOpacity="0.7" />
+                      <stop offset="100%" stopColor={c3} stopOpacity="0.5" />
+                    </radialGradient>
+                    <filter id={`${gradId}-blur`}><feGaussianBlur stdDeviation="2" /></filter>
+                  </defs>
+                  <circle cx="60" cy="60" r="55" fill={c1} fillOpacity="0.15" filter={`url(#${gradId}-blur)`} />
+                  {fruit.shape === "round" && (<circle cx="60" cy="65" r="35" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />)}
+                  {fruit.shape === "oval" && (<ellipse cx="60" cy="65" rx="28" ry="40" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />)}
+                  {fruit.shape === "long" && (<path d="M 50 30 Q 70 35 75 60 Q 80 85 60 95 Q 40 85 45 60 Q 50 35 50 30 Z" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />)}
+                  {fruit.shape === "cluster" && (
+                    <>
+                      <circle cx="55" cy="55" r="15" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />
+                      <circle cx="68" cy="50" r="13" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />
+                      <circle cx="55" cy="72" r="14" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />
+                      <circle cx="70" cy="72" r="12" fill={`url(#${gradId})`} filter={`url(#${gradId}-blur)`} />
+                    </>
+                  )}
+                  <ellipse cx="48" cy="48" rx="8" ry="12" fill={c1} fillOpacity="0.55" />
+                  <path d="M60 28 L60 36" stroke={c3} strokeWidth="2" strokeLinecap="round" />
+                  <path d="M60 32 Q 72 28 76 34 Q 70 40 60 38" fill="#5A7A48" fillOpacity="0.7" />
+                </svg>
+              </div>
+            );
+          }
+          
+          function WeekRibbon({ currentWeek }: { currentWeek: number }) {
+            const scrollRef = useRef<HTMLDivElement>(null);
+            useEffect(() => {
+              if (scrollRef.current) {
+                const activeEl = scrollRef.current.querySelector(`[data-week="${currentWeek}"]`) as HTMLElement;
+                if (activeEl) { activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }
+              }
+            }, [currentWeek]);
+            return (
+              <div className="relative">
+                <div ref={scrollRef} className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 px-1">
+                  {Array.from({ length: 40 }, (_, i) => {
+                    const w = i + 1;
+                    const isActive = w === currentWeek;
+                    const isPast = w < currentWeek;
+                    return (
+                      <div key={w} data-week={w} className={cn("flex flex-col items-center gap-1 transition-all flex-shrink-0", isActive && "scale-110")}>
+                        <div className={cn("relative rounded-full transition-all", isActive ? "w-4 h-4 bg-rose-gold ring-2 ring-rose-gold/30 shadow-md" : isPast ? "w-2.5 h-2.5 bg-moss" : "w-2 h-2 bg-moss-deep/20")}>
+                          {isActive && (<span className="absolute inset-0 rounded-full bg-rose-gold animate-breathe" />)}
+                        </div>
+                        {(w === 1 || w % 4 === 0 || isActive) && (
+                          <span className={cn("text-[10px] tracking-wide transition-colors", isActive ? "text-rose-gold font-semibold" : "text-muted-foreground")}>{w}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between mt-1 px-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground/60">
+                  <span>T1</span><span>T2</span><span>T3</span>
+                </div>
+              </div>
+            );
+          }
+          
+          function MoodConstellation({ todayMood, onPick }: { todayMood: Mood | null; onPick: (m: Mood) => void }) {
+            return (
+              <div className="flex items-center justify-between gap-2">
+                {MOODS.map((m) => {
+                  const isActive = todayMood === m.value;
+                  return (
+                    <button key={m.value} onClick={() => onPick(m.value)} className="group flex flex-col items-center gap-1.5 transition-transform hover:scale-110" title={m.label}>
+                      <div className={cn("rounded-full transition-all", isActive ? "w-9 h-9 ring-2 ring-cream shadow-md scale-110" : "w-6 h-6 group-hover:w-7 group-hover:h-7")} style={{ background: m.color, opacity: isActive ? 1 : todayMood ? 0.4 : 0.7 }} />
+                      {isActive && (<span className="text-[10px] tracking-wide font-medium" style={{ color: m.color }}>{m.label}</span>)}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          }
+          
+          export default function HomeScreen({ onNavigate, onNavigateToMore }: { onNavigate: (v: AppView) => void; onNavigateToMore: (featureId?: string) => void }) {
+            const { profile } = useProfile();
+            const [weekData, setWeekData] = useState<any>(null);
+            const [loadingWeek, setLoadingWeek] = useState(true);
+            const [todayMood, setTodayMood] = useState<Mood | null>(null);
+            const [recentEntries, setRecentEntries] = useState<any[]>([]);
+            const [upcomingAppts, setUpcomingAppts] = useState<any[]>([]);
+            const week = calcWeek(profile?.dueDate);
+            const trimester = trimesterOf(week);
+          
+            useEffect(() => {
+              if (!week) { setLoadingWeek(false); return; }
+              fetch(`/api/weekly-content?week=${week}`).then((r) => r.json()).then((d) => setWeekData(d.week)).finally(() => setLoadingWeek(false));
+            }, [week]);
+          
+            useEffect(() => {
+              fetch("/api/mood").then((r) => r.json()).then((d) => {
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const todayEntry = d.entries?.find((e: any) => { const ed = new Date(e.createdAt); ed.setHours(0, 0, 0, 0); return ed.getTime() === today.getTime(); });
+                if (todayEntry) setTodayMood(todayEntry.mood);
+              });
+              fetch("/api/journal").then((r) => r.json()).then((d) => setRecentEntries(d.entries?.slice(0, 3) || []));
+              fetch("/api/appointments").then((r) => r.json()).then((d) => {
+                const now = new Date();
+                setUpcomingAppts((d.appointments || []).filter((a: any) => new Date(a.date) >= now && !a.completed).slice(0, 3));
+              });
+            }, []);
+          
+            async function saveMood(mood: Mood) {
+              setTodayMood(mood);
+              try { await fetch("/api/mood", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mood, week }) }); } catch {}
+            }
+          
+            if (loadingWeek) {
+              return (
+                <div className="flex items-center justify-center py-24">
+                  <div className="text-center">
+                    <TempieMascot size="lg" state="thinking" className="mx-auto" />
+                    <div className="font-serif text-moss-deep mt-4">Loading your week…</div>
+                  </div>
+                </div>
+              );
+            }
+          
+            return (
+              <div className="space-y-8 pb-32 max-w-3xl mx-auto">
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                  <Card className="rounded-[32px] overflow-hidden border-moss-deep/15 card-floating bg-card">
+                    <div className="bg-gradient-moss-deep text-cream p-6 md:p-8 relative overflow-hidden">
+                      <div className="flex items-start justify-between gap-6">
+                        <div className="accent-bar-left flex-1">
+                          <div className="eyebrow text-butter mb-2">Week {week} · Trimester {trimester}</div>
+                          <h1 className="display-md text-cream leading-tight">{weekData?.babySize || "Growing"}</h1>
+                          <p className="text-cream/70 text-sm mt-2 leading-relaxed">{weekData?.babySizeDesc || "Your baby is growing every day."}</p>
+                          {weekData?.babyLengthCm && (
+                            <div className="mt-3 flex items-center gap-4 text-xs text-cream/60 tracking-wide">
+                              <span>{weekData.babyLengthCm} cm long</span><span>·</span><span>{weekData.babyWeightG} g</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0 animate-breathe-slow"><WatercolorBaby week={week} size={120} /></div>
+                      </div>
+                    </div>
+                    <div className="bg-card px-6 py-4 border-b border-moss-deep/10"><WeekRibbon currentWeek={week} /></div>
+                    {weekData?.affirmation && (
+                      <div className="p-6 md:p-8 bg-blush/15 border-b border-moss-deep/10">
+                        <div className="eyebrow text-rose-gold mb-3">Today's affirmation</div>
+                        <p className="font-script text-3xl md:text-4xl text-moss-deep leading-tight">{weekData.affirmation}</p>
+                      </div>
+                    )}
+                    <div className="p-6 md:p-8 grid md:grid-cols-2 gap-6">
+                      {weekData?.bodyChanges && (
+                        <div className="accent-bar-moss">
+                          <div className="eyebrow text-moss-deep mb-2 flex items-center gap-2"><Leaf className="w-3 h-3" /> Your body</div>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{weekData.bodyChanges}</p>
+                        </div>
+                      )}
+                      {weekData?.bestFriendTip && (
+                        <div className="accent-bar-rose">
+                          <div className="eyebrow text-rose-gold mb-2">Best friend tip</div>
+                          <p className="text-sm text-foreground/80 leading-relaxed">{weekData.bestFriendTip}</p>
+                        </div>
+                      )}
+                    </div>
+                    {weekData?.selfCare && (
+                      <div className="px-6 md:px-8 pb-6 md:pb-8">
+                        <div className="bg-sage/10 rounded-2xl p-5 border border-sage/20">
+                          <div className="eyebrow text-moss mb-3">Self-care this week</div>
+                          <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">{weekData.selfCare}</p>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                </motion.div>
+          
+                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
+                  <Card className="rounded-3xl p-6 md:p-8 bg-card border-moss-deep/10 card-pressed">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <div className="eyebrow text-terracotta mb-1">Today's mood</div>
+                        <h3 className="font-serif text-2xl text-moss-deep">How are you, mama?</h3>
+                      </div>
+                      {todayMood && (<span className="font-script text-2xl text-rose-gold">{MOODS.find((m) => m.value === todayMood)?.label}</span>)}
+                    </div>
+                    <MoodConstellation todayMood={todayMood} onPick={saveMood} />
+                  </Card>
+                </motion.div>
+          
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <QuickAction icon={<MessageCircleHeart className="w-5 h-5" />} label="Tempie" onClick={() => onNavigate("tempie")} />
+                  <QuickAction icon={<Plus className="w-5 h-5" />} label="Journal" onClick={() => onNavigate("journal")} />
+                  <QuickAction icon={<CalIcon className="w-5 h-5" />} label="Calendar" onClick={() => onNavigate("calendar")} />
+                  <QuickAction icon={<Sparkles className="w-5 h-5" />} label="Keepsakes" onClick={() => onNavigate("more")} />
+                </div>
+          
+                {recentEntries.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
+                    <div className="flex items-end justify-between mb-4">
+                      <div>
+                        <div className="eyebrow text-terracotta mb-1">From your journal</div>
+                        <h3 className="font-serif text-2xl text-moss-deep">Recent thoughts</h3>
+                      </div>
+                      <button onClick={() => onNavigate("journal")} className="text-sm text-terracotta hover:underline tracking-wide">All entries →</button>
+                    </div>
+                    <div className="space-y-3">
+                      {recentEntries.map((entry) => (
+                        <button key={entry.id} onClick={() => onNavigate("journal")} className="block w-full text-left">
+                          <Card className="rounded-2xl p-5 bg-card border-moss-deep/10 hover:border-moss-deep/30 transition-all hover:-translate-y-0.5">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 tracking-wide">
+                              <span>{format(new Date(entry.createdAt), "MMM d")}</span>
+                              {entry.mood && (<><span>·</span><span className="capitalize">{entry.mood}</span></>)}
+                              {entry.week && (<><span>·</span><span>Week {entry.week}</span></>)}
+                            </div>
+                            {entry.title && (<div className="font-serif text-lg text-moss-deep mb-1">{entry.title}</div>)}
+                            <p className="text-sm text-foreground/75 leading-relaxed line-clamp-2">{entry.body}</p>
+                          </Card>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+          
+                {upcomingAppts.length > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
+                    <div className="flex items-end justify-between mb-4">
+                      <div>
+                        <div className="eyebrow text-terracotta mb-1">Coming up</div>
+                        <h3 className="font-serif text-2xl text-moss-deep">Appointments</h3>
+                      </div>
+                      <button onClick={() => onNavigate("calendar")} className="text-sm text-terracotta hover:underline tracking-wide">Calendar →</button>
+                    </div>
+                    <div className="space-y-3">
+                      {upcomingAppts.map((appt) => (
+                        <Card key={appt.id} className="rounded-2xl p-5 bg-card border-moss-deep/10">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="font-serif text-lg text-moss-deep">{appt.title}</div>
+                              {appt.location && (<div className="text-xs text-muted-foreground mt-1">{appt.location}</div>)}
+                              {appt.notes && (<p className="text-sm text-foreground/70 mt-2 line-clamp-1">{appt.notes}</p>)}
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <div className="font-serif text-xl text-terracotta">{format(new Date(appt.date), "MMM d")}</div>
+                              <div className="text-xs text-muted-foreground">{format(new Date(appt.date), "h:mm a")}</div>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+          
+                <button onClick={() => onNavigate("tempie")} className="fixed bottom-24 right-6 z-30 group" title="Talk to Tempie">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-butter/30 blur-xl animate-glow scale-150" />
+                    <div className="relative bg-card rounded-full p-3 shadow-premium border border-moss-deep/15 group-hover:scale-105 transition-transform">
+                      <TempieMascot size="md" state="listening" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 bg-rose-gold text-cream text-[10px] font-medium px-2 py-0.5 rounded-full">24/7</div>
+                  </div>
+                </button>
+              </div>
+            );
+          }
+          
+          function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+            return (
+              <button onClick={onClick} className="group">
+                <Card className="rounded-2xl p-4 bg-card border-moss-deep/10 hover:border-moss-deep/30 transition-all hover:-translate-y-0.5 hover:shadow-premium">
+                  <div className="w-10 h-10 rounded-xl bg-moss-deep/8 flex items-center justify-center text-moss-deep mb-2 group-hover:bg-moss-deep/15 transition-colors">{icon}</div>
+                  <div className="text-sm font-medium text-moss-deep tracking-wide">{label}</div>
+                </Card>
+              </button>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/components/app/screens/HomeScreen.tsx"
+
+      - name: Write src/components/app/screens/JournalScreen.tsx
+        run: |
+          cat > src/components/app/screens/JournalScreen.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          import { useEffect, useState, useRef, useCallback } from "react";
+          import { motion } from "framer-motion";
+          import { Card } from "@/components/ui/card";
+          import { Button } from "@/components/ui/button";
+          import { Input } from "@/components/ui/input";
+          import { Label } from "@/components/ui/label";
+          import { Textarea } from "@/components/ui/textarea";
+          import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+          import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+          import { Skeleton } from "@/components/ui/skeleton";
+          import { calcWeek, useProfile } from "@/components/providers";
+          import { Plus, BookHeart, Trash2, Camera, X, Feather, Leaf } from "lucide-react";
+          import { format, formatDistanceToNow } from "date-fns";
+          import { cn } from "@/lib/utils";
+          import { toast } from "sonner";
+          
+          type Mood = "glowing" | "calm" | "tired" | "anxious" | "teary" | "grateful" | "nauseous" | "energized";
+          
+          interface JournalEntry {
+            id: string;
+            title?: string;
+            body: string;
+            mood?: Mood;
+            week?: number;
+            craving?: string;
+            babyName?: string;
+            photoUrl?: string;
+            createdAt: string;
+          }
+          
+          const MOODS: { value: Mood; emoji: string; label: string; color: string }[] = [
+            { value: "glowing", emoji: "🌸", label: "Glowing", color: "#E89098" },
+            { value: "calm", emoji: "🌿", label: "Calm", color: "#7CB374" },
+            { value: "tired", emoji: "🌙", label: "Tired", color: "#9F7BC4" },
+            { value: "anxious", emoji: "💭", label: "Anxious", color: "#A8455D" },
+            { value: "teary", emoji: "💧", label: "Teary", color: "#C56A75" },
+            { value: "grateful", emoji: "💛", label: "Grateful", color: "#FFD98C" },
+            { value: "nauseous", emoji: "🍃", label: "Nauseous", color: "#B85A38" },
+            { value: "energized", emoji: "✨", label: "Energized", color: "#5A7A48" },
+          ];
+          
+          function MarginWatercolor({ mood, size = 40 }: { mood?: Mood; size?: number }) {
+            if (!mood) return null;
+            const m = MOODS.find((x) => x.value === mood);
+            if (!m) return null;
+            return (
+              <svg viewBox="0 0 40 40" fill="none" style={{ width: size, height: size }} xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <radialGradient id={`mw-${mood}`} cx="50%" cy="50%">
+                    <stop offset="0%" stopColor={m.color} stopOpacity="0.7" />
+                    <stop offset="100%" stopColor={m.color} stopOpacity="0.1" />
+                  </radialGradient>
+                </defs>
+                <circle cx="20" cy="20" r="18" fill={`url(#mw-${mood})`} />
+                <path d="M20 30C20 30 14 25 14 18C14 13 17 10 20 10C23 10 26 13 26 18C26 25 20 30 20 30Z" fill={m.color} fillOpacity="0.5" />
+              </svg>
+            );
+          }
+          
+          const MAX_PHOTO_SIZE = 10 * 1024 * 1024;
+          
+          export default function JournalScreen() {
+            const [entries, setEntries] = useState<JournalEntry[]>([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(false);
+            const [addOpen, setAddOpen] = useState(false);
+            const { profile } = useProfile();
+            const week = calcWeek(profile?.dueDate);
+          
+            const load = useCallback(() => {
+              fetch("/api/journal").then((r) => { if (!r.ok) throw new Error(); return r.json(); }).then((d) => { setEntries(d.entries || []); setLoading(false); }).catch(() => { setLoading(false); setError(true); });
+            }, []);
+          
+            useEffect(() => { load(); }, [load]);
+          
+            const grouped = entries.reduce((acc: { label: string; items: JournalEntry[] }[], entry) => {
+              const w = entry.week || 0;
+              const label = w <= 13 ? "First Trimester" : w <= 27 ? "Second Trimester" : w <= 40 ? "Third Trimester" : "Other";
+              const existing = acc.find((g) => g.label === label);
+              if (existing) existing.items.push(entry); else acc.push({ label, items: [entry] });
+              return acc;
+            }, []);
+          
+            return (
+              <div className="space-y-8 max-w-3xl mx-auto pb-24">
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-[28px] bg-card border border-moss-deep/15 card-floating">
+                  <div className="flex">
+                    <div className="spine-moss w-12 md:w-14 flex-shrink-0 flex flex-col items-center justify-center py-6 text-cream">
+                      <div className="text-[10px] tracking-[0.3em] uppercase text-butter/80 whitespace-nowrap" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{week ? `Week ${week}` : "Journal"}</div>
+                    </div>
+                    <div className="flex-1 p-6 md:p-8 paper-laid relative">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="eyebrow text-terracotta mb-2">Your journal</div>
+                          <h1 className="display-md text-moss-deep leading-tight">Sanctuary pages</h1>
+                          {!loading && (<p className="text-sm text-muted-foreground mt-2 leading-relaxed">{entries.length} {entries.length === 1 ? "entry" : "entries"} · private to you</p>)}
+                        </div>
+                        <Button onClick={() => setAddOpen(true)} className="bg-moss-deep hover:bg-moss text-cream rounded-full h-12 px-5 group">
+                          <Plus className="w-4 h-4 mr-1.5 transition-transform group-hover:rotate-90" /> New
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+          
+                {loading ? (
+                  <div className="space-y-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 rounded-2xl" />)}</div>
+                ) : error ? (
+                  <Card className="bg-card border-dashed border-destructive/30 rounded-2xl p-8 text-center">
+                    <BookHeart className="w-10 h-10 text-destructive/40 mx-auto mb-3" />
+                    <div className="font-serif text-lg text-moss-deep">Couldn't load your journal</div>
+                    <Button onClick={load} variant="outline" className="mt-4 rounded-full">Retry</Button>
+                  </Card>
+                ) : entries.length === 0 ? (
+                  <Card className="relative overflow-hidden rounded-[28px] border border-moss-deep/15 paper-laid">
+                    <div className="flex">
+                      <div className="spine-moss w-12 md:w-14 flex-shrink-0" />
+                      <div className="flex-1 p-10 md:p-14 text-center relative">
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2, duration: 0.7 }} className="w-24 h-24 rounded-full bg-gradient-blush shadow-premium flex items-center justify-center mx-auto mb-6 animate-breathe">
+                          <Feather className="w-12 h-12 text-rose-gold" />
+                        </motion.div>
+                        <div className="font-script text-3xl text-moss-deep">Your story starts here.</div>
+                        <p className="font-serif italic text-base text-muted-foreground mt-4 max-w-md mx-auto leading-relaxed">Letters to baby, midnight thoughts, cravings, fears, joys. Whatever you need to put down, mama.</p>
+                        <Button onClick={() => setAddOpen(true)} className="mt-8 bg-moss-deep hover:bg-moss text-cream rounded-full h-12 px-8 group">
+                          Write your first entry
+                          <Feather className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ) : (
+                  <div className="space-y-8">
+                    {grouped.map((group, gi) => (
+                      <div key={group.label}>
+                        <div className="relative my-6 flex items-center gap-4">
+                          <div className="flex-1 h-px bg-moss-deep/15" />
+                          <div className="text-center">
+                            <div className="eyebrow text-terracotta">Chapter</div>
+                            <div className="font-serif italic text-xl text-moss-deep">{group.label}</div>
+                          </div>
+                          <div className="flex-1 h-px bg-moss-deep/15" />
+                        </div>
+                        <div className="space-y-4">
+                          {group.items.map((entry) => (<JournalDiaryPage key={entry.id} entry={entry} onChange={load} />))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+          
+                <NewEntryDialog open={addOpen} onOpenChange={setAddOpen} defaultWeek={week} onAdded={load} />
+              </div>
+            );
+          }
+          
+          function JournalDiaryPage({ entry, onChange }: { entry: JournalEntry; onChange: () => void }) {
+            const [expanded, setExpanded] = useState(false);
+            const [deleteOpen, setDeleteOpen] = useState(false);
+            const mood = MOODS.find((m) => m.value === entry.mood);
+          
+            async function remove() {
+              try {
+                const res = await fetch(`/api/journal?id=${entry.id}`, { method: "DELETE" });
+                if (!res.ok) throw new Error();
+                toast.success("Entry deleted");
+                onChange();
+              } catch { toast.error("Failed to delete"); }
+              setDeleteOpen(false);
+            }
+          
+            return (
+              <>
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                  <Card className="rounded-[24px] overflow-hidden border border-moss-deep/15 card-floating bg-card">
+                    <div className="flex">
+                      <div className="spine-moss w-10 md:w-12 flex-shrink-0 flex flex-col items-center justify-center py-5 text-cream">
+                        <div className="text-[10px] tracking-[0.3em] uppercase text-butter/80" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>{entry.week ? `W${entry.week}` : "·"}</div>
+                      </div>
+                      <div className="flex-1 p-6 paper-laid relative">
+                        {mood && (<div className="absolute top-3 right-3 opacity-80"><MarginWatercolor mood={entry.mood} size={36} /></div>)}
+                        <div className="flex items-start justify-between gap-3 mb-3 pr-10">
+                          <div>
+                            <div className="text-[11px] uppercase tracking-[0.2em] text-terracotta font-medium">{format(new Date(entry.createdAt), "EEEE, MMMM d")}</div>
+                            <div className="text-[11px] text-muted-foreground mt-1 tracking-wide">
+                              {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
+                              {mood && <span className="ml-2 text-rose-gold">· {mood.label}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {entry.title && (<h3 className="font-serif italic text-2xl text-moss-deep mb-3 leading-tight">{entry.title}</h3>)}
+                        <p className={cn("font-serif text-base text-foreground/85 leading-relaxed whitespace-pre-wrap", !expanded && "line-clamp-4")} style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}>{entry.body}</p>
+                        {entry.body.length > 240 && (<button onClick={() => setExpanded(!expanded)} className="text-xs text-terracotta hover:underline mt-2 tracking-wide">{expanded ? "← Show less" : "Read more →"}</button>)}
+                        {(entry.craving || entry.babyName || entry.photoUrl) && (
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {entry.craving && (<div className="text-[11px] bg-butter/30 text-terracotta px-3 py-1.5 rounded-full border border-butter/40 tracking-wide">Craving: {entry.craving}</div>)}
+                            {entry.babyName && (<div className="text-[11px] bg-blush/30 text-rose-gold px-3 py-1.5 rounded-full border border-blush/40 tracking-wide">Baby: {entry.babyName}</div>)}
+                          </div>
+                        )}
+                        {entry.photoUrl && (
+                          <div className="mt-4 rounded-2xl overflow-hidden border border-moss-deep/10">
+                            <img src={entry.photoUrl} alt="Journal photo" className="w-full max-h-72 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          </div>
+                        )}
+                        <div className="flex gap-2 mt-5 pt-4 border-t border-moss-deep/10">
+                          <Button size="sm" variant="ghost" onClick={() => setDeleteOpen(true)} className="h-7 text-xs text-muted-foreground hover:text-destructive"><Trash2 className="w-3 h-3 mr-1" /> Remove</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+          
+                <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                  <AlertDialogContent className="bg-card rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="font-serif text-xl text-moss-deep">Delete this entry?</AlertDialogTitle>
+                      <AlertDialogDescription>This can't be undone. Your words will be gone forever.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-full">Keep it</AlertDialogCancel>
+                      <AlertDialogAction onClick={remove} className="rounded-full bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            );
+          }
+          
+          function NewEntryDialog({ open, onOpenChange, defaultWeek, onAdded }: { open: boolean; onOpenChange: (v: boolean) => void; defaultWeek: number | null; onAdded: () => void }) {
+            const [title, setTitle] = useState("");
+            const [body, setBody] = useState("");
+            const [mood, setMood] = useState<Mood | "">("");
+            const [week, setWeek] = useState<number | "">(defaultWeek || "");
+            const [craving, setCraving] = useState("");
+            const [babyName, setBabyName] = useState("");
+            const [photoUrl, setPhotoUrl] = useState("");
+            const [uploading, setUploading] = useState(false);
+            const [saving, setSaving] = useState(false);
+            const fileInput = useRef<HTMLInputElement>(null);
+            const uploadingRef = useRef(false);
+          
+            function reset() { setTitle(""); setBody(""); setMood(""); setWeek(defaultWeek || ""); setCraving(""); setBabyName(""); setPhotoUrl(""); }
+            useEffect(() => { if (open) reset(); }, [open]);
+          
+            async function upload(file: File) {
+              if (file.size > MAX_PHOTO_SIZE) { toast.error("Photo is too large (max 10MB)"); return; }
+              if (uploadingRef.current) return;
+              uploadingRef.current = true; setUploading(true);
+              try {
+                const fd = new FormData(); fd.append("file", file);
+                const res = await fetch("/api/upload", { method: "POST", body: fd });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                setPhotoUrl(data.url); toast.success("Photo added");
+              } catch { toast.error("Upload failed"); } finally { setUploading(false); uploadingRef.current = false; }
+            }
+          
+            async function submit() {
+              if (!body.trim()) { toast.error("Write something first"); return; }
+              setSaving(true);
+              try {
+                const res = await fetch("/api/journal", {
+                  method: "POST", headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ title: title.trim() || null, body: body.trim(), mood: mood || null, week: week || null, craving: craving.trim() || null, babyName: babyName.trim() || null, photoUrl: photoUrl || null }),
+                });
+                if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err?.error || `Server error (${res.status})`); }
+                toast.success("Entry saved"); reset(); onOpenChange(false); onAdded();
+              } catch (err) {
+                const msg = err instanceof Error ? err.message : "Failed to save";
+                console.error("Journal save failed:", msg); toast.error(msg);
+              } finally { setSaving(false); }
+            }
+          
+            return (
+              <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setTimeout(reset, 300); }}>
+                <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[90vh] overflow-y-auto p-0 border border-moss-deep/15">
+                  <div className="flex">
+                    <div className="spine-moss w-10 flex-shrink-0 rounded-tl-3xl" />
+                    <div className="flex-1 paper-laid">
+                      <DialogHeader className="p-6 pb-0">
+                        <DialogTitle className="font-serif italic text-2xl text-moss-deep">New entry</DialogTitle>
+                        <DialogDescription className="mt-1">Whatever's on your heart, mama.</DialogDescription>
+                      </DialogHeader>
+                    </div>
+                  </div>
+                  <div className="space-y-4 p-6 pt-4 paper-laid">
+                    <div>
+                      <Label>How are you feeling?</Label>
+                      <div className="mt-2 grid grid-cols-4 gap-2">
+                        {MOODS.map((m) => (
+                          <button key={m.value} onClick={() => setMood(mood === m.value ? "" : m.value)} className={cn("flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all duration-200 border", mood === m.value ? "ring-2 ring-rose-gold shadow-soft scale-[1.04]" : "border-moss-deep/10 hover:border-moss-deep/30")} style={mood === m.value ? { background: `${m.color}30` } : {}}>
+                            <span className="text-2xl leading-none">{m.emoji}</span>
+                            <span className="text-[10px] text-moss-deep font-medium tracking-wide">{m.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="je-title">Title (optional)</Label>
+                      <Input id="je-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A note to baby, a moment..." className="mt-1.5 rounded-xl" />
+                    </div>
+                    <div>
+                      <Label htmlFor="je-body">Your thoughts</Label>
+                      <Textarea id="je-body" value={body} onChange={(e) => setBody(e.target.value)} placeholder="Dear baby today..." className="mt-1.5 rounded-xl min-h-[160px] font-serif italic text-base" style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="je-week">Week</Label>
+                        <Input id="je-week" type="number" min={1} max={40} value={week} onChange={(e) => setWeek(e.target.value ? Number(e.target.value) : "")} className="mt-1.5 rounded-xl" />
+                      </div>
+                      <div>
+                        <Label htmlFor="je-craving">Craving (optional)</Label>
+                        <Input id="je-craving" value={craving} onChange={(e) => setCraving(e.target.value)} placeholder="Pickles + ice cream" className="mt-1.5 rounded-xl" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="je-baby">Baby name note (optional)</Label>
+                      <Input id="je-baby" value={babyName} onChange={(e) => setBabyName(e.target.value)} placeholder="Thinking of naming..." className="mt-1.5 rounded-xl" />
+                    </div>
+                    <div>
+                      <Label>Photo (optional)</Label>
+                      <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }} />
+                      {photoUrl ? (
+                        <div className="mt-2 relative rounded-2xl overflow-hidden">
+                          <img src={photoUrl} alt="Uploaded photo" className="w-full max-h-48 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; setPhotoUrl(""); }} />
+                          <button onClick={() => setPhotoUrl("")} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-cream/90 flex items-center justify-center"><X className="w-4 h-4 text-moss-deep" /></button>
+                        </div>
+                      ) : (
+                        <button onClick={() => fileInput.current?.click()} disabled={uploading} className="mt-2 w-full py-6 rounded-2xl border-2 border-dashed border-moss-deep/15 hover:border-moss-deep/30 hover:bg-muted/30 transition-colors flex flex-col items-center gap-1">
+                          <Camera className="w-5 h-5 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground tracking-wide">{uploading ? "Uploading..." : "Add a photo"}</span>
+                        </button>
+                      )}
+                    </div>
+                    <Button onClick={submit} disabled={saving} className="w-full bg-moss-deep hover:bg-moss text-cream rounded-full h-12">{saving ? "Saving..." : "Save entry"}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/components/app/screens/JournalScreen.tsx"      - name: Write src/components/app/screens/TempieScreen.tsx
+        run: |
+          cat > src/components/app/screens/TempieScreen.tsx << 'TENDERTRIMESTERS_FILE_EOF'
+          "use client";
+          
+          import { useEffect, useRef, useState, useCallback } from "react";
+          import { motion, AnimatePresence } from "framer-motion";
+          import { Card } from "@/components/ui/card";
+          import { Button } from "@/components/ui/button";
+          import { Textarea } from "@/components/ui/textarea";
+          import { Send, Trash2, Crown, Moon, ArrowUp } from "lucide-react";
+          import { format } from "date-fns";
+          import { cn } from "@/lib/utils";
+          import { Skeleton } from "@/components/ui/skeleton";
+          import { useProfile, calcWeek } from "@/components/providers";
+          import { toast } from "sonner";
+          import {
+            AlertDialog,
+            AlertDialogAction,
+            AlertDialogCancel,
+            AlertDialogContent,
+            AlertDialogDescription,
+            AlertDialogFooter,
+            AlertDialogHeader,
+            AlertDialogTitle,
+          } from "@/components/ui/alert-dialog";
+          import TempieMascot, { TempieSignature } from "../TempieMascot";
+          
+          type Msg = { id: string; role: "user" | "assistant"; content: string; createdAt: string };
+          type ChatMeta = { isPremium: boolean; remaining: number; limit: number };
+          
+          const SUGGESTED = [
+            "I'm anxious about my first ultrasound",
+            "What should I pack in my hospital bag?",
+            "I can't sleep — help me relax",
+            "Write me an affirmation for today",
+            "Is it normal to feel this tired at week 8?",
+          ];
+          
+          function useIs3am() {
+            const [is3am, setIs3am] = useState(false);
+            useEffect(() => {
+              const check = () => {
+                const h = new Date().getHours();
+                setIs3am(h >= 23 || h < 5);
+              };
+              check();
+              const id = setInterval(check, 60000);
+              return () => clearInterval(id);
+            }, []);
+            return is3am;
+          }
+          
+          export default function TempieScreen() {
+            const { profile } = useProfile();
+            const week = calcWeek(profile?.dueDate);
+            const is3am = useIs3am();
+            const [messages, setMessages] = useState<Msg[]>([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(false);
+            const [input, setInput] = useState("");
+            const [sending, setSending] = useState(false);
+            const [clearOpen, setClearOpen] = useState(false);
+            const [meta, setMeta] = useState<ChatMeta>({ isPremium: false, remaining: 5, limit: 5 });
+            const scrollRef = useRef<HTMLDivElement>(null);
+            const isNearBottom = useRef(true);
+          
+            const load = useCallback(() => {
+              fetch("/api/chat")
+                .then((r) => {
+                  if (!r.ok) throw new Error();
+                  return r.json();
+                })
+                .then((d) => {
+                  setMessages(d.messages || []);
+                  setMeta({ isPremium: d.isPremium ?? false, remaining: d.remaining ?? 5, limit: d.limit ?? 5 });
+                  setLoading(false);
+                })
+                .catch(() => {
+                  setLoading(false);
+                  setError(true);
+                });
+            }, []);
+          
+            useEffect(() => { load(); }, [load]);
+          
+            useEffect(() => {
+              const el = scrollRef.current;
+              if (!el) return;
+              if (isNearBottom.current) {
+                el.scrollTop = el.scrollHeight;
+              }
+            }, [messages, sending]);
+          
+            const handleScroll = () => {
+              const el = scrollRef.current;
+              if (!el) return;
+              const threshold = 100;
+              isNearBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+            };
+          
+            async function send(text: string) {
+              const trimmed = text.trim();
+              if (!trimmed || sending) return;
+              setInput("");
+              setSending(true);
+          
+              const ta = document.querySelector('#tempie-input') as HTMLTextAreaElement | null;
+              if (ta) { ta.style.height = 'auto'; }
+          
+              const userMsg: Msg = {
+                id: `temp-${Date.now()}`,
+                role: "user",
+                content: trimmed,
+                createdAt: new Date().toISOString(),
+              };
+              setMessages((prev) => [...prev, userMsg]);
+          
+              try {
+                const res = await fetch("/api/chat", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ message: trimmed }),
+                });
+                const data = await res.json();
+          
+                if (res.status === 429 && data.error === "limit_reached") {
+                  setMeta((prev) => ({ ...prev, remaining: 0 }));
+                  toast.error(data.message || "Daily message limit reached");
+                  setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+                  setInput(trimmed);
+                  return;
+                }
+          
+                if (!res.ok) throw new Error();
+          
+                const aiMsg: Msg = {
+                  id: `temp-ai-${Date.now()}`,
+                  role: "assistant",
+                  content: data.reply || "I'm not sure what to say. Try asking again?",
+                  createdAt: new Date().toISOString(),
+                };
+                setMessages((prev) => [...prev, aiMsg]);
+              } catch {
+                toast.error("Tempie's having trouble. Try again?");
+                setMessages((prev) => prev.filter((m) => m.id !== userMsg.id));
+                setInput(trimmed);
+              } finally {
+                setSending(false);
+                fetch("/api/chat")
+                  .then((r) => r.json())
+                  .then((d) => setMeta({ isPremium: d.isPremium ?? false, remaining: d.remaining ?? 5, limit: d.limit ?? 5 }))
+                  .catch(() => {});
+              }
+            }
+          
+            async function clearChat() {
+              try {
+                const res = await fetch("/api/chat", { method: "DELETE" });
+                if (!res.ok) throw new Error();
+                setMessages([]);
+                setClearOpen(false);
+                toast.success("Conversation cleared");
+              } catch {
+                toast.error("Failed to clear conversation");
+                setClearOpen(false);
+              }
+            }
+          
+            const placeholder = is3am
+              ? "Can't sleep? I'm here, mama…"
+              : new Date().getHours() < 12
+              ? "Good morning. How are you today?"
+              : new Date().getHours() < 18
+              ? "What's on your heart?"
+              : "How was your day, mama?";
+          
+            return (
+              <div className={cn("flex flex-col h-[calc(100vh-220px)] md:h-[calc(100vh-180px)] relative rounded-[28px] overflow-hidden border", is3am ? "mode-3am bg-moss-deep border-moss-deep/30" : "bg-card border-moss-deep/15")}>
+                <div className={cn("flex items-center justify-between flex-shrink-0 p-5 border-b", is3am ? "border-cream/10" : "border-moss-deep/10")}>
+                  <div className="flex items-center gap-4">
+                    <TempieMascot size="md" state={sending ? "thinking" : is3am ? "sleeping" : "listening"} />
+                    <div>
+                      <div className={cn("font-serif text-2xl leading-none flex items-center gap-2", is3am ? "text-cream" : "text-moss-deep")}>
+                        Tempie
+                        {is3am && <Moon className="w-4 h-4 text-butter" />}
+                      </div>
+                      <div className={cn("text-xs mt-1 flex items-center gap-1.5 tracking-wide", is3am ? "text-cream/60" : "text-muted-foreground")}>
+                        <span className={cn("w-1.5 h-1.5 rounded-full animate-breathe", is3am ? "bg-butter" : "bg-moss")} />
+                        {meta.isPremium
+                          ? <span className={cn("font-medium", is3am ? "text-butter" : "text-rose-gold")}>Premium · Unlimited</span>
+                          : <span>{meta.remaining} of {meta.limit} messages today</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!meta.isPremium && (
+                      <span className={cn("text-[10px] px-2.5 py-1 rounded-full tracking-wide flex items-center gap-1", is3am ? "bg-butter/15 text-butter" : "bg-blush/30 text-rose-gold")}>
+                        <Crown className="w-2.5 h-2.5" /> Premium
+                      </span>
+                    )}
+                    {messages.length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={() => setClearOpen(true)} className={cn("text-xs", is3am ? "text-cream/50 hover:text-cream" : "text-muted-foreground hover:text-destructive")}>
+                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Clear
+                      </Button>
+                    )}
+                  </div>
+                </div>
+          
+                <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-5 space-y-6">
+                  {loading ? (
+                    <div className="space-y-4">
+                      <Skeleton className="h-24 rounded-2xl max-w-[85%]" />
+                      <Skeleton className="h-16 rounded-2xl max-w-[60%] ml-auto" />
+                      <Skeleton className="h-20 rounded-2xl max-w-[80%]" />
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-12">
+                      <p className={cn("text-sm", is3am ? "text-cream/60" : "text-muted-foreground")}>Couldn't load conversation</p>
+                      <Button onClick={load} variant="outline" size="sm" className="mt-3 rounded-full">Retry</Button>
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <WelcomeState onSuggest={send} week={week} userName={profile?.name} is3am={is3am} />
+                  ) : (
+                    <AnimatePresence initial={false}>
+                      {messages.map((m) => (<LetterMessage key={m.id} msg={m} is3am={is3am} />))}
+                      {sending && (
+                        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 items-end">
+                          <TempieMascot size="sm" state="thinking" />
+                          <div className={cn("rounded-2xl rounded-bl-md px-5 py-4 flex gap-1.5 items-center border", is3am ? "bg-moss-deep/60 border-cream/10" : "bg-card border-moss-deep/10 letter-edge")}>
+                            <span className="w-1.5 h-1.5 bg-rose-gold rounded-full animate-breathe" style={{ animationDelay: "0ms" }} />
+                            <span className="w-1.5 h-1.5 bg-rose-gold rounded-full animate-breathe" style={{ animationDelay: "200ms" }} />
+                            <span className="w-1.5 h-1.5 bg-rose-gold rounded-full animate-breathe" style={{ animationDelay: "400ms" }} />
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
+                </div>
+          
+                <div className={cn("flex-shrink-0 p-4 border-t", is3am ? "border-cream/10 bg-moss-deep/50" : "border-moss-deep/10 bg-card")}>
+                  <div className="flex items-end gap-3">
+                    <div className="flex-1 relative">
+                      <Textarea
+                        id="tempie-input"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
+                        placeholder={placeholder}
+                        className={cn("min-h-[48px] max-h-[160px] resize-none rounded-2xl px-4 py-3 pr-12 font-serif text-base leading-relaxed border", is3am ? "bg-moss-deep/40 border-cream/15 text-cream placeholder:text-cream/40 focus-visible:ring-butter/40" : "bg-cream/30 border-moss-deep/15 text-foreground placeholder:text-muted-foreground focus-visible:ring-rose-gold/40")}
+                        style={{ fontFamily: "var(--font-cormorant), Georgia, serif" }}
+                        rows={1}
+                      />
+                    </div>
+                    <button
+                      onClick={() => send(input)}
+                      disabled={!input.trim() || sending}
+                      className={cn("w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all", input.trim() && !sending ? (is3am ? "bg-butter text-moss-deep hover:scale-105 shadow-premium" : "bg-moss-deep text-cream hover:scale-105 shadow-premium") : (is3am ? "bg-cream/10 text-cream/30 cursor-not-allowed" : "bg-muted text-muted-foreground cursor-not-allowed"))}
+                    >
+                      <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
+                    </button>
+                  </div>
+                  {messages.length === 0 && !sending && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {SUGGESTED.slice(0, 3).map((s) => (
+                        <button key={s} onClick={() => send(s)} className={cn("text-xs px-3 py-1.5 rounded-full border transition-all hover:scale-105", is3am ? "bg-cream/5 text-cream/70 border-cream/15 hover:bg-cream/10" : "bg-card text-foreground/70 border-moss-deep/15 hover:border-moss-deep/30")}>{s}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+          
+                <AlertDialog open={clearOpen} onOpenChange={setClearOpen}>
+                  <AlertDialogContent className="bg-card rounded-2xl">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="font-serif text-xl text-moss-deep">Clear conversation?</AlertDialogTitle>
+                      <AlertDialogDescription>This will permanently delete your chat history with Tempie. She won't remember what you talked about.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="rounded-full">Keep it</AlertDialogCancel>
+                      <AlertDialogAction onClick={clearChat} className="rounded-full bg-destructive hover:bg-destructive/90">Clear</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            );
+          }
+          
+          function LetterMessage({ msg, is3am }: { msg: Msg; is3am: boolean }) {
+            const isUser = msg.role === "user";
+            if (isUser) {
+              return (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+                  <div className={cn("max-w-[75%] rounded-2xl rounded-br-md px-5 py-3", is3am ? "bg-butter/15 text-cream" : "bg-moss-deep text-cream")}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap font-serif italic">{msg.content}</p>
+                  </div>
+                </motion.div>
+              );
+            }
+            return (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 items-start">
+                <div className="flex-shrink-0 pt-1"><TempieMascot size="sm" state="idle" /></div>
+                <div className={cn("max-w-[80%] rounded-2xl rounded-bl-md px-6 py-5 border relative", is3am ? "bg-moss-deep/60 border-cream/10" : "bg-card border-moss-deep/10 letter-edge paper-grain")}>
+                  <div className={cn("text-[10px] uppercase tracking-[0.2em] mb-3 pb-2 border-b", is3am ? "text-butter/60 border-cream/10" : "text-terracotta border-moss-deep/10")}>
+                    {format(new Date(msg.createdAt), "h:mm a · MMM d")}
+                  </div>
+                  <p className={cn("font-serif text-base leading-relaxed whitespace-pre-wrap", is3am ? "text-cream/90 italic" : "text-foreground/85 italic")}>{msg.content}</p>
+                  <div className="mt-4 pt-3 border-t border-current/10"><TempieSignature /></div>
+                </div>
+              </motion.div>
+            );
+          }
+          
+          function WelcomeState({ onSuggest, week, userName, is3am }: { onSuggest: (s: string) => void; week: number | null; userName?: string; is3am: boolean }) {
+            const greeting = is3am
+              ? `${userName ? `${userName}, ` : ""}it's late. I'm here.`
+              : week
+              ? `I see you're around week ${week}. How are you, ${userName ? userName.split(" ")[0] : "mama"}?`
+              : `Hi ${userName ? userName.split(" ")[0] : "mama"}. I'm here whenever you need me.`;
+            return (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8 }}>
+                  <TempieMascot size="xl" state={is3am ? "sleeping" : "listening"} className="mx-auto mb-6" />
+                </motion.div>
+                <p className={cn("font-serif italic text-2xl md:text-3xl leading-snug max-w-md mb-2", is3am ? "text-cream" : "text-moss-deep")}>{greeting}</p>
+                <p className={cn("text-sm mt-4 max-w-sm leading-relaxed", is3am ? "text-cream/60" : "text-muted-foreground")}>
+                  {is3am ? "A question, a vent, a 3am panic, a win. Whatever it is, I'm listening." : "A question, a vent, a 3am panic, a win. I'm here for all of it."}
+                </p>
+                {!is3am && (
+                  <div className="mt-8 grid gap-2 max-w-md w-full">
+                    {SUGGESTED.map((s, i) => (
+                      <motion.button key={s} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.08 }} onClick={() => onSuggest(s)} className="text-left text-sm px-4 py-3 rounded-2xl bg-card border border-moss-deep/15 hover:border-moss-deep/30 hover:shadow-soft transition-all">
+                        <span className="text-terracotta mr-2">→</span><span className="text-foreground/80">{s}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          TENDERTRIMESTERS_FILE_EOF
+          echo "Wrote src/components/app/screens/TempieScreen.tsx"
+
+      - name: Commit and push redesign/v2
+        run: |
+          git add -A
+          git status --short
+          git commit -m "feat: warm modernist redesign v2 - editorial layouts, watercolor baby-size, Tempie mascot, leather diary journal, 3am mode"
+          git push -u origin redesign/v2
+
+      - name: Create Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'feat: Warm Modernist Redesign v2',
+              head: 'redesign/v2',
+              base: 'main',
+              body: 'Warm modernist redesign v2. Vercel will auto-deploy a preview URL. Visit the Deployments tab in Vercel to see it.'
+            });
+            console.log('Created Pull Request: redesign/v2 -> main');
+
+      - name: Output summary
+        run: |
+          echo "## Redesign Applied" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch pushed:** \`redesign/v2\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Wait ~60s for Vercel to auto-deploy" >> $GITHUB_STEP_SUMMARY
+          echo "2. Find preview URL in Vercel Deployments" >> $GITHUB_STEP_SUMMARY
+          echo "3. Review the redesign" >> $GITHUB_STEP_SUMMARY
+          echo "4. Merge via Pull Request when happy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "PR link: https://github.com/tendertrimesters-tech/tender-trimesters/pulls" >> $GITHUB_STEP_SUMMARY
