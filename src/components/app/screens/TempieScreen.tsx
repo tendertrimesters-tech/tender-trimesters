@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Trash2, Crown, Moon, ArrowUp } from "lucide-react";
+import { Trash2, Crown, Moon, ArrowUp } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
