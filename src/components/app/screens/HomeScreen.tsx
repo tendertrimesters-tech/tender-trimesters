@@ -306,14 +306,14 @@ export default function HomeScreen({
               </div>
               {/* Watercolor baby illustration */}
               <div className="flex-shrink-0 animate-breathe-slow">
-                <WatercolorBaby week={week} size={120} />
+                <WatercolorBaby week={week || 1} size={120} />
               </div>
             </div>
           </div>
 
           {/* Progress ribbon */}
           <div className="bg-card px-6 py-4 border-b border-moss-deep/10">
-            <WeekRibbon currentWeek={week} />
+            <WeekRibbon currentWeek={week || 1} />
           </div>
 
           {/* Affirmation */}
