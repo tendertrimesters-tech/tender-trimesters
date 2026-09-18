@@ -35,6 +35,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import AmbientBackground from "../app/AmbientBackground";
+import TempieMascot, { TempieSignature } from "../app/TempieMascot";
 
 type LandingPageProps = {
   onOpenApp: () => void;
@@ -60,17 +61,24 @@ export default function LandingPage({ onOpenApp }: LandingPageProps) {
     } catch {}
   }, []);
 
+  // Convenience: open auth dialog (used by all CTAs)
+  const openAuth = (mode: "signin" | "signup" = "signup") => {
+    setMode(mode);
+    setAuthOpen(true);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-cream relative">
-      <AmbientBackground />
+    <div className="min-h-screen bg-gradient-cream relative overflow-hidden">
+      <AmbientBackground variant="editorial" />
       <MilestoneTicker />
-      <Nav onOpenAuth={() => setAuthOpen(true)} onOpenApp={onOpenApp} />
-      <Hero onJoinWaitlist={() => setWaitlistOpen(true)} onOpenApp={onOpenApp} />
-      <FreeVsPremium onUpgrade={() => setAuthOpen(true)} />
+      <Nav onOpenAuth={() => openAuth("signin")} onOpenApp={() => openAuth("signup")} />
+      <Hero onJoinWaitlist={() => setWaitlistOpen(true)} onOpenApp={() => openAuth("signup")} />
+      <EditorialPricing onUpgrade={() => openAuth("signup")} />
       <VisualShowcase />
-      <SignatureFeatures />
+      <SignatureFeatures onUpgrade={() => openAuth("signup")} />
+      <FullBleedQuote />
       <Testimonials />
-      <PremiumBundle onUpgrade={() => setAuthOpen(true)} />
+      <PremiumBundle onUpgrade={() => openAuth("signup")} />
       <WaitlistCTA onJoin={() => setWaitlistOpen(true)} />
       <Footer
         onPrivacy={() => setPrivacyOpen(true)}
@@ -91,32 +99,57 @@ export default function LandingPage({ onOpenApp }: LandingPageProps) {
   );
 }
 
-/* ─────────────────────────── NAV ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   NAV — sticky, transparent, with vertical accent bar
+   ════════════════════════════════════════════════════════════════ */
 
 function Nav({ onOpenAuth, onOpenApp }: { onOpenAuth: () => void; onOpenApp: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-cream/80 border-b border-border/40">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <header
+      className={`sticky top-0 z-40 transition-all duration-500 ${
+        scrolled
+          ? "backdrop-blur-xl bg-cream/85 border-b border-moss-deep/10"
+          : "bg-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <Logo />
           <div>
-            <div className="font-serif text-xl leading-none text-moss-deep">Tender Trimesters</div>
-            <div className="text-[10px] tracking-[0.18em] uppercase text-muted-foreground">by Mommies Matter</div>
+            <div className="font-serif text-xl leading-none text-moss-deep tracking-tight">
+              Tender Trimesters
+            </div>
+            <div className="text-[10px] tracking-[0.22em] uppercase text-terracotta mt-1 font-medium">
+              by Mommies Matter
+            </div>
           </div>
         </div>
-        <nav className="hidden md:flex items-center gap-8 text-sm">
-          <a href="#features" className="text-foreground/70 hover:text-moss transition-colors">Features</a>
-          <a href="#signature" className="text-foreground/70 hover:text-moss transition-colors">Keepsakes</a>
-          <a href="#comparison" className="text-foreground/70 hover:text-moss transition-colors">Pricing</a>
-          <a href="#testimonials" className="text-foreground/70 hover:text-moss transition-colors">Stories</a>
-          <a href="#bundle" className="text-foreground/70 hover:text-moss transition-colors">Bundle</a>
+        <nav className="hidden md:flex items-center gap-10 text-sm">
+          <a href="#features" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Features</a>
+          <a href="#signature" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Keepsakes</a>
+          <a href="#testimonials" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Stories</a>
+          <a href="#bundle" className="text-foreground/70 hover:text-moss-deep transition-colors tracking-wide">Bundle</a>
         </nav>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={onOpenAuth} className="hidden sm:flex">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onOpenAuth}
+            className="hidden sm:inline-flex text-sm text-moss-deep hover:text-terracotta transition-colors tracking-wide font-medium"
+          >
             Sign in
-          </Button>
-          <Button size="sm" onClick={onOpenApp} className="bg-moss hover:bg-moss-deep">
-            Open the App <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+          </button>
+          <Button
+            onClick={onOpenApp}
+            className="bg-moss-deep hover:bg-moss text-cream rounded-full h-10 px-5 text-sm tracking-wide"
+          >
+            Open the App
+            <ArrowRight className="ml-2 w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
@@ -126,34 +159,41 @@ function Nav({ onOpenAuth, onOpenApp }: { onOpenAuth: () => void; onOpenApp: () 
 
 function Logo() {
   return (
-    <div className="w-9 h-9 rounded-full bg-gradient-moss flex items-center justify-center shadow-soft">
+    <div className="w-10 h-10 rounded-full bg-gradient-moss flex items-center justify-center shadow-soft ring-2 ring-moss-deep/20">
       <Leaf className="w-4 h-4 text-cream" />
     </div>
   );
 }
 
-/* ─────────────────────────── MILESTONE TICKER ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   MILESTONE TICKER — deep moss band with heartbeat on Week 8
+   ════════════════════════════════════════════════════════════════ */
 
 function MilestoneTicker() {
   const items = [
-    "Week 4 · Missed your period?",
-    "Week 8 · First heartbeat",
-    "Week 12 · End of trimester 1",
-    "Week 16 · Bump makes its debut",
-    "Week 20 · Halfway there",
-    "Week 24 · Viability milestone",
-    "Week 28 · Third trimester begins",
-    "Week 36 · Early term approaching",
-    "Week 40 · Due date",
+    { week: "Week 4", label: "Missed your period?", heartbeat: false },
+    { week: "Week 8", label: "First heartbeat", heartbeat: true },
+    { week: "Week 12", label: "End of trimester 1", heartbeat: false },
+    { week: "Week 16", label: "Bump makes its debut", heartbeat: false },
+    { week: "Week 20", label: "Halfway there", heartbeat: false },
+    { week: "Week 24", label: "Viability milestone", heartbeat: false },
+    { week: "Week 28", label: "Third trimester begins", heartbeat: false },
+    { week: "Week 36", label: "Early term approaching", heartbeat: false },
+    { week: "Week 40", label: "Due date", heartbeat: false },
   ];
   const doubled = [...items, ...items];
   return (
-    <div className="bg-moss-deep text-cream py-2 overflow-hidden">
+    <div className="bg-moss-deep text-cream py-2.5 overflow-hidden border-b border-cream/10">
       <div className="flex gap-12 whitespace-nowrap animate-ticker">
         {doubled.map((item, i) => (
-          <span key={i} className="text-xs tracking-wider font-medium flex items-center gap-2">
-            <Sparkles className="w-3 h-3 text-blush" />
-            {item}
+          <span
+            key={i}
+            className="text-xs tracking-[0.15em] font-medium flex items-center gap-2 uppercase"
+          >
+            <Sparkles className={`w-3 h-3 ${item.heartbeat ? "text-blush animate-heartbeat" : "text-butter/70"}`} />
+            <span className="text-butter">{item.week}</span>
+            <span className="text-cream/60">·</span>
+            <span className="text-cream/85">{item.label}</span>
           </span>
         ))}
       </div>
@@ -161,75 +201,99 @@ function MilestoneTicker() {
   );
 }
 
-/* ─────────────────────────── HERO ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   HERO — asymmetric editorial, big display serif, visible image
+   ════════════════════════════════════════════════════════════════ */
 
 function Hero({ onJoinWaitlist, onOpenApp }: { onJoinWaitlist: () => void; onOpenApp: () => void }) {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden min-h-[88vh] flex items-center">
+      {/* Background image — actually visible now */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blush/40 rounded-full blur-3xl opacity-60" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sage/40 rounded-full blur-3xl opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-br from-cream via-cream/95 to-blush/20" />
-        <img src="/images/belly-love.jpg" alt="" className="absolute right-0 top-0 w-3/5 h-full object-cover opacity-[0.18] hidden md:block" />
+        <img
+          src="/images/belly-love.jpg"
+          alt=""
+          className="absolute right-0 top-0 w-full md:w-3/5 h-full object-cover opacity-40"
+        />
+        {/* Deep moss gradient overlay from left → right */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(105deg, #F4EAD5 0%, #F4EAD5 30%, rgba(244,234,213,0.85) 50%, rgba(45,63,35,0.3) 80%, rgba(45,63,35,0.5) 100%)",
+          }}
+        />
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 py-20 md:py-32 grid md:grid-cols-12 gap-8 items-center w-full">
+        {/* ── Left: Editorial text (cols 1-7) ── */}
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          className="md:col-span-7 accent-bar-left"
         >
-          <div className="inline-flex items-center gap-2 bg-blush/50 text-rose-gold px-3 py-1 rounded-full text-xs font-medium mb-6">
-            <Sparkles className="w-3 h-3" />
+          <div className="eyebrow text-terracotta mb-6 flex items-center gap-2">
+            <span className="w-8 h-px bg-terracotta" />
             Your 24/7 pregnancy companion
           </div>
-          <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.05] text-moss-deep text-balance">
-            Your pregnancy,<br />
-            <span className="text-gradient-moss italic">one week</span> at a time.
+
+          <h1 className="display-xl text-moss-deep text-balance">
+            Your pregnancy,
+            <br />
+            <span
+              className="font-script text-terracotta"
+              style={{ fontSize: "0.85em", fontWeight: 400 }}
+            >
+              one week
+            </span>{" "}
+            at a time.
           </h1>
-          <p className="mt-6 text-lg text-foreground/70 leading-relaxed max-w-md">
-            A nurturing weekly calendar, daily affirmations, a private journal, mood tracking, and Tempie — your AI companion who's there at 3am when you need her most.
+
+          <p className="mt-8 text-lg md:text-xl text-foreground/75 leading-relaxed max-w-xl text-pretty">
+            A nurturing weekly calendar, daily affirmations, a private journal, mood tracking, and{" "}
+            <span className="font-serif italic text-moss-deep">Tempie</span> — your AI companion
+            who's there at 3am when you need her most.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <Button
-              size="lg"
               onClick={onOpenApp}
-              className="bg-moss hover:bg-moss-deep text-cream px-7 h-12 rounded-full"
+              className="bg-moss-deep hover:bg-moss text-cream px-8 h-14 rounded-full text-base tracking-wide group"
             >
-              Open the App <ArrowRight className="ml-2 w-4 h-4" />
+              Begin your 40 weeks
+              <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
+            <button
               onClick={onJoinWaitlist}
-              className="border-moss/30 text-moss-deep hover:bg-moss/5 px-7 h-12 rounded-full"
+              className="text-moss-deep hover:text-terracotta transition-colors text-base tracking-wide underline decoration-terracotta/40 underline-offset-4 decoration-2"
             >
-              Join the waitlist
-            </Button>
+              or join the waitlist
+            </button>
           </div>
 
-          <div className="mt-8 flex items-center gap-6 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-moss" />
-              Free forever tier
+          <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 text-xs text-muted-foreground tracking-wide">
+            <div className="flex items-center gap-2">
+              <Check className="w-3.5 h-3.5 text-moss" strokeWidth={3} />
+              <span>Free forever tier</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-moss" />
-              Private &amp; secure
+            <div className="flex items-center gap-2">
+              <Check className="w-3.5 h-3.5 text-moss" strokeWidth={3} />
+              <span>Private &amp; secure</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-moss" />
-              40 weeks of content
+            <div className="flex items-center gap-2">
+              <Check className="w-3.5 h-3.5 text-moss" strokeWidth={3} />
+              <span>40 weeks of content</span>
             </div>
           </div>
         </motion.div>
 
+        {/* ── Right: Hero card (cols 8-12) ── */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative"
+          initial={{ opacity: 0, scale: 0.96, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          className="md:col-span-5 relative"
         >
           <HeroCard />
         </motion.div>
@@ -240,230 +304,269 @@ function Hero({ onJoinWaitlist, onOpenApp }: { onJoinWaitlist: () => void; onOpe
 
 function HeroCard() {
   return (
-    <div className="relative">
-      {/* Main phone-card */}
-      <Card className="relative z-10 bg-card border-moss/15 shadow-premium rounded-[28px] overflow-hidden">
-        <div className="bg-gradient-moss p-5 text-cream relative">
-          <img src="/images/baby-hands.jpg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay" />
+    <div className="relative max-w-sm mx-auto">
+      {/* Main phone-card — deeper colors, more contrast */}
+      <Card className="relative z-10 bg-card border-moss-deep/20 card-floating rounded-[32px] overflow-hidden">
+        {/* Header — deep moss with real imagery visible */}
+        <div className="bg-gradient-moss-deep p-6 text-cream relative overflow-hidden">
+          <img
+            src="/images/baby-hands.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay"
+          />
           <div className="relative z-10">
-            <div className="flex items-center justify-between text-[10px] uppercase tracking-widest opacity-80">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-butter/80">
               <span>Week 16</span>
               <span>Second Trimester</span>
             </div>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-blush/20 backdrop-blur-sm flex items-center justify-center">
-                <Baby className="w-7 h-7 text-blush" />
+            <div className="mt-4 flex items-center gap-4">
+              {/* Watercolor avocado SVG instead of lucide icon */}
+              <div className="w-16 h-16 relative">
+                <WatercolorFruit fruit="avocado" />
               </div>
               <div>
-                <div className="font-serif text-2xl leading-none">Avocado</div>
-                <div className="text-xs opacity-70">About 4.6 inches long</div>
+                <div className="font-serif text-3xl leading-none">Avocado</div>
+                <div className="text-xs opacity-80 mt-1">About 4.6 inches long</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="p-5 space-y-4">
-          <div className="bg-blush/30 rounded-2xl p-4">
-            <div className="text-[10px] uppercase tracking-widest text-rose-gold mb-1">Today's Affirmation</div>
-            <p className="font-script text-xl text-moss-deep">My changing body is beautiful.</p>
+        {/* Body */}
+        <div className="p-6 space-y-5 bg-card">
+          {/* Affirmation — letterpress feel */}
+          <div className="bg-blush/20 rounded-2xl p-5 border border-blush/20">
+            <div className="eyebrow text-rose-gold mb-2">Today's Affirmation</div>
+            <p className="font-script text-2xl text-moss-deep leading-tight">
+              My changing body is beautiful.
+            </p>
           </div>
 
-          <div>
-            <div className="text-xs font-semibold text-moss-deep mb-2 flex items-center gap-1.5">
+          {/* Best friend tip */}
+          <div className="accent-bar-moss">
+            <div className="eyebrow text-moss-deep mb-2 flex items-center gap-2">
               <Leaf className="w-3.5 h-3.5" /> Best Friend Tip
             </div>
-            <p className="text-sm text-foreground/75 leading-relaxed">
+            <p className="text-sm text-foreground/80 leading-relaxed">
               Invest in 2-3 quality maternity basics. You'll live in them for months.
             </p>
           </div>
 
-          <div className="flex items-center justify-between bg-sage/30 rounded-xl p-3">
-            <div className="flex items-center gap-2">
-              <MessageCircleHeart className="w-4 h-4 text-moss" />
-              <span className="text-xs font-medium text-moss-deep">Tempie's here</span>
+          {/* Tempie chip — with mascot */}
+          <div className="flex items-center justify-between bg-moss-deep/5 rounded-2xl p-4 border border-moss-deep/10">
+            <div className="flex items-center gap-3">
+              <TempieMascot size="sm" state="listening" />
+              <div>
+                <div className="text-sm font-medium text-moss-deep">Tempie's here</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                  24/7 companion
+                </div>
+              </div>
             </div>
-            <span className="text-[10px] text-muted-foreground">24/7 companion</span>
           </div>
         </div>
       </Card>
 
-      {/* Floating affirmation chip */}
+      {/* Floating affirmation sticker — script font, rotated */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6, duration: 0.6 }}
-        className="absolute -top-3 -right-3 z-20 bg-cream shadow-premium rounded-2xl px-4 py-2 border border-rose-gold/20"
+        initial={{ opacity: 0, y: 20, rotate: -8 }}
+        animate={{ opacity: 1, y: 0, rotate: -8 }}
+        transition={{ delay: 0.7, duration: 0.7 }}
+        className="absolute -top-6 -right-6 z-20 bg-cream card-floating rounded-2xl px-5 py-3 border border-rose-gold/20"
       >
-        <div className="font-script text-rose-gold text-lg">you've got this, mama</div>
+        <div className="font-script text-rose-gold text-xl">you've got this, mama</div>
       </motion.div>
 
-      {/* Floating mood chip */}
+      {/* Floating mood chip — bottom left */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.6 }}
-        className="absolute -bottom-4 -left-4 z-20 bg-cream shadow-soft rounded-2xl px-4 py-3 border border-moss/15"
+        transition={{ delay: 0.9, duration: 0.7 }}
+        className="absolute -bottom-6 -left-6 z-20 bg-cream card-floating rounded-2xl px-4 py-3 border border-moss-deep/15"
       >
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Today's mood</div>
+        <div className="eyebrow text-muted-foreground mb-1.5">Today's mood</div>
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🌸</span>
-          <span className="text-sm font-medium text-moss-deep">Glowing</span>
+          {/* Mood constellation — 5 dots, today's enlarged */}
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-blush/40" />
+            <div className="w-2 h-2 rounded-full bg-butter/60" />
+            <div className="w-4 h-4 rounded-full bg-blush ring-2 ring-blush/30" />
+            <div className="w-2 h-2 rounded-full bg-lavender/50" />
+            <div className="w-2 h-2 rounded-full bg-sage/50" />
+          </div>
+          <span className="text-sm font-medium text-moss-deep ml-1">Glowing</span>
         </div>
       </motion.div>
     </div>
   );
 }
 
-/* ─────────────────────────── FREE VS PREMIUM ─────────────────────────── */
+/**
+ * WatercolorFruit — inline SVG placeholder for the 40-week series.
+ * Will be replaced with actual watercolor PNGs in /public/watercolors/.
+ * For now, generates a tasteful geometric fruit shape per week.
+ */
+function WatercolorFruit({ fruit, size = 64 }: { fruit: string; size?: number }) {
+  // Generate a soft watercolor-style blob per fruit type
+  const fruitColors: Record<string, [string, string, string]> = {
+    avocado: ["#7CB374", "#5A7A48", "#2D3F23"],
+    lemon: ["#FFD98C", "#E8B860", "#A8821A"],
+    poppyseed: ["#722F37", "#4A1F25", "#2D1418"],
+    coconut: ["#DDC9A0", "#A88E5C", "#5A4A30"],
+    papaya: ["#E89098", "#C56A75", "#A8455D"],
+    watermelon: ["#E89098", "#7CB374", "#2D3F23"],
+    // Add more fruits as needed for each week
+  };
+  const [c1, c2, c3] = fruitColors[fruit] || fruitColors.avocado;
 
-function FreeVsPremium({ onUpgrade }: { onUpgrade: () => void }) {
   return (
-    <section id="comparison" className="py-20 md:py-28 bg-cream">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="text-xs uppercase tracking-[0.2em] text-terracotta mb-3">Choose your journey</div>
-          <h2 className="font-serif text-4xl md:text-5xl text-moss-deep">Free, or fully held.</h2>
-          <p className="mt-4 text-foreground/70">
-            Start free, forever. When you're ready for the deeper layers — Tempie at 3am, partner access, bump photos, and the full Mommies Matter bundle — premium is a one-time $9.99.
-          </p>
-        </div>
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: size, height: size }}
+    >
+      {/* Watercolor blob — soft radial gradient */}
+      <defs>
+        <radialGradient id={`grad-${fruit}`} cx="40%" cy="40%">
+          <stop offset="0%" stopColor={c1} stopOpacity="0.9" />
+          <stop offset="60%" stopColor={c2} stopOpacity="0.7" />
+          <stop offset="100%" stopColor={c3} stopOpacity="0.5" />
+        </radialGradient>
+        <filter id={`blur-${fruit}`}>
+          <feGaussianBlur stdDeviation="1.5" />
+        </filter>
+      </defs>
+      {/* Main body */}
+      <ellipse cx="32" cy="34" rx="22" ry="26" fill={`url(#grad-${fruit})`} filter={`url(#blur-${fruit})`} />
+      {/* Highlight */}
+      <ellipse cx="26" cy="26" rx="6" ry="8" fill={c1} fillOpacity="0.5" />
+      {/* Stem */}
+      <path d="M32 8 L32 14" stroke={c3} strokeWidth="1.5" strokeLinecap="round" />
+      {/* Leaf */}
+      <path d="M32 10 Q36 6 40 8 Q38 12 32 12" fill={c1} fillOpacity="0.7" />
+    </svg>
+  );
+}
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          <FreeCard />
-          <PremiumCard onUpgrade={onUpgrade} />
-        </div>
+/* ════════════════════════════════════════════════════════════════
+   EDITORIAL PRICING — one-liner replaces SaaS table
+   ════════════════════════════════════════════════════════════════ */
+
+function EditorialPricing({ onUpgrade }: { onUpgrade: () => void }) {
+  return (
+    <section id="comparison" className="py-32 md:py-40 relative">
+      <div className="max-w-4xl mx-auto px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <div className="eyebrow text-terracotta mb-6">Choose your journey</div>
+
+          <p className="display-md text-moss-deep text-balance leading-tight">
+            <span className="text-foreground/60">Free,</span>{" "}
+            <span className="italic">forever.</span>
+            <br />
+            <span className="text-foreground/60">And when you're ready to be fully held,</span>
+            <br />
+            <span className="text-gradient-rose">$9.99 once.</span>
+          </p>
+
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              onClick={onUpgrade}
+              className="bg-moss-deep hover:bg-moss text-cream px-10 h-14 rounded-full text-base tracking-wide group"
+            >
+              Begin free, upgrade anytime
+              <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <span className="text-sm text-muted-foreground tracking-wide">
+              or $4.99/month if you prefer to spread it out
+            </span>
+          </div>
+
+          <div className="mt-16 grid sm:grid-cols-3 gap-6 text-left max-w-2xl mx-auto">
+            <div className="accent-bar-left">
+              <div className="eyebrow text-moss-deep mb-2">Free</div>
+              <p className="text-sm text-foreground/70 leading-relaxed">
+                40-week calendar, affirmations, mood, journal, 5 Tempie messages a day. Forever.
+              </p>
+            </div>
+            <div className="accent-bar-rose">
+              <div className="eyebrow text-rose-gold mb-2">Premium</div>
+              <p className="text-sm text-foreground/70 leading-relaxed">
+                Unlimited Tempie, bump photos, partner access, audio meditations, all 9 keepsakes.
+              </p>
+            </div>
+            <div className="accent-bar-moss">
+              <div className="eyebrow text-terracotta mb-2">Bundle</div>
+              <p className="text-sm text-foreground/70 leading-relaxed">
+                Ebook + affirmation deck + first-trimester checklist + letter templates. $9.99.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-function FreeCard() {
-  const features = [
-    "Weekly milestone calendar (40 weeks)",
-    "Baby size tracker with fruit comparisons",
-    "Daily affirmations",
-    "Mood check-ins with simple trends",
-    "Private journal (text + mood)",
-    "Tempie AI chat — 5 messages / day",
-  ];
-  return (
-    <Card className="bg-card border-moss/15 rounded-[28px] p-7 shadow-soft">
-      <div className="flex items-baseline justify-between mb-1">
-        <h3 className="font-serif text-3xl text-moss-deep">Free</h3>
-        <div className="text-xs uppercase tracking-widest text-muted-foreground">Forever</div>
-      </div>
-      <div className="flex items-baseline gap-1 mb-6">
-        <span className="font-serif text-5xl text-moss-deep">$0</span>
-      </div>
-      <ul className="space-y-3">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-3">
-            <div className="mt-0.5 w-5 h-5 rounded-full bg-moss/15 flex items-center justify-center flex-shrink-0">
-              <Check className="w-3 h-3 text-moss" />
-            </div>
-            <span className="text-sm text-foreground/80">{f}</span>
-          </li>
-        ))}
-      </ul>
-      <div className="mt-7 text-xs text-muted-foreground italic">
-        No credit card. No trial expiration. Just here for you.
-      </div>
-    </Card>
-  );
-}
-
-function PremiumCard({ onUpgrade }: { onUpgrade: () => void }) {
-  const features = [
-    "Everything in Free, plus:",
-    "Tempie AI chat — unlimited, 24/7",
-    "Bump photo gallery by week",
-    "Custom appointment reminders",
-    "Partner access (read-only journey view)",
-    "Audio affirmations & meditations",
-    "Letters from Baby (AI-written letters in baby's voice)",
-    "Fear to Flame — AI-powered fear reframing",
-    "Premium bundle: ebook + affirmations deck",
-  ];
-  return (
-    <Card className="relative bg-gradient-to-br from-cream to-blush/20 border-rose-gold/30 rounded-[28px] p-7 shadow-premium">
-      <div className="absolute -top-3 left-7 bg-gradient-premium text-cream text-[10px] uppercase tracking-widest px-3 py-1 rounded-full">
-        Most loved
-      </div>
-      <div className="flex items-baseline justify-between mb-1">
-        <h3 className="font-serif text-3xl text-rose-gold">Premium</h3>
-        <div className="text-xs uppercase tracking-widest text-rose-gold/70">One-time</div>
-      </div>
-      <div className="flex items-baseline gap-2 mb-6">
-        <span className="font-serif text-5xl text-moss-deep">$9.99</span>
-        <span className="text-sm text-muted-foreground line-through">$19.99</span>
-      </div>
-      <ul className="space-y-3">
-        {features.map((f, i) => (
-          <li key={f} className={`flex items-start gap-3 ${i === 0 ? "font-semibold text-moss-deep" : ""}`}>
-            <div className="mt-0.5 w-5 h-5 rounded-full bg-rose-gold/20 flex items-center justify-center flex-shrink-0">
-              <Star className="w-3 h-3 text-rose-gold fill-rose-gold" />
-            </div>
-            <span className={`text-sm ${i === 0 ? "text-moss-deep" : "text-foreground/80"}`}>{f}</span>
-          </li>
-        ))}
-      </ul>
-      <Button
-        onClick={onUpgrade}
-        className="mt-7 w-full bg-gradient-premium text-cream hover:opacity-90 h-12 rounded-full"
-      >
-        Start free, upgrade anytime
-      </Button>
-      <div className="mt-3 text-center text-xs text-muted-foreground">
-        Or $4.99/month if you prefer to spread it out
-      </div>
-    </Card>
-  );
-}
-
-/* ─────────────────────────── VISUAL SHOWCASE ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   VISUAL SHOWCASE — asymmetric editorial grid
+   ════════════════════════════════════════════════════════════════ */
 
 function VisualShowcase() {
   const items = [
-    { icon: Calendar, label: "Weekly Milestones", desc: "40 weeks of baby's growth, your body, your emotions.", bg: "from-sage/40 to-sage/20", color: "text-moss-deep", image: "/images/calendar-nature.jpg" },
-    { icon: BookHeart, label: "Private Journal", desc: "Notes, moods, cravings, baby names — all in one place.", bg: "from-blush/40 to-butter/20", color: "text-rose-gold", image: "/images/journal-writing.jpg" },
-    { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", bg: "from-butter to-blush/20", color: "text-moss-deep", image: "/images/soft-pink.jpg" },
-    { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", bg: "from-lavender/40 to-lavender/10", color: "text-moss-deep", image: "/images/belly-love.jpg" },
-    { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", bg: "from-sage/40 to-butter/10", color: "text-moss-deep", image: "/images/botanical-soft.jpg" },
-    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", bg: "from-blush/40 to-lavender/20", color: "text-rose-gold", image: "/images/partner-couple.jpg" },
+    { icon: Calendar, label: "Weekly Milestones", desc: "40 weeks of baby's growth, your body, your emotions.", image: "/images/calendar-nature.jpg", span: "lg:col-span-2 lg:row-span-2" },
+    { icon: BookHeart, label: "Private Journal", desc: "Notes, moods, cravings, baby names — all in one place.", image: "/images/journal-writing.jpg", span: "" },
+    { icon: MessageCircleHeart, label: "Tempie Chat", desc: "Your AI companion — answering, soothing, celebrating.", image: "/images/soft-pink.jpg", span: "" },
+    { icon: Camera, label: "Bump Photos", desc: "Document every week. Watch your baby grow.", image: "/images/belly-love.jpg", span: "lg:col-span-2" },
+    { icon: Bell, label: "Appointment Reminders", desc: "OB visits, glucose tests, ultrasounds — never miss one.", image: "/images/botanical-soft.jpg", span: "" },
+    { icon: Users, label: "Partner Access", desc: "Bring your person along. They see what you share.", image: "/images/partner-couple.jpg", span: "" },
   ];
   return (
-    <section id="features" className="py-20 md:py-28 bg-gradient-to-b from-cream to-butter/30">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="text-xs uppercase tracking-[0.2em] text-terracotta mb-3">What's inside</div>
-          <h2 className="font-serif text-4xl md:text-5xl text-moss-deep">A sanctuary for every week.</h2>
-          <p className="mt-4 text-foreground/70">
+    <section id="features" className="py-24 md:py-32 bg-gradient-to-b from-transparent via-butter/10 to-transparent">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-3xl mb-16"
+        >
+          <div className="eyebrow text-terracotta mb-4">What's inside</div>
+          <h2 className="display-md text-moss-deep text-balance leading-tight">
+            A sanctuary for every week.
+          </h2>
+          <p className="mt-6 text-lg text-foreground/70 leading-relaxed max-w-xl">
             Every feature designed with one question: does this make a mama feel more held?
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 auto-rows-[220px]">
           {items.map((item, i) => (
             <motion.div
               key={item.label}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.5 }}
+              transition={{ delay: i * 0.08, duration: 0.6 }}
+              className={item.span}
             >
-              <Card className="rounded-3xl h-full hover:shadow-soft transition-all hover:-translate-y-1 duration-300 overflow-hidden border border-moss/10">
-                <div className={`relative h-36 bg-gradient-to-br ${item.bg} overflow-hidden`}>
-                  <img src={item.image} alt={item.label} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-multiply" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                  <div className="relative z-10 p-5">
-                    <div className="w-12 h-12 rounded-2xl bg-cream/70 backdrop-blur-sm flex items-center justify-center mb-3 shadow-sm">
-                      <item.icon className={`w-5 h-5 ${item.color}`} />
-                    </div>
+              <Card className="relative h-full rounded-3xl overflow-hidden border-moss-deep/10 group hover:shadow-premium transition-all duration-500 hover:-translate-y-1">
+                <img
+                  src={item.image}
+                  alt={item.label}
+                  className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-60 transition-opacity duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-moss-deep/85 via-moss-deep/20 to-transparent" />
+                <div className="relative z-10 h-full p-6 flex flex-col justify-end text-cream">
+                  <div className="w-12 h-12 rounded-2xl bg-cream/15 backdrop-blur-sm flex items-center justify-center mb-3 border border-cream/20">
+                    <item.icon className="w-5 h-5 text-butter" />
                   </div>
-                </div>
-                <div className="p-5 pt-3">
-                  <h3 className={`font-serif text-xl mb-2 ${item.color}`}>{item.label}</h3>
-                  <p className="text-sm text-foreground/70 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-serif text-2xl mb-1.5 leading-tight">{item.label}</h3>
+                  <p className="text-sm text-cream/75 leading-relaxed">{item.desc}</p>
                 </div>
               </Card>
             </motion.div>
@@ -474,87 +577,240 @@ function VisualShowcase() {
   );
 }
 
-/* ─────────────────────────── SIGNATURE FEATURES ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   SIGNATURE FEATURES — 3 hero full-bleed + 6 secondary grid
+   ════════════════════════════════════════════════════════════════ */
 
-function SignatureFeatures() {
-  const features = [
-    { emoji: "💌", title: "Letters from Baby", desc: "Each week your baby writes you a tender letter in their own voice — a keepsake to hold forever.", accent: "bg-blush/30" },
-    { emoji: "🔥", title: "Fear to Flame", desc: "Name a fear. Watch AI gently reframe it into courage. Track your growing bravery.", accent: "bg-terracotta/20" },
-    { emoji: "📖", title: "My Mother's Mother", desc: "12 guided interview prompts that capture a generational keepsake you'll treasure.", accent: "bg-butter" },
-    { emoji: "🌙", title: "DreamKeeper", desc: "Log your vivid pregnancy dreams. AI surfaces the recurring symbols and themes.", accent: "bg-lavender/20" },
-    { emoji: "🌊", title: "Hormone Horoscope", desc: "A poetic, science-backed forecast of what your hormones are doing — and why you feel the way you do.", accent: "bg-sage/20" },
-    { emoji: "🌱", title: "The Name Garden", desc: "Plant name ideas as seeds. Watch them grow. Track how your feelings shift week to week.", accent: "bg-sage/30" },
-    { emoji: "⏳", title: "Memory Capsule", desc: "Seal letters, wishes, and promises now that unlock for your child on a future date you choose.", accent: "bg-lavender/30" },
-    { emoji: "🎵", title: "Birth Playlist Composer", desc: "Build the soundtrack for labor by phase — early, active, pushing, first cry, golden hour.", accent: "bg-blush/20" },
-    { emoji: "🤍", title: "Belly Bonding Rituals", desc: "A daily 60-second ritual — a phrase, a hand position, a breath — building your bond before birth.", accent: "bg-blush/30" },
+function SignatureFeatures({ onUpgrade }: { onUpgrade: () => void }) {
+  const heroFeatures = [
+    {
+      title: "Letters from Baby",
+      desc: "Each week your baby writes you a tender letter in their own voice — a keepsake to hold forever.",
+      quote: "Dear mama, today I grew fingernails. You grew brave.",
+      accent: "bg-blush/15",
+      textColor: "text-rose-gold",
+      side: "left",
+    },
+    {
+      title: "Fear to Flame",
+      desc: "Name a fear. Watch AI gently reframe it into courage. Track your growing bravery week by week.",
+      quote: "What felt like a storm at week 12 became a steady rain by week 20.",
+      accent: "bg-terracotta/15",
+      textColor: "text-terracotta",
+      side: "right",
+    },
+    {
+      title: "Memory Capsule",
+      desc: "Seal letters, wishes, and promises now that unlock for your child on a future date you choose.",
+      quote: "For your 18th birthday, from the mama I was at week 24.",
+      accent: "bg-lavender/15",
+      textColor: "text-lavender",
+      side: "left",
+    },
+  ];
+
+  const secondaryFeatures = [
+    { title: "My Mother's Mother", desc: "12 guided interview prompts that capture a generational keepsake." },
+    { title: "DreamKeeper", desc: "Log your vivid pregnancy dreams. AI surfaces the recurring symbols and themes." },
+    { title: "Hormone Horoscope", desc: "A poetic, science-backed forecast of what your hormones are doing." },
+    { title: "The Name Garden", desc: "Plant name ideas as seeds. Watch them grow. Track how your feelings shift." },
+    { title: "Birth Playlist Composer", desc: "Build the soundtrack for labor by phase — early, active, pushing, golden hour." },
+    { title: "Belly Bonding Rituals", desc: "A daily 60-second ritual — a phrase, a hand position, a breath." },
   ];
 
   return (
-    <section id="signature" className="py-20 px-4 sm:px-6">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <div className="text-[10px] uppercase tracking-[0.2em] text-rose-gold font-semibold mb-2">Unlike any other pregnancy app</div>
-          <h2 className="font-serif text-3xl sm:text-4xl text-moss-deep">Nine features you won't find anywhere else</h2>
-          <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto">
-            Every other pregnancy app gives you a calendar and a checklist. We give you a deeply personal, keepsake-driven experience that honors the emotional journey of becoming a mother.
-          </p>
-        </motion.div>
+    <section id="signature" className="relative">
+      {/* Hero features — full-bleed editorial */}
+      {heroFeatures.map((f, i) => (
+        <HeroFeatureBlock key={f.title} feature={f} index={i} />
+      ))}
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((f, i) => (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.04 * i }}
+      {/* Secondary features — quieter grid */}
+      <div className="py-20 md:py-28 bg-cream">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-2xl mb-12"
+          >
+            <div className="eyebrow text-rose-gold mb-4">And six more keepsakes</div>
+            <h3 className="display-md text-moss-deep leading-tight">
+              The full sanctuary.
+            </h3>
+          </motion.div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {secondaryFeatures.map((f, i) => (
+              <motion.div
+                key={f.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+              >
+                <Card className="rounded-2xl p-6 h-full border-moss-deep/10 hover:border-moss-deep/30 transition-all hover:-translate-y-0.5 duration-300 bg-card">
+                  <h4 className="font-serif text-xl text-moss-deep mb-2">{f.title}</h4>
+                  <p className="text-sm text-foreground/70 leading-relaxed">{f.desc}</p>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Button
+              onClick={onUpgrade}
+              className="bg-gradient-premium text-cream hover:opacity-90 px-10 h-14 rounded-full text-base tracking-wide group"
             >
-              <Card className="rounded-2xl p-5 h-full border-moss/10 hover:shadow-soft transition-shadow">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">{f.emoji}</span>
-                  <div>
-                    <div className="font-serif text-base text-moss-deep">{f.title}</div>
-                    <p className="text-xs text-foreground/70 leading-relaxed mt-1">{f.desc}</p>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
+              Unlock all nine
+              <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────── TESTIMONIALS ─────────────────────────── */
+function HeroFeatureBlock({
+  feature,
+  index,
+}: {
+  feature: { title: string; desc: string; quote: string; accent: string; textColor: string; side: string };
+  index: number;
+}) {
+  const isLeft = feature.side === "left";
+  return (
+    <div className={`relative py-24 md:py-36 ${feature.accent} overflow-hidden`}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-2 gap-12 items-center">
+        {/* Text side */}
+        <motion.div
+          initial={{ opacity: 0, x: isLeft ? -24 : 24 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className={isLeft ? "md:order-1" : "md:order-2"}
+        >
+          <div className="eyebrow text-terracotta mb-4">
+            Keepsake {String(index + 1).padStart(2, "0")}
+          </div>
+          <h3 className={`display-md ${feature.textColor} mb-6 leading-tight`}>
+            {feature.title}
+          </h3>
+          <p className="text-lg text-foreground/75 leading-relaxed mb-8 max-w-md">
+            {feature.desc}
+          </p>
+          <div className="accent-bar-left">
+            <p className="font-serif italic text-xl text-moss-deep leading-snug">
+              &ldquo;{feature.quote}&rdquo;
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Visual side — large watercolor placeholder */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className={`relative h-80 md:h-96 ${isLeft ? "md:order-2" : "md:order-1"}`}
+        >
+          <div className="absolute inset-0 rounded-3xl bg-card/40 backdrop-blur-sm border border-cream/30 overflow-hidden">
+            {/* Soft watercolor wash inside the frame */}
+            <div className="absolute inset-0 opacity-60 animate-drift-slow"
+              style={{
+                background: `radial-gradient(circle at ${isLeft ? "70% 30%" : "30% 70%}, var(--cream-deep) 0%, transparent 70%)`,
+              }}
+            />
+            {/* Decorative botanical */}
+            <div className="absolute bottom-0 right-0 w-2/3 h-2/3 opacity-50 animate-drift">
+              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M100 200C100 200 40 160 40 100C40 50 70 20 100 20C130 20 160 50 160 100C160 160 100 200 100 200Z"
+                  fill={feature.textColor === "text-rose-gold" ? "#E89098" : feature.textColor === "text-terracotta" ? "#B85A38" : "#9F7BC4"}
+                  fillOpacity="0.3"
+                />
+                <path d="M100 200V20" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.4" className={feature.textColor} />
+              </svg>
+            </div>
+            {/* Script quote */}
+            <div className="absolute inset-0 flex items-center justify-center p-12">
+              <p className="font-script text-3xl text-moss-deep/70 text-center leading-tight">
+                {feature.title}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   FULL BLEED QUOTE — the signature keepsake moment
+   ════════════════════════════════════════════════════════════════ */
+
+function FullBleedQuote() {
+  return (
+    <section className="relative py-32 md:py-48 bg-moss-deep text-cream overflow-hidden">
+      {/* Soft botanical drifting in background */}
+      <div className="absolute inset-0 opacity-15">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-butter rounded-full blur-3xl opacity-40 animate-drift-slow" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blush rounded-full blur-3xl opacity-30 animate-drift" />
+      </div>
+
+      <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2 }}
+        >
+          <Moon className="w-12 h-12 text-butter mx-auto mb-8 animate-breathe-slow" />
+          <p className="display-lg text-cream text-balance leading-tight">
+            <span className="italic">She is becoming a mother.</span>
+            <br />
+            <span className="text-butter">We are keeping every week.</span>
+          </p>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TESTIMONIALS — letter-style with script signature
+   ════════════════════════════════════════════════════════════════ */
 
 function Testimonials() {
   const quotes = [
     {
       text: "It feels like a friend is checking in with me. The weekly tips feel personal — not clinical.",
-      name: "First-time mom, week 22",
+      name: "First-time mom",
+      detail: "Week 22",
     },
     {
       text: "Tempie answered my 3am panic about whether my baby's kicks were normal. She didn't replace my OB, but she helped me breathe until morning.",
-      name: "Mama of one, week 28",
+      name: "Mama of one",
+      detail: "Week 28",
     },
     {
       text: "I cried when I read the affirmation on week 16. 'My changing body is beautiful.' I needed that.",
       name: "Tender Trimesters mama",
+      detail: "Week 16",
     },
   ];
   return (
-    <section id="testimonials" className="py-20 md:py-28 bg-cream">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="text-xs uppercase tracking-[0.2em] text-terracotta mb-3">Mama stories</div>
-          <h2 className="font-serif text-4xl md:text-5xl text-moss-deep">You are not alone in this.</h2>
-        </div>
+    <section id="testimonials" className="py-24 md:py-32">
+      <div className="max-w-6xl mx-auto px-6 lg:px-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-2xl mb-16"
+        >
+          <div className="eyebrow text-terracotta mb-4">Mama stories</div>
+          <h2 className="display-md text-moss-deep leading-tight">
+            You are not alone in this.
+          </h2>
+        </motion.div>
         <div className="grid md:grid-cols-3 gap-6">
           {quotes.map((q, i) => (
             <motion.div
@@ -564,16 +820,20 @@ function Testimonials() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="bg-card border-moss/10 rounded-3xl p-6 h-full hover:shadow-soft transition-all hover:-translate-y-1 duration-300">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-blush flex items-center justify-center">
-                    <Heart className="w-4 h-4 text-rose-gold" />
-                  </div>
-                  <div className="font-script text-2xl text-rose-gold leading-none">"</div>
+              <Card className="bg-card paper-grain rounded-3xl p-8 h-full border-moss-deep/10 card-pressed relative overflow-hidden">
+                <div className="font-script text-7xl text-rose-gold/15 absolute top-2 left-4 leading-none">
+                  &ldquo;
                 </div>
-                <p className="text-foreground/80 leading-relaxed text-[15px] italic">{q.text}</p>
-                <div className="mt-5 pt-5 border-t border-border/30 text-xs text-muted-foreground">
-                  — {q.name}
+                <div className="relative z-10">
+                  <p className="font-serif italic text-lg text-moss-deep leading-relaxed mb-6">
+                    {q.text}
+                  </p>
+                  <div className="pt-4 border-t border-moss-deep/10">
+                    <div className="font-script text-2xl text-rose-gold leading-none">
+                      {q.name}
+                    </div>
+                    <div className="eyebrow text-muted-foreground mt-2">{q.detail}</div>
+                  </div>
                 </div>
               </Card>
             </motion.div>
@@ -584,7 +844,9 @@ function Testimonials() {
   );
 }
 
-/* ─────────────────────────── PREMIUM BUNDLE ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   PREMIUM BUNDLE — warm modernist treatment
+   ════════════════════════════════════════════════════════════════ */
 
 function PremiumBundle({ onUpgrade }: { onUpgrade: () => void }) {
   const includes = [
@@ -594,53 +856,60 @@ function PremiumBundle({ onUpgrade }: { onUpgrade: () => void }) {
     { title: "Letters to Baby Templates", desc: "Writing prompts for each trimester. Document the journey you'll want to remember forever.", icon: Heart },
   ];
   return (
-    <section id="bundle" className="py-20 md:py-28 bg-gradient-to-b from-cream to-blush/15">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <Card className="bg-gradient-moss text-cream rounded-[36px] overflow-hidden shadow-premium">
+    <section id="bundle" className="py-24 md:py-32">
+      <div className="max-w-6xl mx-auto px-6 lg:px-10">
+        <Card className="bg-gradient-moss-deep text-cream rounded-[36px] overflow-hidden card-floating border border-cream/10">
           <div className="p-8 md:p-14">
-            <div className="text-center mb-10">
-              <div className="text-xs uppercase tracking-[0.2em] text-blush mb-3">Premium Bundle</div>
-              <h2 className="font-serif text-4xl md:text-5xl">Everything mama needs, in one place.</h2>
-              <p className="mt-4 text-cream/70 max-w-xl mx-auto">
-                The full Mommies Matter digital library — bundled with the app for one price. No subscriptions required (though we offer one if you prefer).
+            <div className="max-w-2xl mb-12">
+              <div className="eyebrow text-butter mb-4">Premium Bundle</div>
+              <h2 className="display-md text-cream leading-tight">
+                Everything mama needs, in one place.
+              </h2>
+              <p className="mt-6 text-cream/70 text-lg leading-relaxed">
+                The full Mommies Matter digital library — bundled with the app for one price.
+                No subscriptions required (though we offer one if you prefer).
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 mb-10">
+            <div className="grid sm:grid-cols-2 gap-4 mb-12">
               {includes.map((item) => (
-                <div key={item.title} className="bg-cream/10 backdrop-blur-sm rounded-2xl p-5 flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-blush/20 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-5 h-5 text-blush" />
+                <div
+                  key={item.title}
+                  className="bg-cream/5 backdrop-blur-sm rounded-2xl p-6 flex gap-4 border border-cream/10 hover:bg-cream/10 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-butter/15 flex items-center justify-center flex-shrink-0 border border-butter/20">
+                    <item.icon className="w-5 h-5 text-butter" />
                   </div>
                   <div>
-                    <div className="font-serif text-lg">{item.title}</div>
-                    <div className="text-xs text-cream/70 mt-1 leading-relaxed">{item.desc}</div>
+                    <div className="font-serif text-xl text-cream">{item.title}</div>
+                    <div className="text-sm text-cream/70 mt-1 leading-relaxed">{item.desc}</div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="text-center">
-              <div className="inline-flex items-baseline gap-3 mb-6">
-                <span className="text-cream/50 line-through text-lg">$29.99</span>
-                <span className="font-serif text-6xl text-blush">$9.99</span>
-                <span className="text-cream/60 text-sm">one-time</span>
-              </div>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pt-8 border-t border-cream/10">
               <div>
-                <Button
-                  onClick={onUpgrade}
-                  size="lg"
-                  className="bg-cream text-moss-deep hover:bg-blush px-10 h-14 rounded-full text-base"
-                >
-                  Get the Bundle <ArrowRight className="ml-2 w-4 h-4" />
-                </Button>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-cream/40 line-through text-lg">$29.99</span>
+                  <span className="font-serif text-6xl text-butter">$9.99</span>
+                  <span className="text-cream/60 text-sm">one-time</span>
+                </div>
+                <div className="text-xs text-cream/50 mt-2">
+                  Or included free with Premium monthly ($4.99/mo)
+                </div>
               </div>
-              <div className="mt-6 text-xs text-cream/60">
-                Or included free with Premium monthly ($4.99/mo)
-              </div>
-              <div className="mt-6 pt-6 border-t border-cream/15">
-                <EbookStandalone />
-              </div>
+              <Button
+                onClick={onUpgrade}
+                className="bg-butter text-moss-deep hover:bg-cream px-10 h-14 rounded-full text-base tracking-wide group"
+              >
+                Get the Bundle
+                <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-cream/10">
+              <EbookStandalone />
             </div>
           </div>
         </Card>
@@ -648,8 +917,6 @@ function PremiumBundle({ onUpgrade }: { onUpgrade: () => void }) {
     </section>
   );
 }
-
-/* ─────────────────────────── EBOOK STANDALONE ─────────────────────────── */
 
 function EbookStandalone() {
   const [email, setEmail] = useState("");
@@ -678,22 +945,22 @@ function EbookStandalone() {
   }
 
   return (
-    <div className="text-center">
-      <p className="text-xs text-cream/50 mb-3 uppercase tracking-widest">Or get just the ebook</p>
-      <div className="flex items-center justify-center gap-2 max-w-sm mx-auto">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-4">
+      <div className="eyebrow text-cream/50">Or get just the ebook</div>
+      <div className="flex items-center gap-2 max-w-sm">
         <input
           type="email"
           placeholder="your@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleBuy()}
-          className="bg-cream/10 border border-cream/20 rounded-full px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:ring-2 focus:ring-blush/40 flex-1 min-w-0"
+          className="bg-cream/10 border border-cream/20 rounded-full px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:outline-none focus:ring-2 focus:ring-butter/40 flex-1 min-w-0"
         />
         <Button
           onClick={handleBuy}
           disabled={loading || !email.includes("@")}
           size="sm"
-          className="bg-blush/20 hover:bg-blush/30 text-cream rounded-full px-5 h-10 text-sm whitespace-nowrap"
+          className="bg-butter/20 hover:bg-butter/30 text-cream rounded-full px-5 h-10 text-sm whitespace-nowrap"
         >
           {loading ? "..." : "Buy Ebook"}
         </Button>
@@ -702,32 +969,50 @@ function EbookStandalone() {
   );
 }
 
-/* ─────────────────────────── WAITLIST CTA ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   WAITLIST CTA — full-bleed moss sanctuary
+   ════════════════════════════════════════════════════════════════ */
 
 function WaitlistCTA({ onJoin }: { onJoin: () => void }) {
   return (
-    <section className="py-20 md:py-24 bg-moss-deep text-cream">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-        <Moon className="w-10 h-10 text-blush mx-auto mb-5" />
-        <h2 className="font-serif text-4xl md:text-5xl leading-tight">
-          The waitlist is open.<br />Be the first to hold this.
-        </h2>
-        <p className="mt-5 text-cream/70 max-w-lg mx-auto">
-          Join 200+ mamas getting early access, free affirmation drops, and Helena-Ann's letters from the journey.
-        </p>
-        <Button
-          onClick={onJoin}
-          size="lg"
-          className="mt-8 bg-blush text-moss-deep hover:bg-blush-deep px-10 h-14 rounded-full text-base"
+    <section className="py-32 md:py-40 bg-moss-deep text-cream relative overflow-hidden">
+      {/* Soft moon glow */}
+      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-butter rounded-full blur-3xl opacity-20 animate-glow" />
+      <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-blush rounded-full blur-3xl opacity-15 animate-drift" />
+
+      <div className="max-w-3xl mx-auto px-6 text-center relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
         >
-          Join the Waitlist <ArrowRight className="ml-2 w-4 h-4" />
-        </Button>
+          <Moon className="w-14 h-14 text-butter mx-auto mb-8 animate-breathe-slow" />
+          <h2 className="display-md text-cream leading-tight mb-6">
+            The waitlist is open.
+            <br />
+            <span className="italic text-butter">Be the first to hold this.</span>
+          </h2>
+          <p className="text-cream/70 text-lg leading-relaxed max-w-xl mx-auto mb-10">
+            Join 200+ mamas getting early access, free affirmation drops, and Helena-Ann's
+            letters from the journey.
+          </p>
+          <Button
+            onClick={onJoin}
+            className="bg-butter text-moss-deep hover:bg-cream px-10 h-14 rounded-full text-base tracking-wide group"
+          >
+            Join the Waitlist
+            <ArrowRight className="ml-2.5 w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────── FOOTER ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════════════════════════════ */
 
 function Footer({
   onPrivacy,
@@ -737,50 +1022,51 @@ function Footer({
   onTerms: () => void;
 }) {
   return (
-    <footer className="bg-cream border-t border-border/40 py-12">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid md:grid-cols-4 gap-8">
-        <div>
-          <div className="flex items-center gap-2 mb-3">
+    <footer className="bg-cream border-t border-moss-deep/15 py-16">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-4 gap-10">
+        <div className="md:col-span-2">
+          <div className="flex items-center gap-3 mb-4">
             <Logo />
-            <div className="font-serif text-lg text-moss-deep">Tender Trimesters</div>
+            <div>
+              <div className="font-serif text-xl text-moss-deep">Tender Trimesters</div>
+              <div className="text-[10px] tracking-[0.22em] uppercase text-terracotta mt-1">by Mommies Matter</div>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            A Mommies Matter product. Built with love by Helena-Ann Baker — mama, author, and your companion on this journey.
+          <p className="text-sm text-foreground/70 leading-relaxed max-w-md">
+            A Mommies Matter product. Built with love by Helena-Ann Baker — mama, author,
+            and your companion on this journey.
           </p>
         </div>
         <div>
-          <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">The App</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
-            <li><a href="#features" className="hover:text-moss">Features</a></li>
-            <li><a href="#comparison" className="hover:text-moss">Pricing</a></li>
-            <li><a href="#bundle" className="hover:text-moss">Bundle</a></li>
+          <div className="eyebrow text-moss-deep mb-4">The App</div>
+          <ul className="space-y-2.5 text-sm text-foreground/70">
+            <li><a href="#features" className="hover:text-terracotta transition-colors">Features</a></li>
+            <li><a href="#comparison" className="hover:text-terracotta transition-colors">Pricing</a></li>
+            <li><a href="#bundle" className="hover:text-terracotta transition-colors">Bundle</a></li>
           </ul>
         </div>
         <div>
-          <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">About</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
-            <li><a href="#testimonials" className="hover:text-moss">Mama Stories</a></li>
-            <li><a href="mailto:hello@mommiesmatter.com?subject=Mommies%20Matter%20Book" className="hover:text-moss">Mommies Matter Book</a></li>
-            <li><a href="mailto:hello@mommiesmatter.com" className="hover:text-moss">Contact</a></li>
-          </ul>
-        </div>
-        <div>
-          <div className="text-xs uppercase tracking-widest text-moss-deep mb-3 font-semibold">Legal</div>
-          <ul className="space-y-2 text-sm text-foreground/70">
-            <li><a href="/privacy" className="hover:text-moss">Privacy Policy</a></li>
-            <li><a href="/terms" className="hover:text-moss">Terms of Service</a></li>
+          <div className="eyebrow text-moss-deep mb-4">About</div>
+          <ul className="space-y-2.5 text-sm text-foreground/70">
+            <li><a href="#testimonials" className="hover:text-terracotta transition-colors">Mama Stories</a></li>
+            <li><a href="mailto:hello@mommiesmatter.com?subject=Mommies%20Matter%20Book" className="hover:text-terracotta transition-colors">Mommies Matter Book</a></li>
+            <li><a href="mailto:hello@mommiesmatter.com" className="hover:text-terracotta transition-colors">Contact</a></li>
+            <li><button onClick={onPrivacy} className="hover:text-terracotta transition-colors">Privacy Policy</button></li>
+            <li><button onClick={onTerms} className="hover:text-terracotta transition-colors">Terms of Service</button></li>
           </ul>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-10 pt-6 border-t border-border/30 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 mt-12 pt-6 border-t border-moss-deep/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
         <div>© {new Date().getFullYear()} Mommies Matter. All rights reserved.</div>
-        <div className="font-script text-rose-gold text-base">made with love, mama</div>
+        <div className="font-script text-rose-gold text-lg">made with love, mama</div>
       </div>
     </footer>
   );
 }
 
-/* ─────────────────────────── DIALOGS ─────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   DIALOGS (preserved from original — minor visual polish only)
+   ════════════════════════════════════════════════════════════════ */
 
 function WaitlistDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [name, setName] = useState("");
@@ -812,14 +1098,14 @@ function WaitlistDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setTimeout(() => { setDone(false); setName(""); setEmail(""); }, 300); }}>
-      <DialogContent className="bg-card rounded-3xl max-w-md">
+      <DialogContent className="bg-card rounded-3xl max-w-md border border-moss-deep/15">
         {done ? (
-          <div className="text-center py-6">
-            <div className="w-16 h-16 rounded-full bg-blush/40 mx-auto flex items-center justify-center mb-4">
+          <div className="text-center py-8">
+            <div className="w-16 h-16 rounded-full bg-blush/30 mx-auto flex items-center justify-center mb-4 animate-breathe">
               <Heart className="w-7 h-7 text-rose-gold fill-rose-gold" />
             </div>
-            <h3 className="font-serif text-2xl text-moss-deep mb-2">Welcome, mama.</h3>
-            <p className="text-sm text-foreground/70">
+            <h3 className="font-serif text-3xl text-moss-deep mb-3">Welcome, mama.</h3>
+            <p className="text-sm text-foreground/70 leading-relaxed">
               You're on the list. Watch your inbox for a confirmation and Helena-Ann's first letter.
             </p>
           </div>
@@ -840,7 +1126,7 @@ function WaitlistDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
                 <Label htmlFor="wl-email">Email</Label>
                 <Input id="wl-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="mt-1.5 rounded-xl" />
               </div>
-              <Button onClick={submit} disabled={loading} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11">
+              <Button onClick={submit} disabled={loading} className="w-full bg-moss-deep hover:bg-moss rounded-full h-11">
                 {loading ? "Adding you..." : "Join the waitlist"}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
@@ -901,7 +1187,7 @@ function AuthDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) { setError(""); setName(""); setEmail(""); setPassword(""); } }}>
-      <DialogContent className="bg-card rounded-3xl max-w-md">
+      <DialogContent className="bg-card rounded-3xl max-w-md border border-moss-deep/15">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl text-moss-deep">
             {mode === "signup" ? "Create your account" : "Welcome back, mama"}
@@ -932,17 +1218,17 @@ function AuthDialog({
               {error}
             </div>
           )}
-          <Button onClick={submit} disabled={loading} className="w-full bg-moss hover:bg-moss-deep rounded-full h-11">
+          <Button onClick={submit} disabled={loading} className="w-full bg-moss-deep hover:bg-moss rounded-full h-11">
             {loading ? "One moment..." : mode === "signup" ? "Create account" : "Sign in"}
           </Button>
           <div className="text-center text-sm text-muted-foreground">
             {mode === "signup" ? (
               <>Already have an account?{" "}
-                <button onClick={() => setMode("signin")} className="text-moss hover:underline font-medium">Sign in</button>
+                <button onClick={() => setMode("signin")} className="text-terracotta hover:underline font-medium">Sign in</button>
               </>
             ) : (
               <>New here?{" "}
-                <button onClick={() => setMode("signup")} className="text-moss hover:underline font-medium">Create an account</button>
+                <button onClick={() => setMode("signup")} className="text-terracotta hover:underline font-medium">Create an account</button>
               </>
             )}
           </div>
@@ -955,7 +1241,7 @@ function AuthDialog({
 function PrivacyDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto scroll-soft">
+      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto border border-moss-deep/15">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl text-moss-deep">Privacy Policy</DialogTitle>
         </DialogHeader>
@@ -991,7 +1277,7 @@ function PrivacyDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v
 function TermsDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto scroll-soft">
+      <DialogContent className="bg-card rounded-3xl max-w-lg max-h-[80vh] overflow-y-auto border border-moss-deep/15">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl text-moss-deep">Terms of Service</DialogTitle>
         </DialogHeader>
