@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calcWeek, useProfile } from "@/components/providers";
-import { Plus, BookHeart, Trash2, Camera, X, Feather, Leaf } from "lucide-react";
+import { Plus, BookHeart, Trash2, Camera, X, Feather } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
