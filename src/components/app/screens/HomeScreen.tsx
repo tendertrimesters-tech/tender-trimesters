@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { calcWeek, trimesterOf, useProfile } from "@/components/providers";
 import type { AppView } from "../AppShell";
-import { Baby, Sparkles, Calendar as CalIcon, ArrowRight, Plus, MessageCircleHeart, Users, Flower2, Leaf } from "lucide-react";
+import { Sparkles, Calendar as CalIcon, Plus, MessageCircleHeart, Leaf } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import TempieMascot from "../TempieMascot";
