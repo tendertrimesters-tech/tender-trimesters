@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { addMailchimpSubscriber, isMailchimpConfigured } from "@/lib/mailchimp";
+import { getEmailClient, isEmailConfigured, getFromAddress } from "@/lib/email";
+import { waitlistWelcomeEmail, waitlistWelcomeEmailText } from "@/lib/waitlist-email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,14 +22,34 @@ export async function POST(req: NextRequest) {
       update: {}, // don't overwrite if already exists
     });
 
-    // 2. Add to Mailchimp (for automated email sequences)
-    // This runs in the background — if it fails, the waitlist still succeeded
+    // 2. Add to Mailchimp (for audience storage and future campaigns)
+    // Runs in background — if it fails, the waitlist still succeeded
     if (isMailchimpConfigured()) {
       addMailchimpSubscriber(email, name, source).catch((err) => {
         console.error("[waitlist] Mailchimp sync failed (non-blocking):", err);
       });
+    }
+
+    // 3. Send welcome email via Resend
+    // Runs in background — if it fails, the waitlist still succeeded
+    if (isEmailConfigured()) {
+      const resend = getEmailClient();
+      if (resend) {
+        resend.emails.send({
+          from: getFromAddress(),
+          to: email.toLowerCase().trim(),
+          subject: "Welcome to Tender Trimesters, mama 💛",
+          html: waitlistWelcomeEmail(name?.trim() || null),
+          text: waitlistWelcomeEmailText(name?.trim() || null),
+          tags: [{ name: "waitlist", value: source || "landing" }],
+        }).then((result) => {
+          console.log("[waitlist] Welcome email sent:", result?.data?.id || "unknown");
+        }).catch((err) => {
+          console.error("[waitlist] Welcome email failed (non-blocking):", err);
+        });
+      }
     } else {
-      console.log("[waitlist] Mailchimp not configured — skipping sync");
+      console.log("[waitlist] Resend not configured — skipping welcome email");
     }
 
     return NextResponse.json({ ok: true, id: entry.id });
