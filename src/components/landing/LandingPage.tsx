@@ -63,7 +63,7 @@ export default function LandingPage({ onOpenApp }: LandingPageProps) {
 
   // Convenience: open auth dialog (used by all CTAs)
   const openAuth = (mode: "signin" | "signup" = "signup") => {
-    setMode(mode);
+    setAuthMode(mode);
     setAuthOpen(true);
   };
 
@@ -717,7 +717,7 @@ function HeroFeatureBlock({
             {/* Soft watercolor wash inside the frame */}
             <div className="absolute inset-0 opacity-60 animate-drift-slow"
               style={{
-                background: `radial-gradient(circle at ${isLeft ? "70% 30%" : "30% 70%}, var(--cream-deep) 0%, transparent 70%)`,
+                background: `radial-gradient(circle at ${isLeft ? "70% 30%" : "30% 70%"}, var(--cream-deep) 0%, transparent 70%)`,
               }}
             />
             {/* Decorative botanical */}
