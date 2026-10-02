@@ -5,9 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "next-themes";
 
-const parisienne = localFont({ src: "../../fonts/Parisienne-Regular.ttf", variable: "--font-parisienne", display: "swap" });
+const parisienne = localFont({ src: "../../fonts/parisienne-regular.ttf", variable: "--font-parisienne", display: "swap" });
 const cormorant = localFont({ src: [{ path: "../../fonts/Cormorant-Regular.ttf", weight: "400" }, { path: "../../fonts/Cormorant-SemiBold.ttf", weight: "600" }, { path: "../../fonts/Cormorant-Bold.ttf", weight: "700" }], variable: "--font-cormorant", display: "swap" });
-const jost = localFont({ src: "../../fonts/Jost-Regular.ttf", variable: "--font-jost", display: "swap" });
+const jost = localFont({ src: "../../fonts/jost-regular.ttf", variable: "--font-jost", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Tender Trimesters — Your Pregnancy, One Week at a Time",
