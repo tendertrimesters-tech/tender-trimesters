@@ -1,19 +1,10 @@
-// Mailchimp client for adding waitlist subscribers.
-// Uses the Marketing API to add/update members in a specific audience.
-//
-// Required env vars (set in Vercel → Settings → Environment Variables):
-//   MAILCHIMP_API_KEY     — from Mailchimp → Account → Extras → API keys
-//   MAILCHIMP_AUDIENCE_ID — from Mailchimp → Audience → Settings → Audience name and defaults
+import crypto from "crypto";
 
 interface MailchimpMember {
   email_address: string;
   status: "subscribed" | "pending" | "unsubscribed";
-  merge_fields?: {
-    FNAME?: string;
-    LNAME?: string;
-  };
+  merge_fields?: { FNAME?: string; LNAME?: string; };
   tags?: string[];
-  source?: string;
 }
 
 interface MailchimpResponse {
@@ -22,11 +13,6 @@ interface MailchimpResponse {
   status: string;
 }
 
-/**
- * Get the Mailchimp server prefix from the API key.
- * API keys look like: "abcdef1234567890-us5"
- * The part after the dash is the server prefix.
- */
 function getServerPrefix(): string | null {
   const key = process.env.MAILCHIMP_API_KEY;
   if (!key) return null;
@@ -34,24 +20,10 @@ function getServerPrefix(): string | null {
   return parts.length > 1 ? parts[parts.length - 1] : null;
 }
 
-/**
- * Check if Mailchimp is configured (both API key and audience ID are set).
- */
 export function isMailchimpConfigured(): boolean {
-  return Boolean(
-    process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID
-  );
+  return Boolean(process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID);
 }
 
-/**
- * Add or update a subscriber in the Mailchimp audience.
- * Uses upsert semantics — if the email already exists, it updates; otherwise, it creates.
- *
- * @param email - The subscriber's email address
- * @param name - Optional first name (will be split if full name provided)
- * @param source - Optional source tag (e.g., "landing_hero", "tiktok_launch")
- * @returns true if successful, false if Mailchimp is not configured or the request failed
- */
 export async function addMailchimpSubscriber(
   email: string,
   name?: string | null,
@@ -62,13 +34,10 @@ export async function addMailchimpSubscriber(
   const serverPrefix = getServerPrefix();
 
   if (!apiKey || !audienceId || !serverPrefix) {
-    console.log(
-      "[mailchimp] Not configured — skipping. Set MAILCHIMP_API_KEY and MAILCHIMP_AUDIENCE_ID in Vercel."
-    );
+    console.log("[mailchimp] Not configured — skipping. Set MAILCHIMP_API_KEY and MAILCHIMP_AUDIENCE_ID in Vercel.");
     return false;
   }
 
-  // Parse the name — Mailchimp wants FNAME and LNAME separately
   let mergeFields: MailchimpMember["merge_fields"] = {};
   if (name) {
     const nameParts = name.trim().split(/\s+/);
@@ -86,16 +55,12 @@ export async function addMailchimpSubscriber(
   };
 
   try {
-    // Mailchimp uses HTTP Basic Auth with the API key as the password
-    // and any string as the username (conventionally "anystring")
     const authHeader = Buffer.from(`anystring:${apiKey}`).toString("base64");
-
-    const url = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members/${encodeURIComponent(
-      email.toLowerCase().trim()
-    )}`;
+    const subscriberHash = crypto.createHash("md5").update(email.toLowerCase().trim()).digest("hex");
+    const url = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members/${subscriberHash}`;
 
     const response = await fetch(url, {
-      method: "PUT", // PUT = upsert (create or update)
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Basic ${authHeader}`,
@@ -105,16 +70,12 @@ export async function addMailchimpSubscriber(
 
     if (!response.ok) {
       const errorBody = await response.text();
-      console.error(
-        `[mailchimp] API error ${response.status}: ${errorBody}`
-      );
+      console.error(`[mailchimp] API error ${response.status}: ${errorBody}`);
       return false;
     }
 
     const data = (await response.json()) as MailchimpResponse;
-    console.log(
-      `[mailchimp] ✓ Added/updated subscriber: ${data.email_address} (status: ${data.status})`
-    );
+    console.log(`[mailchimp] SUCCESS: Added/updated subscriber (status: ${data.status})`);
     return true;
   } catch (error) {
     console.error("[mailchimp] Failed to add subscriber:", error);
@@ -122,10 +83,6 @@ export async function addMailchimpSubscriber(
   }
 }
 
-/**
- * Add a tag to an existing subscriber (e.g., "premium", "ebook_buyer").
- * Useful for segmenting your audience later.
- */
 export async function tagMailchimpSubscriber(
   email: string,
   tag: string
@@ -140,8 +97,7 @@ export async function tagMailchimpSubscriber(
 
   try {
     const authHeader = Buffer.from(`anystring:${apiKey}`).toString("base64");
-    const subscriberHash = encodeURIComponent(email.toLowerCase().trim());
-
+    const subscriberHash = crypto.createHash("md5").update(email.toLowerCase().trim()).digest("hex");
     const url = `https://${serverPrefix}.api.mailchimp.com/3.0/lists/${audienceId}/members/${subscriberHash}/tags`;
 
     const response = await fetch(url, {
