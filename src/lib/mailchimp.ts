@@ -1,9 +1,19 @@
 import crypto from "crypto";
 
+// Mailchimp client for adding waitlist subscribers.
+// Uses the Marketing API to add/update members in a specific audience.
+//
+// Required env vars (set in Vercel → Settings → Environment Variables):
+//   MAILCHIMP_API_KEY     — from Mailchimp → Account → Extras → API keys
+//   MAILCHIMP_AUDIENCE_ID — from Mailchimp → Audience → Settings → Audience name and defaults
+
 interface MailchimpMember {
   email_address: string;
   status: "subscribed" | "pending" | "unsubscribed";
-  merge_fields?: { FNAME?: string; LNAME?: string; };
+  merge_fields?: {
+    FNAME?: string;
+    LNAME?: string;
+  };
   tags?: string[];
 }
 
@@ -21,7 +31,9 @@ function getServerPrefix(): string | null {
 }
 
 export function isMailchimpConfigured(): boolean {
-  return Boolean(process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID);
+  return Boolean(
+    process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID
+  );
 }
 
 export async function addMailchimpSubscriber(
