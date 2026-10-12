@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Valid email required" }, { status: 400 });
     }
 
-    // 1. Save to database (always — this is our source of truth)
     const entry = await db.waitlistEntry.upsert({
       where: { email: email.toLowerCase().trim() },
       create: {
@@ -19,19 +18,23 @@ export async function POST(req: NextRequest) {
         name: name?.trim() || null,
         source: source || "landing",
       },
-      update: {}, // don't overwrite if already exists
+      update: {},
     });
 
-    // 2. Add to Mailchimp (for audience storage and future campaigns)
-    // Runs in background — if it fails, the waitlist still succeeded
     if (isMailchimpConfigured()) {
-      addMailchimpSubscriber(email, name, source).catch((err) => {
-        console.error("[waitlist] Mailchimp sync failed (non-blocking):", err);
+      addMailchimpSubscriber(email, name, source).then((success) => {
+        if (success) {
+          console.log("[waitlist] Mailchimp sync: SUCCESS");
+        } else {
+          console.error("[waitlist] Mailchimp sync: FAILED — check API key, audience ID, and permissions");
+        }
+      }).catch((err) => {
+        console.error("[waitlist] Mailchimp sync: ERROR", err?.message || err);
       });
+    } else {
+      console.warn("[waitlist] Mailchimp not configured — skipping sync");
     }
 
-    // 3. Send welcome email via Resend
-    // Runs in background — if it fails, the waitlist still succeeded
     if (isEmailConfigured()) {
       const resend = getEmailClient();
       if (resend) {
@@ -43,13 +46,17 @@ export async function POST(req: NextRequest) {
           text: waitlistWelcomeEmailText(name?.trim() || null),
           tags: [{ name: "waitlist", value: source || "landing" }],
         }).then((result) => {
-          console.log("[waitlist] Welcome email sent:", result?.data?.id || "unknown");
+          if (result?.data?.id) {
+            console.log("[waitlist] Welcome email sent: SUCCESS");
+          } else {
+            console.error("[waitlist] Welcome email: FAILED — no ID returned");
+          }
         }).catch((err) => {
-          console.error("[waitlist] Welcome email failed (non-blocking):", err);
+          console.error("[waitlist] Welcome email: ERROR", err?.message || err);
         });
       }
     } else {
-      console.log("[waitlist] Resend not configured — skipping welcome email");
+      console.warn("[waitlist] Resend not configured — skipping welcome email");
     }
 
     return NextResponse.json({ ok: true, id: entry.id });
@@ -60,7 +67,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  // Return count of waitlist entries (for admin/stats)
   try {
     const count = await db.waitlistEntry.count();
     return NextResponse.json({ count });
