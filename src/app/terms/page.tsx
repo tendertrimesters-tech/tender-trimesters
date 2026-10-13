@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service — Tender Trimesters",
-  description: "Terms and conditions for using Tender Trimesters by Mommies Matter.",
+  description: "Terms and conditions for using Tender Trimesters.",
 };
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
         </a>
         <h1 className="font-serif text-3xl text-moss-deep mt-8">Terms of Service</h1>
         <p className="text-xs text-muted-foreground mt-2">
-          Effective: August 15, 2026 &middot; Mommies Matter
+          Effective: August 15, 2026 &middot; Tender Trimesters
         </p>
 
         <div className="prose prose-sm mt-8 space-y-6 text-foreground/85 leading-relaxed">
@@ -33,7 +33,7 @@ export default function TermsPage() {
               content, mood tracking, journaling, AI chat, guided meditations, and
               premium features such as baby letters, fear reframing, dream analysis,
               name exploration, memory capsules, and birth playlists. The service is
-              provided by Mommies Matter.
+              provided by Tender Trimesters.
             </p>
           </section>
 
@@ -114,7 +114,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-serif text-xl text-moss-deep mt-8">10. Limitation of Liability</h2>
             <p>
-              To the fullest extent permitted by law, Mommies Matter shall not be liable
+              To the fullest extent permitted by law, Tender Trimesters shall not be liable
               for any indirect, incidental, special, consequential, or punitive damages
               arising from your use of the service. Our total liability shall not exceed
               the amount you paid to us in the twelve months preceding the claim.
@@ -133,10 +133,10 @@ export default function TermsPage() {
           <section>
             <h2 className="font-serif text-xl text-moss-deep mt-8">12. Contact</h2>
             <p>
-              Mommies Matter
+              Tender Trimesters
               <br />
-              <a href="mailto:hello@mommiesmatter.com" className="text-moss hover:underline">
-                hello@mommiesmatter.com
+              <a href="mailto:hello@tendertrimesters.com" className="text-moss hover:underline">
+                hello@tendertrimesters.com
               </a>
             </p>
           </section>
