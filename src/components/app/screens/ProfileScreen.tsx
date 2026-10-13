@@ -252,7 +252,7 @@ export default function ProfileScreen({ onSignOut }: { onSignOut: () => void }) 
       {partnerLink && <PartnerPreviewDialog open={partnerOpen} onOpenChange={setPartnerOpen} profile={profile} />}
 
       <div className="text-center text-[10px] text-muted-foreground pt-4 pb-2">
-        Tender Trimesters · by Mommies Matter<br />
+        Tender Trimesters<br />
         Made with love by Helena-Ann Baker
       </div>
     </div>
