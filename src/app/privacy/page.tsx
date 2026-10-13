@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — Tender Trimesters",
-  description: "How Tender Trimesters by Mommies Matter collects, uses, and protects your personal information.",
+  description: "How Tender Trimesters collects, uses, and protects your personal information.",
 };
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         </a>
         <h1 className="font-serif text-3xl text-moss-deep mt-8">Privacy Policy</h1>
         <p className="text-xs text-muted-foreground mt-2">
-          Effective: August 15, 2026 &middot; Mommies Matter
+          Effective: August 15, 2026 &middot; Tender Trimesters
         </p>
 
         <div className="prose prose-sm mt-8 space-y-6 text-foreground/85 leading-relaxed">
@@ -80,8 +80,8 @@ export default function PrivacyPage() {
             </ul>
             <p className="mt-2">
               To exercise these rights, contact us at{" "}
-              <a href="mailto:hello@mommiesmatter.com" className="text-moss hover:underline">
-                hello@mommiesmatter.com
+              <a href="mailto:hello@tendertrimesters.com" className="text-moss hover:underline">
+                hello@tendertrimesters.com
               </a>.
             </p>
           </section>
@@ -124,10 +124,10 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-serif text-xl text-moss-deep mt-8">10. Contact</h2>
             <p>
-              Mommies Matter
+              Tender Trimesters
               <br />
-              <a href="mailto:hello@mommiesmatter.com" className="text-moss hover:underline">
-                hello@mommiesmatter.com
+              <a href="mailto:hello@tendertrimesters.com" className="text-moss hover:underline">
+                hello@tendertrimesters.com
               </a>
             </p>
           </section>
