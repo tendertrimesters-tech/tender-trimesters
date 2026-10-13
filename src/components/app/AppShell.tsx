@@ -73,7 +73,7 @@ export default function AppShell({ onSignOut }: { onSignOut: () => void }) {
             </div>
             <div>
               <div className="font-serif text-lg text-moss-deep leading-none">Tender Trimesters</div>
-              <div className="text-[9px] tracking-[0.15em] uppercase text-muted-foreground mt-0.5">by Mommies Matter</div>
+              <div className="text-[9px] tracking-[0.15em] uppercase text-muted-foreground mt-0.5">by Tender Trimesters</div>
             </div>
           </div>
           <div className="flex items-center gap-3">
