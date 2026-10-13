@@ -68,7 +68,7 @@ export async function GET() {
 
     const exportData = {
       exportedAt: new Date().toISOString(),
-      app: "Tender Trimesters by Mommies Matter",
+      app: "Tender Trimesters",
       profile: user,
       journalEntries,
       moodEntries,
