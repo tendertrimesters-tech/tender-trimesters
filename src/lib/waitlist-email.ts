@@ -83,7 +83,7 @@ export function waitlistWelcomeEmail(name: string | null): string {
           <tr>
             <td style="padding:24px 0 0 0;" align="center">
               <p style="margin:0;font-size:15px;color:#2D3F23;line-height:1.7;">With love,<br/><strong>Helena-Ann</strong></p>
-              <p style="margin:12px 0 0 0;font-size:12px;color:#5A4F38;">Founder, Tender Trimesters · Mommies Matter</p>
+              <p style="margin:12px 0 0 0;font-size:12px;color:#5A4F38;">Founder, Tender Trimesters</p>
             </td>
           </tr>
 
@@ -91,7 +91,7 @@ export function waitlistWelcomeEmail(name: string | null): string {
           <tr>
             <td style="padding:32px 0 0 0;" align="center">
               <p style="margin:0;font-size:11px;color:#5A4F38;opacity:0.7;">You're receiving this because you joined the Tender Trimesters waitlist.</p>
-              <p style="margin:8px 0 0 0;font-size:11px;color:#5A4F38;opacity:0.7;">tendertrimesters.com · hello@mommiesmatter.com</p>
+              <p style="margin:8px 0 0 0;font-size:11px;color:#5A4F38;opacity:0.7;">tendertrimesters.com · hello@tendertrimesters.com</p>
             </td>
           </tr>
 
@@ -122,8 +122,8 @@ Pin it somewhere. Say it out loud. Repeat as needed.
 
 With love,
 Helena-Ann
-Founder, Tender Trimesters · Mommies Matter
+Founder, Tender Trimesters
 
-tendertrimesters.com · hello@mommiesmatter.com
+tendertrimesters.com · hello@tendertrimesters.com
 `;
 }
