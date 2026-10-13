@@ -96,7 +96,7 @@ export function welcomePremiumEmail(name: string, tier: string) {
           <tr>
             <td align="center" style="padding:32px 0 0 0;">
               <p style="margin:0 0 4px 0;font-size:13px;color:#BE5068;font-style:italic;">made with love, mama</p>
-              <p style="margin:0;font-size:11px;color:rgba(26,22,16,0.4);">Tender Trimesters by Mommies Matter · Helena-Ann Baker</p>
+              <p style="margin:0;font-size:11px;color:rgba(26,22,16,0.4);">Tender Trimesters · Helena-Ann Baker</p>
             </td>
           </tr>
 
@@ -177,7 +177,7 @@ export function ebookOnlyEmail(name: string) {
           <tr>
             <td align="center" style="padding:32px 0 0 0;">
               <p style="margin:0 0 4px 0;font-size:13px;color:#BE5068;font-style:italic;">made with love, mama</p>
-              <p style="margin:0;font-size:11px;color:rgba(26,22,16,0.4);">Tender Trimesters by Mommies Matter · Helena-Ann Baker</p>
+              <p style="margin:0;font-size:11px;color:rgba(26,22,16,0.4);">Tender Trimesters · Helena-Ann Baker</p>
             </td>
           </tr>
 
