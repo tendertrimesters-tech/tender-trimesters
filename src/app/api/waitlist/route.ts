@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { addMailchimpSubscriber, isMailchimpConfigured } from "@/lib/mailchimp";
 import { getEmailClient, isEmailConfigured, getFromAddress } from "@/lib/email";
@@ -22,47 +23,55 @@ export async function POST(req: NextRequest) {
       update: {},
     });
 
-    // 2. Add to Mailchimp (for audience storage and future campaigns)
-    // Logs success or failure — checkable in Vercel → Project → Logs
-    if (isMailchimpConfigured()) {
-      addMailchimpSubscriber(email, name, source).then((success) => {
-        if (success) {
-          console.log("[waitlist] Mailchimp sync: SUCCESS");
-        } else {
-          console.error("[waitlist] Mailchimp sync: FAILED (returned false — check API key, audience ID, and permissions)");
-        }
-      }).catch((err) => {
-        console.error("[waitlist] Mailchimp sync: ERROR", err?.message || err);
-      });
-    } else {
-      console.warn("[waitlist] Mailchimp not configured — skipping sync. Set MAILCHIMP_API_KEY and MAILCHIMP_AUDIENCE_ID in Vercel.");
-    }
-
-    // 3. Send welcome email via Resend
-    // Logs success or failure — checkable in Vercel → Project → Logs
-    if (isEmailConfigured()) {
-      const resend = getEmailClient();
-      if (resend) {
-        resend.emails.send({
-          from: getFromAddress(),
-          to: email.toLowerCase().trim(),
-          subject: "Welcome to Tender Trimesters, mama 💛",
-          html: waitlistWelcomeEmail(name?.trim() || null),
-          text: waitlistWelcomeEmailText(name?.trim() || null),
-          tags: [{ name: "waitlist", value: source || "landing" }],
-        }).then((result) => {
-          if (result?.data?.id) {
-            console.log("[waitlist] Welcome email sent: SUCCESS (id:", result.data.id + ")");
+    // 2. Side effects (Mailchimp sync + Resend welcome email).
+    // CRITICAL: Must use `after()` from next/server, NOT fire-and-forget `.then()`.
+    // Vercel freezes the serverless function the moment it returns a response —
+    // any pending promises that haven't fired yet never run. `after()` tells
+    // Vercel to keep the function alive until this work completes, without
+    // making the user wait for the response (they get 200 OK instantly).
+    after(async () => {
+      // Mailchimp sync (PUT is idempotent — safe to retry)
+      if (isMailchimpConfigured()) {
+        try {
+          const ok = await addMailchimpSubscriber(email, name, source);
+          if (ok) {
+            console.log("[waitlist] Mailchimp sync: SUCCESS");
           } else {
-            console.error("[waitlist] Welcome email: FAILED — no ID returned", JSON.stringify(result));
+            console.error("[waitlist] Mailchimp sync: FAILED (returned false — check API key, audience ID, and permissions)");
           }
-        }).catch((err) => {
-          console.error("[waitlist] Welcome email: ERROR", err?.message || err);
-        });
+        } catch (err) {
+          console.error("[waitlist] Mailchimp sync: ERROR", err?.message || err);
+        }
+      } else {
+        console.warn("[waitlist] Mailchimp not configured — skipping sync. Set MAILCHIMP_API_KEY and MAILCHIMP_AUDIENCE_ID in Vercel.");
       }
-    } else {
-      console.warn("[waitlist] Resend not configured — skipping welcome email. Set RESEND_API_KEY in Vercel.");
-    }
+
+      // Resend welcome email
+      if (isEmailConfigured()) {
+        const resend = getEmailClient();
+        if (resend) {
+          try {
+            const result = await resend.emails.send({
+              from: getFromAddress(),
+              to: email.toLowerCase().trim(),
+              subject: "Welcome to Tender Trimesters, mama 💛",
+              html: waitlistWelcomeEmail(name?.trim() || null),
+              text: waitlistWelcomeEmailText(name?.trim() || null),
+              tags: [{ name: "waitlist", value: source || "landing" }],
+            });
+            if (result?.data?.id) {
+              console.log("[waitlist] Welcome email sent: SUCCESS (id:", result.data.id + ")");
+            } else {
+              console.error("[waitlist] Welcome email: FAILED — no ID returned", JSON.stringify(result));
+            }
+          } catch (err) {
+            console.error("[waitlist] Welcome email: ERROR", err?.message || err);
+          }
+        }
+      } else {
+        console.warn("[waitlist] Resend not configured — skipping welcome email. Set RESEND_API_KEY in Vercel.");
+      }
+    });
 
     return NextResponse.json({ ok: true, id: entry.id });
   } catch (e) {
