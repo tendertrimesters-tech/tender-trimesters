@@ -31,7 +31,6 @@ export default withAuth({
         "/api/weekly-content",
         "/api/hormone-horoscope",
         "/api/stripe/webhook",
-        "/api/admin",
       ];
       if (publicPaths.some((p) => req.nextUrl.pathname.startsWith(p))) return true;
 
