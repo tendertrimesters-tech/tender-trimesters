@@ -12,8 +12,8 @@ const jost = localFont({ src: "../../fonts/jost-regular.ttf", variable: "--font-
 
 export const metadata: Metadata = {
   title: "Tender Trimesters — Your Pregnancy, One Week at a Time",
-  description: "A nurturing weekly pregnancy calendar with daily tender notes, mood tracking, a private journal, and Tempie — your 24/7 AI companion. From the Mommies Matter family.",
-  keywords: ["pregnancy app", "pregnancy calendar", "weekly pregnancy", "mood tracker", "pregnancy journal", "Tender Trimesters", "Mommies Matter"],
+  description: "A nurturing weekly pregnancy calendar with daily tender notes, mood tracking, a private journal, and Tempie — your 24/7 AI companion. From the Tender Trimesters family.",
+  keywords: ["pregnancy app", "pregnancy calendar", "weekly pregnancy", "mood tracker", "pregnancy journal", "Tender Trimesters"],
   authors: [{ name: "Helena-Ann Baker" }],
   icons: { icon: "/favicon.ico", apple: "/apple-icon.png" },
   openGraph: { title: "Tender Trimesters — Your Pregnancy, One Week at a Time", description: "A nurturing weekly pregnancy calendar with daily affirmations, mood tracking, a private journal, and Tempie — your 24/7 AI companion.", images: [{ url: "/og-image.png", width: 1200, height: 630 }] },
