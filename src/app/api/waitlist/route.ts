@@ -40,7 +40,8 @@ export async function POST(req: NextRequest) {
             console.error("[waitlist] Mailchimp sync: FAILED (returned false — check API key, audience ID, and permissions)");
           }
         } catch (err) {
-          console.error("[waitlist] Mailchimp sync: ERROR", err?.message || err);
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error("[waitlist] Mailchimp sync: ERROR", msg);
         }
       } else {
         console.warn("[waitlist] Mailchimp not configured — skipping sync. Set MAILCHIMP_API_KEY and MAILCHIMP_AUDIENCE_ID in Vercel.");
@@ -65,7 +66,8 @@ export async function POST(req: NextRequest) {
               console.error("[waitlist] Welcome email: FAILED — no ID returned", JSON.stringify(result));
             }
           } catch (err) {
-            console.error("[waitlist] Welcome email: ERROR", err?.message || err);
+            const msg = err instanceof Error ? err.message : String(err);
+            console.error("[waitlist] Welcome email: ERROR", msg);
           }
         }
       } else {
@@ -75,7 +77,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, id: entry.id });
   } catch (e) {
-    console.error("waitlist error", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("waitlist error", msg);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
